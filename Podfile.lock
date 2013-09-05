@@ -1,0 +1,13 @@
+PODS:
+  - LibYAML (0.1.4)
+  - YAML-Framework (0.0.1):
+    - LibYAML (~> 0.1.4)
+
+DEPENDENCIES:
+  - YAML-Framework
+
+SPEC CHECKSUMS:
+  LibYAML: 49b77e5b3f4417fa512a8f1f4675a78480bf6b3d
+  YAML-Framework: 4ada9225119ffb13a206f251fe4434e660bca16d
+
+COCOAPODS: 0.23.0

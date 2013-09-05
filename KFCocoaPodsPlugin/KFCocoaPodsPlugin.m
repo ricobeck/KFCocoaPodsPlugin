@@ -30,6 +30,7 @@
 
 #define kPodCommand @"/usr/bin/pod"
 
+#define kCommandInstall @"install"
 #define kCommandUpdate @"update"
 #define kCommandOutdated @"outdated"
 #define kCommandNoColor @"--no-color"
@@ -170,7 +171,8 @@
         {
             [weakSelf printMessageBold:@"start pod update" forTask:nil];
             
-            [[KFTaskController new] runShellCommand:kPodCommand withArguments:@[kCommandUpdate, kCommandNoColor] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:^(NSTask *task, NSString *output, NSString *error)
+            NSString *command =[KFWorkspaceController currentWorkspaceHasPodfileLock] ? kCommandUpdate : kCommandInstall;
+            [[KFTaskController new] runShellCommand:kPodCommand withArguments:@[command, kCommandNoColor] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:^(NSTask *task, NSString *output, NSString *error)
              {
                  if (output != nil)
                  {

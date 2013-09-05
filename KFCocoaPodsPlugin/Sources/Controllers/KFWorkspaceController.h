@@ -13,6 +13,8 @@
 
 + (BOOL)currentWorkspaceHasPodfile;
 
++ (BOOL)currentWorkspaceHasPodfileLock;
+
 + (NSString *)currentWorkspaceDirectoryPath;
 
 + (NSString *)currentWorkspacePodfilePath;
