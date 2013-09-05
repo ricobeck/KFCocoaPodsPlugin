@@ -17,5 +17,7 @@
 
 + (NSString *)currentWorkspacePodfilePath;
 
++ (NSString *)currentWorkspacePodfileLockPath;
+
 
 @end

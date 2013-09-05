@@ -10,6 +10,7 @@
 #import "KFConsoleController.h"
 #import "KFTaskController.h"
 #import "KFWorkspaceController.h"
+#import "KFCocoaPodController.h"
 
 
 @interface KFCocoaPodsPlugin ()
@@ -21,22 +22,29 @@
 
 @property (nonatomic, strong) KFTaskController *taskController;
 
+@property (nonatomic, strong) KFCocoaPodController *cocoaPodController;
+
 
 @end
 
 
 #define kPodCommand @"/usr/bin/pod"
+
+#define kCommandUpdate @"update"
+#define kCommandOutdated @"outdated"
 #define kCommandNoColor @"--no-color"
+
 
 @implementation KFCocoaPodsPlugin
 
+
+#pragma mark -
 
 + (BOOL)shouldLoadPlugin
 {
     NSString *bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
     return bundleIdentifier && [bundleIdentifier caseInsensitiveCompare:@"com.apple.dt.Xcode"] == NSOrderedSame;
 }
-
 
 
 + (void)pluginDidLoad:(NSBundle *)plugin
@@ -58,20 +66,25 @@
         
         [self buildRepoIndex];
         [self insertMenu];
+        
+        _cocoaPodController = [[KFCocoaPodController alloc] initWithRepoData:self.repos];
     }
     return self;
 }
 
 
+#pragma mark - Initialization
+
+
 - (void)buildRepoIndex
 {
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    [self.consoleController logMessage:@"building repo index"];
+    [self printMessage:@"building repo index" forTask:nil];
     
     NSMutableDictionary *parsedRepos = [NSMutableDictionary new];
     
     NSArray *repos = [fileManager contentsOfDirectoryAtPath:[@"~/.cocoapods/repos/" stringByExpandingTildeInPath] error:nil];
-   [self.consoleController logMessage:repos];
+   [self.consoleController logMessage:repos forTask:nil];
     
     for (NSString *repoDirectory in repos)
     {
@@ -91,7 +104,7 @@
         }
     }
     
-    self.repos = [[parsedRepos copy] retain];
+    self.repos = [parsedRepos copy];
 }
 
 
@@ -106,7 +119,11 @@
         
         NSMenu *submenu = [[NSMenu alloc] initWithTitle:@"CocoaPods Submenu"];
         
-        NSMenuItem *updateMenuItem = [[NSMenuItem alloc] initWithTitle:@"Update/Install" action:@selector(doMenuAction) keyEquivalent:@""];
+        NSMenuItem *checkMenuItem = [[NSMenuItem alloc] initWithTitle:@"Check Pods" action:@selector(checkOutdatedPodsAction:) keyEquivalent:@""];
+        [checkMenuItem setTarget:self];
+        [submenu addItem:checkMenuItem];
+        
+        NSMenuItem *updateMenuItem = [[NSMenuItem alloc] initWithTitle:@"Update/Install" action:@selector(podUpdateAction:) keyEquivalent:@""];
         [updateMenuItem setTarget:self];
         [submenu addItem:updateMenuItem];
         
@@ -126,88 +143,152 @@
             {
                 NSMenuItem *versionMenuItem = [[NSMenuItem alloc] initWithTitle:version action:nil keyEquivalent:@""];
                 [repoVersionMenu addItem:versionMenuItem];
-                [versionMenuItem release];
             }
             
             repoMenuItem.submenu = repoVersionMenu;
-            [repoVersionMenu release];
-            
             [repoMenu addItem:repoMenuItem];
-            [repoMenuItem release];
         }
         reposMenuItem.submenu = repoMenu;
         [submenu addItem:reposMenuItem];
-        [repoMenu release];
         
         cocoapodsMenuItem.submenu = submenu;
-        [cocoapodsMenuItem release];
-        [submenu release];
     }
 }
 
 
-- (void)doMenuAction
+#pragma mark - Actions
+
+
+- (void)podUpdateAction:(id)sender
 {
-    [self performSelectorInBackground:@selector(podUpdate) withObject:nil];
+    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
+
+    __weak typeof(self) weakSelf = self;
+    dispatch_async(queue, ^
+    {
+        if ([KFWorkspaceController currentWorkspaceHasPodfile])
+        {
+            [weakSelf printMessageBold:@"start pod update" forTask:nil];
+            
+            [[KFTaskController new] runShellCommand:kPodCommand withArguments:@[kCommandUpdate, kCommandNoColor] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:^(NSTask *task, NSString *output, NSString *error)
+             {
+                 if (output != nil)
+                 {
+                     [weakSelf printMessage:output forTask:task];
+                 }
+                 else
+                 {
+                     [weakSelf printMessage:error forTask:task];
+                 }
+             }
+             completion:^(NSTask *task, BOOL success, NSException *exception)
+             {
+                 if (success)
+                 {
+                     [weakSelf printMessageBold:@"pod update done" forTask:task];
+                 }
+                 else
+                 {
+                     [weakSelf printMessageBold:@"pod update failed" forTask:task];
+                 }
+                 [weakSelf.consoleController removeTask:task];
+             }];
+        }
+        else
+        {
+            [weakSelf printMessageBold:@"no podfile - no pod update" forTask:nil];
+        }
+    });
 }
 
 
-- (void)podUpdate
+- (void)checkOutdatedPodsAction:(id)sender
 {
-    if ([KFWorkspaceController currentWorkspaceHasPodfile])
+    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
+    
+    __weak typeof(self) weakSelf = self;
+    dispatch_async(queue, ^
     {
-        [self performSelectorOnMainThread:@selector(printMessageBold:) withObject:@"start pod update" waitUntilDone:NO];
-
-        [[KFTaskController new] runShellCommand:kPodCommand withArguments:@[@"update", kCommandNoColor] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:^(NSTask *task, NSString *output, NSString *error)
-         {
-             if (output != nil)
-             {
-                 [self performSelectorOnMainThread:@selector(printMessage:) withObject:output waitUntilDone:NO];
-             }
-             else
-             {
-                 [self performSelectorOnMainThread:@selector(printMessage:) withObject:error waitUntilDone:NO];
-             }
-         }
-         completion:^(NSTask *task, BOOL success, NSException *exception)
-         {
-             if (success)
-             {
-                 [self performSelectorOnMainThread:@selector(printMessageBold:) withObject:@"pod update done" waitUntilDone:NO];
-             }
-             else
-             {
-                 [self performSelectorOnMainThread:@selector(printMessageBold:) withObject:@"pod update failed" waitUntilDone:NO];
-             }
-         }];
+       if ([KFWorkspaceController currentWorkspaceHasPodfile])
+       {
+           [weakSelf printMessageBold:@"start pod outdated check" forTask:nil];
+           
+           [[KFTaskController new] runShellCommand:kPodCommand withArguments:@[kCommandOutdated, kCommandNoColor] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:^(NSTask *task, NSString *output, NSString *error)
+            {
+                if (output != nil)
+                {
+                    [weakSelf printMessage:output forTask:task];
+                }
+                else
+                {
+                    [weakSelf printMessage:error forTask:task];
+                }
+            }
+           completion:^(NSTask *task, BOOL success, NSException *exception)
+            {
+                if (success)
+                {
+                    [weakSelf printMessageBold:@"pod outdated done" forTask:task];
+                }
+                else
+                {
+                    [weakSelf printMessageBold:@"pod outdated failed" forTask:task];
+                }
+                [weakSelf.consoleController removeTask:task];
+            }];
+       }
+       else
+       {
+           [weakSelf printMessageBold:@"no podfile - no outdated pods" forTask:nil];
+       }
+    });
+    return;
+    
+    //TODO: maybe implement own checking?
+    
+    /*
+    NSError *error = nil;
+    NSString *content = [NSString stringWithContentsOfFile:[KFWorkspaceController currentWorkspacePodfileLockPath] encoding:NSUTF8StringEncoding error:&error];
+    
+    if (error == nil)
+    {
+        NSArray *outdatedPods = [self.cocoaPodController outdatedPodsForLockFileContents:content];
+        [self printMessage:[outdatedPods description]];
     }
     else
     {
-        [self performSelectorOnMainThread:@selector(printMessageBold:) withObject:@"no podfile - no pod update" waitUntilDone:NO];
+        [self printMessage:error.description];
     }
+     */
+
 }
 
+#pragma mark - Logging
 
-- (void)printMessage:(NSString *)message
+
+- (void)printMessage:(NSString *)message forTask:(NSTask *)task
 {
-   [self.consoleController logMessage:message printBold:NO];
+     __weak typeof(self) weakSelf = self;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [weakSelf.consoleController logMessage:message printBold:NO forTask:task];
+    });
 }
 
 
-- (void)printMessageBold:(NSString *)message
+- (void)printMessageBold:(NSString *)message forTask:(NSTask *)task
 {
-    [self.consoleController logMessage:message printBold:YES];
+     __weak typeof(self) weakSelf = self;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [weakSelf.consoleController logMessage:message printBold:YES forTask:task];
+    });
 }
 
 
-
-
+#pragma mark -
 
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [self.repos release];
-    [super dealloc];
 }
 
 
