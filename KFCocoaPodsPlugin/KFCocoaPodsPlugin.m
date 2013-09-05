@@ -104,7 +104,7 @@
         }
     }
     
-    self.repos = [[parsedRepos copy] retain];
+    self.repos = [parsedRepos copy];
 }
 
 
@@ -143,22 +143,15 @@
             {
                 NSMenuItem *versionMenuItem = [[NSMenuItem alloc] initWithTitle:version action:nil keyEquivalent:@""];
                 [repoVersionMenu addItem:versionMenuItem];
-                [versionMenuItem release];
             }
             
             repoMenuItem.submenu = repoVersionMenu;
-            [repoVersionMenu release];
-            
             [repoMenu addItem:repoMenuItem];
-            [repoMenuItem release];
         }
         reposMenuItem.submenu = repoMenu;
         [submenu addItem:reposMenuItem];
-        [repoMenu release];
         
         cocoapodsMenuItem.submenu = submenu;
-        [cocoapodsMenuItem release];
-        [submenu release];
     }
 }
 
@@ -170,39 +163,40 @@
 {
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
 
+    __weak typeof(self) weakSelf = self;
     dispatch_async(queue, ^
     {
         if ([KFWorkspaceController currentWorkspaceHasPodfile])
         {
-            [self printMessageBold:@"start pod update" forTask:nil];
+            [weakSelf printMessageBold:@"start pod update" forTask:nil];
             
             [[KFTaskController new] runShellCommand:kPodCommand withArguments:@[kCommandUpdate, kCommandNoColor] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:^(NSTask *task, NSString *output, NSString *error)
              {
                  if (output != nil)
                  {
-                     [self printMessage:output forTask:task];
+                     [weakSelf printMessage:output forTask:task];
                  }
                  else
                  {
-                     [self printMessage:error forTask:task];
+                     [weakSelf printMessage:error forTask:task];
                  }
              }
              completion:^(NSTask *task, BOOL success, NSException *exception)
              {
                  if (success)
                  {
-                     [self printMessageBold:@"pod update done" forTask:task];
+                     [weakSelf printMessageBold:@"pod update done" forTask:task];
                  }
                  else
                  {
-                     [self printMessageBold:@"pod update failed" forTask:task];
+                     [weakSelf printMessageBold:@"pod update failed" forTask:task];
                  }
-                 [self.consoleController removeTask:task];
+                 [weakSelf.consoleController removeTask:task];
              }];
         }
         else
         {
-            [self printMessageBold:@"no podfile - no pod update" forTask:nil];
+            [weakSelf printMessageBold:@"no podfile - no pod update" forTask:nil];
         }
     });
 }
@@ -212,38 +206,40 @@
 {
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
     
+    __weak typeof(self) weakSelf = self;
     dispatch_async(queue, ^
     {
        if ([KFWorkspaceController currentWorkspaceHasPodfile])
        {
-           [self printMessageBold:@"start pod outdated check" forTask:nil];
+           [weakSelf printMessageBold:@"start pod outdated check" forTask:nil];
            
            [[KFTaskController new] runShellCommand:kPodCommand withArguments:@[kCommandOutdated, kCommandNoColor] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:^(NSTask *task, NSString *output, NSString *error)
             {
                 if (output != nil)
                 {
-                    [self printMessage:output forTask:task];
+                    [weakSelf printMessage:output forTask:task];
                 }
                 else
                 {
-                    [self printMessage:error forTask:task];
+                    [weakSelf printMessage:error forTask:task];
                 }
             }
            completion:^(NSTask *task, BOOL success, NSException *exception)
             {
                 if (success)
                 {
-                    [self printMessageBold:@"pod outdated done" forTask:task];
+                    [weakSelf printMessageBold:@"pod outdated done" forTask:task];
                 }
                 else
                 {
-                    [self printMessageBold:@"pod outdated failed" forTask:task];
+                    [weakSelf printMessageBold:@"pod outdated failed" forTask:task];
                 }
+                [weakSelf.consoleController removeTask:task];
             }];
        }
        else
        {
-           [self printMessageBold:@"no podfile - no pod update" forTask:nil];
+           [weakSelf printMessageBold:@"no podfile - no outdated pods" forTask:nil];
        }
     });
     return;
@@ -272,15 +268,19 @@
 
 - (void)printMessage:(NSString *)message forTask:(NSTask *)task
 {
+     __weak typeof(self) weakSelf = self;
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.consoleController logMessage:message printBold:NO forTask:task];
+        [weakSelf.consoleController logMessage:message printBold:NO forTask:task];
     });
 }
 
 
 - (void)printMessageBold:(NSString *)message forTask:(NSTask *)task
 {
-    [self.consoleController logMessage:message printBold:YES forTask:task];
+     __weak typeof(self) weakSelf = self;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [weakSelf.consoleController logMessage:message printBold:YES forTask:task];
+    });
 }
 
 
@@ -289,8 +289,6 @@
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [self.repos release];
-    [super dealloc];
 }
 
 

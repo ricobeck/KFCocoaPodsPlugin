@@ -53,7 +53,6 @@
     @finally
     {
         completionBlock(task, YES, nil);
-        [task release];
     }
 }
 
