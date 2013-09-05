@@ -10,24 +10,67 @@
 #import "IDEKit.h"
 
 
+@interface KFConsoleController ()
+
+
+@property (nonatomic, strong) NSMutableDictionary *consoleForTask;
+
+
+@end
+
+
 @implementation KFConsoleController
 
 
-- (void)logMessage:(id)object
+
+- (id)init
 {
-    [self logMessage:object printBold:NO];
+    self = [super init];
+    if (self)
+    {
+        _consoleForTask = [NSMutableDictionary new];
+    }
+    return self;
 }
 
 
-- (void)logMessage:(id)object printBold:(BOOL)isBold
+
+- (void)logMessage:(id)object forTask:(NSTask *)task
 {
-    IDEConsoleTextView *console = [self consoleView:[NSApp mainWindow].contentView];
+    [self logMessage:object printBold:NO forTask:task];
+}
+
+
+- (void)logMessage:(id)object printBold:(BOOL)isBold forTask:(NSTask *)task
+{
+    IDEConsoleTextView *console;
+    if (task == nil)
+    {
+        console = [self consoleView:[NSApp mainWindow].contentView];
+    }
+    else
+    {
+        console = [self.consoleForTask objectForKey:@(task.processIdentifier)];
+        if (console == nil)
+        {
+            console = [self consoleView:[NSApp mainWindow].contentView];
+            [self.consoleForTask setObject:console forKey:@(task.processIdentifier)];
+        }
+    }
+    
+    
     console.logMode = isBold ? 2 : 1;
     
     [console insertText:object];
     [console insertNewline:self];
     
     console.logMode = 0;
+}
+
+
+- (void)removeTask:(NSTask *)task
+{
+    [self.consoleForTask removeObjectForKey:@(task.processIdentifier)];
 }
 
 

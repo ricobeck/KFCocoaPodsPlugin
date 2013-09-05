@@ -14,9 +14,12 @@
 @interface KFConsoleController : NSObject
 
 
-- (void)logMessage:(id)object;
+- (void)logMessage:(id)object forTask:(NSTask *)task;
 
-- (void)logMessage:(id)object printBold:(BOOL)isBold;
+- (void)logMessage:(id)object printBold:(BOOL)isBold forTask:(NSTask *)task;
+
+
+- (void)removeTask:(NSTask *)task;
 
 
 @end

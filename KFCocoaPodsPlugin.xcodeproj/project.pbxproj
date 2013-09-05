@@ -11,6 +11,7 @@
 		1D02734C17D746CB00E8389F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D02734B17D746CB00E8389F /* Foundation.framework */; };
 		1D02735217D746CC00E8389F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1D02735017D746CC00E8389F /* InfoPlist.strings */; };
 		1D02735517D746CC00E8389F /* KFCocoaPodsPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D02735417D746CC00E8389F /* KFCocoaPodsPlugin.m */; };
+		1D24305C17D8DB8F00E0D3DD /* KFCocoaPodController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D24305B17D8DB8F00E0D3DD /* KFCocoaPodController.m */; };
 		1D35C31F17D8B814006A9BDC /* KFTaskController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D35C31E17D8B814006A9BDC /* KFTaskController.m */; };
 		1D35C32217D8BBE9006A9BDC /* KFWorkspaceController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D35C32117D8BBE9006A9BDC /* KFWorkspaceController.m */; };
 		1DDE21BF17D8B08D0015857D /* KFConsoleController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DDE21BE17D8B08D0015857D /* KFConsoleController.m */; };
@@ -25,6 +26,8 @@
 		1D02735317D746CC00E8389F /* KFCocoaPodsPlugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KFCocoaPodsPlugin.h; sourceTree = "<group>"; };
 		1D02735417D746CC00E8389F /* KFCocoaPodsPlugin.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KFCocoaPodsPlugin.m; sourceTree = "<group>"; };
 		1D02735617D746CC00E8389F /* KFCocoaPodsPlugin-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "KFCocoaPodsPlugin-Prefix.pch"; sourceTree = "<group>"; };
+		1D24305A17D8DB8F00E0D3DD /* KFCocoaPodController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KFCocoaPodController.h; path = Sources/Controllers/KFCocoaPodController.h; sourceTree = "<group>"; };
+		1D24305B17D8DB8F00E0D3DD /* KFCocoaPodController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = KFCocoaPodController.m; path = Sources/Controllers/KFCocoaPodController.m; sourceTree = "<group>"; };
 		1D35C31D17D8B814006A9BDC /* KFTaskController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KFTaskController.h; path = Sources/Controllers/KFTaskController.h; sourceTree = "<group>"; };
 		1D35C31E17D8B814006A9BDC /* KFTaskController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = KFTaskController.m; path = Sources/Controllers/KFTaskController.m; sourceTree = "<group>"; };
 		1D35C32017D8BBE9006A9BDC /* KFWorkspaceController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KFWorkspaceController.h; path = Sources/Controllers/KFWorkspaceController.h; sourceTree = "<group>"; };
@@ -82,12 +85,7 @@
 			children = (
 				1D02735317D746CC00E8389F /* KFCocoaPodsPlugin.h */,
 				1D02735417D746CC00E8389F /* KFCocoaPodsPlugin.m */,
-				1DDE21BD17D8B08D0015857D /* KFConsoleController.h */,
-				1DDE21BE17D8B08D0015857D /* KFConsoleController.m */,
-				1D35C31D17D8B814006A9BDC /* KFTaskController.h */,
-				1D35C31E17D8B814006A9BDC /* KFTaskController.m */,
-				1D35C32017D8BBE9006A9BDC /* KFWorkspaceController.h */,
-				1D35C32117D8BBE9006A9BDC /* KFWorkspaceController.m */,
+				1D24305D17D8DB9400E0D3DD /* Controllers */,
 				1DDE21C017D8B1E70015857D /* XcodeClasses */,
 				1D02734E17D746CC00E8389F /* Supporting Files */,
 			);
@@ -102,6 +100,21 @@
 				1D02735617D746CC00E8389F /* KFCocoaPodsPlugin-Prefix.pch */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		1D24305D17D8DB9400E0D3DD /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				1D24305A17D8DB8F00E0D3DD /* KFCocoaPodController.h */,
+				1D24305B17D8DB8F00E0D3DD /* KFCocoaPodController.m */,
+				1DDE21BD17D8B08D0015857D /* KFConsoleController.h */,
+				1DDE21BE17D8B08D0015857D /* KFConsoleController.m */,
+				1D35C31D17D8B814006A9BDC /* KFTaskController.h */,
+				1D35C31E17D8B814006A9BDC /* KFTaskController.m */,
+				1D35C32017D8BBE9006A9BDC /* KFWorkspaceController.h */,
+				1D35C32117D8BBE9006A9BDC /* KFWorkspaceController.m */,
+			);
+			name = Controllers;
 			sourceTree = "<group>";
 		};
 		1DDE21C017D8B1E70015857D /* XcodeClasses */ = {
@@ -182,6 +195,7 @@
 				1DDE21BF17D8B08D0015857D /* KFConsoleController.m in Sources */,
 				1D35C31F17D8B814006A9BDC /* KFTaskController.m in Sources */,
 				1D35C32217D8BBE9006A9BDC /* KFWorkspaceController.m in Sources */,
+				1D24305C17D8DB8F00E0D3DD /* KFCocoaPodController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

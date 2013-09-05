@@ -11,6 +11,8 @@
 
 
 #define kPodfile @"Podfile"
+#define kPodfileLock @"Podfile.lock"
+
 
 @implementation KFWorkspaceController
 
@@ -24,6 +26,12 @@
 + (NSString *)currentWorkspacePodfilePath
 {
     return [[self currentWorkspaceDirectoryPath] stringByAppendingPathComponent:kPodfile];
+}
+
+
++ (NSString *)currentWorkspacePodfileLockPath
+{
+    return [[self currentWorkspaceDirectoryPath] stringByAppendingPathComponent:kPodfileLock];
 }
 
 
