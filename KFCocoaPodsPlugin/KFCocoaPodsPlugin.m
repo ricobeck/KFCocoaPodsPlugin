@@ -7,6 +7,9 @@
 //
 
 #import "KFCocoaPodsPlugin.h"
+#import "KFConsoleController.h"
+#import "KFTaskController.h"
+#import "KFWorkspaceController.h"
 
 
 @interface KFCocoaPodsPlugin ()
@@ -14,9 +17,16 @@
 
 @property (nonatomic, strong) NSDictionary *repos;
 
+@property (nonatomic, strong) KFConsoleController *consoleController;
+
+@property (nonatomic, strong) KFTaskController *taskController;
+
 
 @end
 
+
+#define kPodCommand @"/usr/bin/pod"
+#define kCommandNoColor @"--no-color"
 
 @implementation KFCocoaPodsPlugin
 
@@ -43,6 +53,9 @@
 {
     if (self = [super init])
     {
+        _consoleController = [KFConsoleController new];
+        _taskController = [KFTaskController new];
+        
         [self buildRepoIndex];
         [self insertMenu];
     }
@@ -53,12 +66,12 @@
 - (void)buildRepoIndex
 {
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSLog(@"building repo index");
+    [self.consoleController logMessage:@"building repo index"];
     
     NSMutableDictionary *parsedRepos = [NSMutableDictionary new];
     
     NSArray *repos = [fileManager contentsOfDirectoryAtPath:[@"~/.cocoapods/repos/" stringByExpandingTildeInPath] error:nil];
-    NSLog(@"repost: %@", repos);
+   [self.consoleController logMessage:repos];
     
     for (NSString *repoDirectory in repos)
     {
@@ -135,9 +148,59 @@
 
 - (void)doMenuAction
 {
-    NSAlert *alert = [NSAlert alertWithMessageText:@"Hello, World" defaultButton:nil alternateButton:nil otherButton:nil informativeTextWithFormat:@""];
-    [alert runModal];
+    [self performSelectorInBackground:@selector(podUpdate) withObject:nil];
 }
+
+
+- (void)podUpdate
+{
+    if ([KFWorkspaceController currentWorkspaceHasPodfile])
+    {
+        [self performSelectorOnMainThread:@selector(printMessageBold:) withObject:@"start pod update" waitUntilDone:NO];
+
+        [[KFTaskController new] runShellCommand:kPodCommand withArguments:@[@"update", kCommandNoColor] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:^(NSTask *task, NSString *output, NSString *error)
+         {
+             if (output != nil)
+             {
+                 [self performSelectorOnMainThread:@selector(printMessage:) withObject:output waitUntilDone:NO];
+             }
+             else
+             {
+                 [self performSelectorOnMainThread:@selector(printMessage:) withObject:error waitUntilDone:NO];
+             }
+         }
+         completion:^(NSTask *task, BOOL success, NSException *exception)
+         {
+             if (success)
+             {
+                 [self performSelectorOnMainThread:@selector(printMessageBold:) withObject:@"pod update done" waitUntilDone:NO];
+             }
+             else
+             {
+                 [self performSelectorOnMainThread:@selector(printMessageBold:) withObject:@"pod update failed" waitUntilDone:NO];
+             }
+         }];
+    }
+    else
+    {
+        [self performSelectorOnMainThread:@selector(printMessageBold:) withObject:@"no podfile - no pod update" waitUntilDone:NO];
+    }
+}
+
+
+- (void)printMessage:(NSString *)message
+{
+   [self.consoleController logMessage:message printBold:NO];
+}
+
+
+- (void)printMessageBold:(NSString *)message
+{
+    [self.consoleController logMessage:message printBold:YES];
+}
+
+
+
 
 
 - (void)dealloc
