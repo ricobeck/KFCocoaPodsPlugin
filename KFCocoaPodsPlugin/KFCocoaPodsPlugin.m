@@ -11,6 +11,8 @@
 #import "KFTaskController.h"
 #import "KFWorkspaceController.h"
 #import "KFCocoaPodController.h"
+#import "KFNotificationController.h"
+
 #import "KFRepoModel.h"
 
 #import <YAML-Framework/YAMLSerialization.h>
@@ -27,6 +29,8 @@
 @property (nonatomic, strong) KFTaskController *taskController;
 
 @property (nonatomic, strong) KFCocoaPodController *cocoaPodController;
+
+@property (nonatomic, strong) KFNotificationController *notificationController;
 
 
 @end
@@ -72,16 +76,10 @@
     {
         _consoleController = [KFConsoleController new];
         _taskController = [KFTaskController new];
+        _notificationController = [KFNotificationController new];
         
-        
-        @try {
-            [self buildRepoIndex];
-            [self insertMenu];
-        }
-        @catch (NSException *exception)
-        {
-            NSLog(@"exception :%@", exception.description);
-        }
+        [self buildRepoIndex];
+        [self insertMenu];
 
         _cocoaPodController = [[KFCocoaPodController alloc] initWithRepoData:self.repos];
     }
@@ -198,6 +196,9 @@
 
 - (void)podUpdateAction:(id)sender
 {
+    NSString *workspaceTitle = [KFWorkspaceController currentRepresentingTitle];
+    NSLog(@"workspace title: %@", workspaceTitle);
+    
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
 
     __weak typeof(self) weakSelf = self;
@@ -205,7 +206,10 @@
     {
         if ([KFWorkspaceController currentWorkspaceHasPodfile])
         {
+            
+            
             [weakSelf printMessageBold:@"start pod update" forTask:nil];
+            
             
             NSString *command =[KFWorkspaceController currentWorkspaceHasPodfileLock] ? kCommandUpdate : kCommandInstall;
             [[KFTaskController new] runShellCommand:kPodCommand withArguments:@[command, kParamdNoColor] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:^(NSTask *task, NSString *output, NSString *error)
@@ -221,14 +225,18 @@
              }
              completion:^(NSTask *task, BOOL success, NSString *output, NSException *exception)
              {
+                 NSString *title;
+                 NSString *message = workspaceTitle;
                  if (success)
                  {
-                     [weakSelf printMessageBold:@"pod update done" forTask:task];
+                     title = NSLocalizedString(@"Cocoapods update succeeded", nil);
                  }
                  else
                  {
-                     [weakSelf printMessageBold:@"pod update failed" forTask:task];
+                     title = NSLocalizedString(@"Cocoapods update failed", nil);
                  }
+                 [weakSelf printMessageBold:title forTask:task];
+                 [weakSelf.notificationController showNotificationWithTitle:title andMessage:message];
                  [weakSelf.consoleController removeTask:task];
              }];
         }
