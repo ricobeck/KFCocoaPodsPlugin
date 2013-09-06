@@ -19,6 +19,15 @@
 #import <KSCrypto/KSSHA1Stream.h>
 
 
+typedef NS_ENUM(NSUInteger, KFMenuItemTag)
+{
+    KFMenuItemTagEditPodfile,
+    KFMenuItemTagCheckForUpdates,
+    KFMenuItemTagUpdate
+};
+
+
+
 @interface KFCocoaPodsPlugin ()
 
 
@@ -87,6 +96,12 @@
 }
 
 
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem
+{
+    return YES;
+}
+
+
 #pragma mark - Initialization
 
 
@@ -151,6 +166,10 @@
         
         NSMenu *submenu = [[NSMenu alloc] initWithTitle:@"CocoaPods Submenu"];
         
+        NSMenuItem *editPodfileMenuItem = [[NSMenuItem alloc] initWithTitle:@"Edit Podfile" action:@selector(editPodfileAction:) keyEquivalent:@""];
+        [editPodfileMenuItem setTarget:self];
+        [submenu addItem:editPodfileMenuItem];
+        
         NSMenuItem *checkMenuItem = [[NSMenuItem alloc] initWithTitle:@"Check Pods" action:@selector(checkOutdatedPodsAction:) keyEquivalent:@""];
         [checkMenuItem setTarget:self];
         [submenu addItem:checkMenuItem];
@@ -190,6 +209,12 @@
 
 
 #pragma mark - Actions
+
+
+- (void)editPodfileAction:(id)sender
+{
+    [self openFileInIDE:[KFWorkspaceController currentWorkspacePodfilePath]];
+}
 
 
 - (void)podUpdateAction:(id)sender
@@ -296,6 +321,8 @@
                 [self printMessage:[repoModel description]];
             }
             [self.notificationController showNotificationWithTitle:[NSString stringWithFormat:NSLocalizedString(@"%d Updateable Pods", nil), [podsWithUpdates count]] andMessage:[[podsWithUpdates valueForKey:@"pod"] componentsJoinedByString:@", "]];
+            
+            [self openFileInIDE:[KFWorkspaceController currentWorkspacePodfilePath]];
         }
         else
         {
@@ -375,6 +402,13 @@
         }
     });
 }
+
+
+- (void)openFileInIDE:(NSString *)file
+{
+    [[[NSApplication sharedApplication] delegate] application:[NSApplication sharedApplication] openFile:file];
+}
+
 
 #pragma mark - Logging
 
