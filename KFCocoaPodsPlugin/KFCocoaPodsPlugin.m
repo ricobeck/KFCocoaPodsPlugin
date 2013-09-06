@@ -93,12 +93,10 @@
 - (void)buildRepoIndex
 {
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    [self printMessage:@"building repo index" forTask:nil];
+    [self printMessage:@"building repo index"];
     
     NSMutableDictionary *parsedRepos = [NSMutableDictionary new];
-    
     NSArray *repos = [fileManager contentsOfDirectoryAtPath:[@"~/.cocoapods/repos/" stringByExpandingTildeInPath] error:nil];
-   [self.consoleController logMessage:repos forTask:nil];
     
     for (NSString *repoDirectory in repos)
     {
@@ -197,19 +195,14 @@
 - (void)podUpdateAction:(id)sender
 {
     NSString *workspaceTitle = [KFWorkspaceController currentRepresentingTitle];
-    NSLog(@"workspace title: %@", workspaceTitle);
+    __weak typeof(self) weakSelf = self;
     
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
-
-    __weak typeof(self) weakSelf = self;
     dispatch_async(queue, ^
     {
         if ([KFWorkspaceController currentWorkspaceHasPodfile])
         {
-            
-            
-            [weakSelf printMessageBold:@"start pod update" forTask:nil];
-            
+            [weakSelf printMessageBold:@"start pod update"];
             
             NSString *command =[KFWorkspaceController currentWorkspaceHasPodfileLock] ? kCommandUpdate : kCommandInstall;
             [[KFTaskController new] runShellCommand:kPodCommand withArguments:@[command, kParamdNoColor] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:^(NSTask *task, NSString *output, NSString *error)
@@ -242,7 +235,7 @@
         }
         else
         {
-            [weakSelf printMessageBold:@"no podfile - no pod update" forTask:nil];
+            [weakSelf printMessageBold:@"no podfile - no pod update"];
         }
     });
 }
@@ -255,23 +248,20 @@
     
     if (error == nil)
     {
-        [self printMessageBold:NSLocalizedString(@"Start checking for updated Pods", nil) forTask:nil];
+        [self printMessageBold:NSLocalizedString(@"Start checking for updated Pods", nil)];
         
         NSMutableArray *yaml = [YAMLSerialization YAMLWithData:[content dataUsingEncoding:NSUTF8StringEncoding] options:kYAMLReadOptionStringScalars error:&error];
         
         /*
-        [self printMessageBold:@"parsed lock file" forTask:nil];
-        [self printMessage:[[yaml firstObject] description] forTask:nil];
+        [self printMessageBold:@"parsed lock file"];
+        [self printMessage:[[yaml firstObject] description]];
          */
         
         NSDictionary *specChecksums = [yaml firstObject][@"SPEC CHECKSUMS"];
         NSArray *installedPods = [yaml firstObject][@"PODS"];
         
-        
         NSMutableArray *podsWithUpdates = [NSMutableArray new];
         NSCharacterSet *trimSet = [NSCharacterSet characterSetWithCharactersInString:@" ()"];
-        
-        
         
         for (NSString *spec in specChecksums)
         {
@@ -296,26 +286,25 @@
             {
                 [podsWithUpdates addObject:latestVersionRepoModel];
             }
-            
-            //[self printMessage:[NSString stringWithFormat:@"%@ installed: %@, available: %@ (%@)", spec, checksum, latestVersionRepoModel.checksum, latestVersionRepoModel.version] forTask:nil];
         }
         
         if ([podsWithUpdates count] > 0)
         {
-            [self printMessageBold:NSLocalizedString(@"The following Pods have updates available", nil) forTask:nil];
+            [self printMessageBold:NSLocalizedString(@"The following Pods have updates available", nil)];
             for (KFRepoModel *repoModel in podsWithUpdates)
             {
-                [self printMessage:[repoModel description] forTask:nil];
+                [self printMessage:[repoModel description]];
             }
+            [self.notificationController showNotificationWithTitle:[NSString stringWithFormat:NSLocalizedString(@"%d Updateable Pods", nil), [podsWithUpdates count]] andMessage:[[podsWithUpdates valueForKey:@"pod"] componentsJoinedByString:@", "]];
         }
         else
         {
-            [self printMessageBold:NSLocalizedString(@"No updates available", nil) forTask:nil];
+            [self printMessageBold:NSLocalizedString(@"No updates available", nil)];
         }
     }
     else
     {
-        [self printMessage:error.description forTask:nil];
+        [self printMessage:error.description];
     }
 }
 
@@ -341,8 +330,6 @@
             {
                 [weakSelf printMessageBold:error.description forTask:task];
             }
-            
-            
         }
     }];
 }
@@ -357,7 +344,7 @@
     {
         if ([KFWorkspaceController currentWorkspaceHasPodfile])
         {
-            [weakSelf printMessageBold:@"start pod outdated check" forTask:nil];
+            [weakSelf printMessageBold:@"start pod outdated check"];
 
             [[KFTaskController new] runShellCommand:kPodCommand withArguments:@[kCommandOutdated, kParamdNoColor] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:^(NSTask *task, NSString *output, NSString *error)
             {
@@ -384,12 +371,18 @@
         }
         else
         {
-            [weakSelf printMessageBold:@"no podfile - no outdated pods" forTask:nil];
+            [weakSelf printMessageBold:@"no podfile - no outdated pods"];
         }
     });
 }
 
 #pragma mark - Logging
+
+
+- (void)printMessage:(NSString *)message
+{
+    [self printMessageBold:message forTask:nil];
+}
 
 
 - (void)printMessage:(NSString *)message forTask:(NSTask *)task
@@ -398,6 +391,12 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         [weakSelf.consoleController logMessage:message printBold:NO forTask:task];
     });
+}
+
+
+- (void)printMessageBold:(NSString *)message
+{
+    [self printMessageBold:message forTask:nil];
 }
 
 
