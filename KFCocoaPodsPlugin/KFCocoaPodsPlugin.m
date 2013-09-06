@@ -12,6 +12,8 @@
 #import "KFWorkspaceController.h"
 #import "KFCocoaPodController.h"
 
+#import <YAML-Framework/YAMLSerialization.h>
+
 
 @interface KFCocoaPodsPlugin ()
 
@@ -32,8 +34,12 @@
 
 #define kCommandInstall @"install"
 #define kCommandUpdate @"update"
+#define kCommandInterprocessCommunication @"ipc"
 #define kCommandOutdated @"outdated"
-#define kCommandNoColor @"--no-color"
+
+#define kCommandConvertPodFileToYAML @"podfile"
+
+#define kParamdNoColor @"--no-color"
 
 
 @implementation KFCocoaPodsPlugin
@@ -172,7 +178,7 @@
             [weakSelf printMessageBold:@"start pod update" forTask:nil];
             
             NSString *command =[KFWorkspaceController currentWorkspaceHasPodfileLock] ? kCommandUpdate : kCommandInstall;
-            [[KFTaskController new] runShellCommand:kPodCommand withArguments:@[command, kCommandNoColor] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:^(NSTask *task, NSString *output, NSString *error)
+            [[KFTaskController new] runShellCommand:kPodCommand withArguments:@[command, kParamdNoColor] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:^(NSTask *task, NSString *output, NSString *error)
              {
                  if (output != nil)
                  {
@@ -183,7 +189,7 @@
                      [weakSelf printMessage:error forTask:task];
                  }
              }
-             completion:^(NSTask *task, BOOL success, NSException *exception)
+             completion:^(NSTask *task, BOOL success, NSString *output, NSException *exception)
              {
                  if (success)
                  {
@@ -206,6 +212,8 @@
 
 - (void)checkOutdatedPodsAction:(id)sender
 {
+    //[self parseYAMLForPodfile:[KFWorkspaceController currentWorkspacePodfilePath]];
+
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
     
     __weak typeof(self) weakSelf = self;
@@ -215,7 +223,7 @@
        {
            [weakSelf printMessageBold:@"start pod outdated check" forTask:nil];
            
-           [[KFTaskController new] runShellCommand:kPodCommand withArguments:@[kCommandOutdated, kCommandNoColor] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:^(NSTask *task, NSString *output, NSString *error)
+           [[KFTaskController new] runShellCommand:kPodCommand withArguments:@[kCommandOutdated, kParamdNoColor] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:^(NSTask *task, NSString *output, NSString *error)
             {
                 if (output != nil)
                 {
@@ -226,7 +234,7 @@
                     [weakSelf printMessage:error forTask:task];
                 }
             }
-           completion:^(NSTask *task, BOOL success, NSException *exception)
+           completion:^(NSTask *task, BOOL success, NSString *output, NSException *exception)
             {
                 if (success)
                 {
@@ -244,25 +252,53 @@
            [weakSelf printMessageBold:@"no podfile - no outdated pods" forTask:nil];
        }
     });
-    return;
+    
     
     //TODO: maybe implement own checking?
     
-    /*
     NSError *error = nil;
     NSString *content = [NSString stringWithContentsOfFile:[KFWorkspaceController currentWorkspacePodfileLockPath] encoding:NSUTF8StringEncoding error:&error];
     
     if (error == nil)
     {
-        NSArray *outdatedPods = [self.cocoaPodController outdatedPodsForLockFileContents:content];
-        [self printMessage:[outdatedPods description]];
+        NSMutableArray *yaml = [YAMLSerialization YAMLWithData:[content dataUsingEncoding:NSUTF8StringEncoding] options:kYAMLReadOptionStringScalars error:&error];
+        
+        //NSArray *outdatedPods = [self.cocoaPodController outdatedPodsForLockFileContents:content];
+        [self printMessageBold:@"parsed lock file" forTask:nil];
+        [self printMessage:[yaml description] forTask:nil];
     }
     else
     {
-        [self printMessage:error.description];
+        [self printMessage:error.description forTask:nil];
     }
-     */
+}
 
+
+- (void)parseYAMLForPodfile:(NSString *)podfile
+{
+     __weak typeof(self) weakSelf = self;
+    [[KFTaskController new] runShellCommand:kPodCommand withArguments:@[kCommandInterprocessCommunication, kCommandConvertPodFileToYAML, podfile] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:nil completion:^(NSTask *task, BOOL success, NSString *output, NSException *exception)
+    {
+        if (success)
+        {
+            [weakSelf printMessageBold:@"parsed podfile:" forTask:task];
+            NSMutableArray *lines = [[output componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] mutableCopy];
+            [lines removeObjectAtIndex:0];
+            output = [lines componentsJoinedByString:@"\n"];
+            NSError *error = nil;
+            NSMutableArray *yaml = [YAMLSerialization YAMLWithData:[output dataUsingEncoding:NSUTF8StringEncoding] options:kYAMLReadOptionStringScalars error:&error];
+            if (error == nil)
+            {
+                [weakSelf printMessage:[yaml description] forTask:task];
+            }
+            else
+            {
+                [weakSelf printMessageBold:error.description forTask:task];
+            }
+            
+            
+        }
+    }];
 }
 
 #pragma mark - Logging

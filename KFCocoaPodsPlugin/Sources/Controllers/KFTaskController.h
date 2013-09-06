@@ -11,7 +11,7 @@
 
 typedef void(^KFTaskControllerProgressBlock)(NSTask *task, NSString *output, NSString *error);
 
-typedef void(^KFTaskControllerCompletionBlock)(NSTask *task, BOOL success, NSException *exception);
+typedef void(^KFTaskControllerCompletionBlock)(NSTask *task, BOOL success, NSString *output, NSException *exception);
 
 @interface KFTaskController : NSObject
 
