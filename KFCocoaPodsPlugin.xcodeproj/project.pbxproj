@@ -14,7 +14,9 @@
 		1D24305C17D8DB8F00E0D3DD /* KFCocoaPodController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D24305B17D8DB8F00E0D3DD /* KFCocoaPodController.m */; };
 		1D35C31F17D8B814006A9BDC /* KFTaskController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D35C31E17D8B814006A9BDC /* KFTaskController.m */; };
 		1D35C32217D8BBE9006A9BDC /* KFWorkspaceController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D35C32117D8BBE9006A9BDC /* KFWorkspaceController.m */; };
+		1DAC167617D9F09300287BA0 /* KFRepoModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DAC167517D9F09300287BA0 /* KFRepoModel.m */; };
 		1DDE21BF17D8B08D0015857D /* KFConsoleController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DDE21BE17D8B08D0015857D /* KFConsoleController.m */; };
+		C8DBFFE38BD1451BB6DACAF9 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8B5BF65125F74E12891B4621 /* libPods.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +34,8 @@
 		1D35C31E17D8B814006A9BDC /* KFTaskController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = KFTaskController.m; path = Sources/Controllers/KFTaskController.m; sourceTree = "<group>"; };
 		1D35C32017D8BBE9006A9BDC /* KFWorkspaceController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KFWorkspaceController.h; path = Sources/Controllers/KFWorkspaceController.h; sourceTree = "<group>"; };
 		1D35C32117D8BBE9006A9BDC /* KFWorkspaceController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = KFWorkspaceController.m; path = Sources/Controllers/KFWorkspaceController.m; sourceTree = "<group>"; };
+		1DAC167417D9F09300287BA0 /* KFRepoModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KFRepoModel.h; sourceTree = "<group>"; };
+		1DAC167517D9F09300287BA0 /* KFRepoModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KFRepoModel.m; sourceTree = "<group>"; };
 		1DDE21BD17D8B08D0015857D /* KFConsoleController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KFConsoleController.h; path = Sources/Controllers/KFConsoleController.h; sourceTree = "<group>"; };
 		1DDE21BE17D8B08D0015857D /* KFConsoleController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = KFConsoleController.m; path = Sources/Controllers/KFConsoleController.m; sourceTree = "<group>"; };
 		1DDE21C117D8B1E70015857D /* DVTFoundation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DVTFoundation.h; sourceTree = "<group>"; };
@@ -39,6 +43,8 @@
 		1DDE21C317D8B1E70015857D /* IDEFoundation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDEFoundation.h; sourceTree = "<group>"; };
 		1DDE21C417D8B1E70015857D /* IDEKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDEKit.h; sourceTree = "<group>"; };
 		1DDE21C517D8B1E70015857D /* IDESourceEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDESourceEditor.h; sourceTree = "<group>"; };
+		890D3963EC534E2586D5020C /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = SOURCE_ROOT; };
+		8B5BF65125F74E12891B4621 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -48,6 +54,7 @@
 			files = (
 				1D02734A17D746CB00E8389F /* AppKit.framework in Frameworks */,
 				1D02734C17D746CB00E8389F /* Foundation.framework in Frameworks */,
+				C8DBFFE38BD1451BB6DACAF9 /* libPods.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -60,6 +67,7 @@
 				1D02734D17D746CC00E8389F /* KFCocoaPodsPlugin */,
 				1D02734817D746CB00E8389F /* Frameworks */,
 				1D02734717D746CB00E8389F /* Products */,
+				890D3963EC534E2586D5020C /* Pods.xcconfig */,
 			);
 			sourceTree = "<group>";
 		};
@@ -76,6 +84,7 @@
 			children = (
 				1D02734917D746CB00E8389F /* AppKit.framework */,
 				1D02734B17D746CB00E8389F /* Foundation.framework */,
+				8B5BF65125F74E12891B4621 /* libPods.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -85,6 +94,7 @@
 			children = (
 				1D02735317D746CC00E8389F /* KFCocoaPodsPlugin.h */,
 				1D02735417D746CC00E8389F /* KFCocoaPodsPlugin.m */,
+				1DAC167317D9F09300287BA0 /* Models */,
 				1D24305D17D8DB9400E0D3DD /* Controllers */,
 				1DDE21C017D8B1E70015857D /* XcodeClasses */,
 				1D02734E17D746CC00E8389F /* Supporting Files */,
@@ -117,6 +127,16 @@
 			name = Controllers;
 			sourceTree = "<group>";
 		};
+		1DAC167317D9F09300287BA0 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				1DAC167417D9F09300287BA0 /* KFRepoModel.h */,
+				1DAC167517D9F09300287BA0 /* KFRepoModel.m */,
+			);
+			name = Models;
+			path = Sources/Models;
+			sourceTree = "<group>";
+		};
 		1DDE21C017D8B1E70015857D /* XcodeClasses */ = {
 			isa = PBXGroup;
 			children = (
@@ -136,9 +156,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1D02735917D746CC00E8389F /* Build configuration list for PBXNativeTarget "KFCocoaPodsPlugin" */;
 			buildPhases = (
+				C90012E6A43940B78D0347BA /* Check Pods Manifest.lock */,
 				1D02734217D746CB00E8389F /* Sources */,
 				1D02734317D746CB00E8389F /* Frameworks */,
 				1D02734417D746CB00E8389F /* Resources */,
+				6864FFC159CF45B5806FA1D4 /* Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -186,6 +208,39 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		6864FFC159CF45B5806FA1D4 /* Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Pods-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C90012E6A43940B78D0347BA /* Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		1D02734217D746CB00E8389F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -196,6 +251,7 @@
 				1D35C31F17D8B814006A9BDC /* KFTaskController.m in Sources */,
 				1D35C32217D8BBE9006A9BDC /* KFWorkspaceController.m in Sources */,
 				1D24305C17D8DB8F00E0D3DD /* KFCocoaPodController.m in Sources */,
+				1DAC167617D9F09300287BA0 /* KFRepoModel.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -270,6 +326,7 @@
 		};
 		1D02735A17D746CC00E8389F /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 890D3963EC534E2586D5020C /* Pods.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COMBINE_HIDPI_IMAGES = YES;
@@ -286,6 +343,7 @@
 		};
 		1D02735B17D746CC00E8389F /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 890D3963EC534E2586D5020C /* Pods.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COMBINE_HIDPI_IMAGES = YES;

@@ -23,6 +23,12 @@
 }
 
 
++ (BOOL)currentWorkspaceHasPodfileLock
+{
+    return [self fileNameExistsInCurrentWorkspace:kPodfileLock];
+}
+
+
 + (NSString *)currentWorkspacePodfilePath
 {
     return [[self currentWorkspaceDirectoryPath] stringByAppendingPathComponent:kPodfile];

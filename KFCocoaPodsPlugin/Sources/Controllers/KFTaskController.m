@@ -21,17 +21,28 @@
     task.standardOutput = [NSPipe pipe];
     task.standardError  = [NSPipe pipe];
     
+    __block NSMutableData *outputData = [NSMutableData new];
+    __block NSMutableData *errorData = [NSMutableData new];
+    
 
     [[task.standardOutput fileHandleForReading] setReadabilityHandler:^(NSFileHandle *file)
     {
         NSData *availableData = [file availableData];
-        progressBlock(task, [[NSString alloc] initWithData:availableData encoding:NSUTF8StringEncoding], nil);
+        [outputData appendData:availableData];
+        if (progressBlock != nil)
+        {
+            progressBlock(task, [[NSString alloc] initWithData:availableData encoding:NSUTF8StringEncoding], nil);
+        }
     }];
     
     [[task.standardError fileHandleForReading] setReadabilityHandler:^(NSFileHandle *file)
     {
         NSData *availableData = [file availableData];
-        progressBlock(task, nil, [[NSString alloc] initWithData:availableData encoding:NSUTF8StringEncoding]);
+        [errorData appendData:availableData];
+        if (progressBlock != nil)
+        {
+            progressBlock(task, nil, [[NSString alloc] initWithData:availableData encoding:NSUTF8StringEncoding]);
+        }
     }];
     
     [task setTerminationHandler:^(NSTask *task)
@@ -48,11 +59,11 @@
     }
     @catch (NSException *exception)
     {
-        completionBlock(task, NO, exception);
+        completionBlock(task, NO, [[NSString alloc] initWithData:errorData encoding:NSUTF8StringEncoding], exception);
     }
     @finally
     {
-        completionBlock(task, YES, nil);
+        completionBlock(task, YES, [[NSString alloc] initWithData:outputData encoding:NSUTF8StringEncoding], nil);
     }
 }
 
