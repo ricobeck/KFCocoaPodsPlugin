@@ -1,12 +1,15 @@
 PODS:
+  - KSCrypto (1.2.2)
   - LibYAML (0.1.4)
   - YAML-Framework (0.0.1):
     - LibYAML (~> 0.1.4)
 
 DEPENDENCIES:
+  - KSCrypto (~> 1.2.2)
   - YAML-Framework
 
 SPEC CHECKSUMS:
+  KSCrypto: f010e3bb8db23f1bb4fe30b18c0236477d0d6270
   LibYAML: 49b77e5b3f4417fa512a8f1f4675a78480bf6b3d
   YAML-Framework: 4ada9225119ffb13a206f251fe4434e660bca16d
 
