@@ -16,6 +16,7 @@
 		1D35C32217D8BBE9006A9BDC /* KFWorkspaceController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D35C32117D8BBE9006A9BDC /* KFWorkspaceController.m */; };
 		1DAC167617D9F09300287BA0 /* KFRepoModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DAC167517D9F09300287BA0 /* KFRepoModel.m */; };
 		1DDE21BF17D8B08D0015857D /* KFConsoleController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DDE21BE17D8B08D0015857D /* KFConsoleController.m */; };
+		1DF28C9017DA5B6B00DFBD5C /* KFNotificationController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DF28C8F17DA5B6B00DFBD5C /* KFNotificationController.m */; };
 		C8DBFFE38BD1451BB6DACAF9 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8B5BF65125F74E12891B4621 /* libPods.a */; };
 /* End PBXBuildFile section */
 
@@ -43,6 +44,8 @@
 		1DDE21C317D8B1E70015857D /* IDEFoundation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDEFoundation.h; sourceTree = "<group>"; };
 		1DDE21C417D8B1E70015857D /* IDEKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDEKit.h; sourceTree = "<group>"; };
 		1DDE21C517D8B1E70015857D /* IDESourceEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IDESourceEditor.h; sourceTree = "<group>"; };
+		1DF28C8E17DA5B6B00DFBD5C /* KFNotificationController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KFNotificationController.h; path = Sources/Controllers/KFNotificationController.h; sourceTree = "<group>"; };
+		1DF28C8F17DA5B6B00DFBD5C /* KFNotificationController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = KFNotificationController.m; path = Sources/Controllers/KFNotificationController.m; sourceTree = "<group>"; };
 		890D3963EC534E2586D5020C /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = SOURCE_ROOT; };
 		8B5BF65125F74E12891B4621 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -123,6 +126,8 @@
 				1D35C31E17D8B814006A9BDC /* KFTaskController.m */,
 				1D35C32017D8BBE9006A9BDC /* KFWorkspaceController.h */,
 				1D35C32117D8BBE9006A9BDC /* KFWorkspaceController.m */,
+				1DF28C8E17DA5B6B00DFBD5C /* KFNotificationController.h */,
+				1DF28C8F17DA5B6B00DFBD5C /* KFNotificationController.m */,
 			);
 			name = Controllers;
 			sourceTree = "<group>";
@@ -252,6 +257,7 @@
 				1D35C32217D8BBE9006A9BDC /* KFWorkspaceController.m in Sources */,
 				1D24305C17D8DB8F00E0D3DD /* KFCocoaPodController.m in Sources */,
 				1DAC167617D9F09300287BA0 /* KFRepoModel.m in Sources */,
+				1DF28C9017DA5B6B00DFBD5C /* KFNotificationController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

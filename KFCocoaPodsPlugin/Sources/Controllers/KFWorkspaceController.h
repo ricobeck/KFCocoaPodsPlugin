@@ -11,6 +11,8 @@
 @interface KFWorkspaceController : NSObject
 
 
++ (NSString *)currentRepresentingTitle;
+
 + (BOOL)currentWorkspaceHasPodfile;
 
 + (BOOL)currentWorkspaceHasPodfileLock;

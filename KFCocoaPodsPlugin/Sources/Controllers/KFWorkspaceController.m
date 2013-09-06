@@ -7,7 +7,7 @@
 //
 
 #import "KFWorkspaceController.h"
-#import "IDEFoundation.h"
+#import "IDEKit.h"
 
 
 #define kPodfile @"Podfile"
@@ -43,6 +43,12 @@
 
 + (id)workspaceForKeyWindow
 {
+    /*
+     
+    IDEWorkspaceWindowController *workspaceController = [IDEWorkspaceWindowController workspaceWindowControllerForWindow:[NSApp mainWindow]];
+    [workspaceController ]
+     */
+    
     NSArray *workspaceWindowControllers = [NSClassFromString(@"IDEWorkspaceWindowController") valueForKey:@"workspaceWindowControllers"];
     for (id controller in workspaceWindowControllers)
     {
@@ -54,6 +60,12 @@
         }
     }
     return nil;
+}
+
+
++ (NSString *)currentRepresentingTitle
+{
+    return [[self workspaceForKeyWindow] valueForKey:@"name"];
 }
 
 
