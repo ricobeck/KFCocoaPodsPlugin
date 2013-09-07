@@ -62,6 +62,7 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 
 #pragma mark -
 
+
 + (BOOL)shouldLoadPlugin
 {
     NSString *bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
@@ -71,11 +72,20 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 
 + (void)pluginDidLoad:(NSBundle *)plugin
 {
+    if ([self shouldLoadPlugin]) {
+        [self sharedPlugin];
+    }
+}
+
++ (instancetype)sharedPlugin
+{
     static id sharedPlugin = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        sharedPlugin = [[self alloc] init];
-    });
+	static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
+		sharedPlugin = [[self alloc] init];
+	});
+    
+    return sharedPlugin;
 }
 
 

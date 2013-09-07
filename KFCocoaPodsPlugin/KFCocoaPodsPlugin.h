@@ -10,4 +10,10 @@
 
 @interface KFCocoaPodsPlugin : NSObject
 
+
++ (instancetype)sharedPlugin;
+
++ (BOOL)shouldLoadPlugin;
+
+
 @end
