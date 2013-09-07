@@ -6,7 +6,7 @@
 //  Copyright (c) 2013 KF Interactive. All rights reserved.
 //
 
-#import "DVTTextCompletionKeywordsStrategy+KFCocoaPods.h"
+#import "DVTTextCompletionWordsInFileStrategy+KFCocoaPods.h"
 #import "MethodSwizzle.h"
 #import "KFCocoaPodsPlugin.h"
 
@@ -49,10 +49,27 @@
             NSRange selectedRange = [sourceTextView selectedRange];
             
             NSString *string = [textStorage string];
-            NSString *itemString = [string substringWithRange:NSMakeRange(0, selectedRange.location)];
-            NSLog(@"item string: %@", itemString);
+            NSRange itemRange = NSMakeRange(0, selectedRange.location);
+            NSString *itemString = [string substringWithRange:itemRange];
+            
+            NSRange newlineRange = [itemString rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet] options:NSBackwardsSearch];
+            
+            if (newlineRange.location != NSNotFound)
+            {
+                itemRange.length = itemRange.length - newlineRange.location;
+                itemRange.location = itemRange.location + newlineRange.location;
+                
+                if (itemRange.length < [string length] && NSMaxRange(itemRange) < [string length])
+                {
+                    itemString = [string substringWithRange:itemRange];
+                }
+            }
+            
+            if ([[itemString lowercaseString] hasSuffix:@"pod "])
+            {
+                items = [[KFCocoaPodsPlugin sharedPlugin] autoCompletionItems];
+            }
         }
-        items = [[KFCocoaPodsPlugin sharedPlugin] autoCompletionItems];
     }
     @catch (NSException *exception)
     {
