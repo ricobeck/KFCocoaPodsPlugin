@@ -44,12 +44,12 @@
             
             if ([line hasSuffix:@"pod "])
             {
-                NSLog(@"show auto completion for pods");
                 shouldAutoComplete = YES;
             }
         }
         @catch (NSException *exception)
         {
+            
         }
     }
     

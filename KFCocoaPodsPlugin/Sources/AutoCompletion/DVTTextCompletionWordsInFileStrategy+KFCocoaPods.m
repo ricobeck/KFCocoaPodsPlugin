@@ -19,25 +19,9 @@
     MethodSwizzle(self, @selector(completionItemsForDocumentLocation:context:areDefinitive:), @selector(swizzle_completionItemsForDocumentLocation:context:areDefinitive:));
 }
 
-/*
- arg1 = DVTTextDocumentLocation
- arg2 = NSDictionary
- DVTTextCompletionContextSourceCodeLanguage <DVTSourceCodeLanguage>
- DVTTextCompletionContextTextStorage <DVTTextStorage>
- DVTTextCompletionContextTextView <DVTSourceTextView>
- IDETextCompletionContextDocumentKey <IDESourceCodeDocument>
- IDETextCompletionContextEditorKey <IDESourceCodeEditor>
- IDETextCompletionContextPlatformFamilyNamesKey (macosx, iphoneos?)
- IDETextCompletionContextUnsavedDocumentStringsKey <NSDictionary>
- IDETextCompletionContextWorkspaceKey <IDEWorkspace>
- arg3 = unsure, not changing it
- returns = IDEIndexCompletionArray
- */
-
 - (id)swizzle_completionItemsForDocumentLocation:(id)arg1 context:(id)arg2 areDefinitive:(char *)arg3
 {
     id items = [self swizzle_completionItemsForDocumentLocation:arg1 context:arg2 areDefinitive:arg3];
-    NSLog(@"i am active: %@", arg2);
     @try
     {
         DVTSourceCodeLanguage *sourceCodeLanguage = [arg2 valueForKey:@"DVTTextCompletionContextSourceCodeLanguage"];
@@ -73,7 +57,7 @@
     }
     @catch (NSException *exception)
     {
-        NSLog(@"exception %@", exception);
+        
     }
     
     return items;
