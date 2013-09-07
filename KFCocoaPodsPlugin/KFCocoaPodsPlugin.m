@@ -22,7 +22,7 @@
 typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 {
     KFMenuItemTagEditPodfile,
-    KFMenuItemTagCheckForUpdates,
+    KFMenuItemTagCheckForOutdatedPods,
     KFMenuItemTagUpdate
 };
 
@@ -98,7 +98,17 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem
 {
-    return YES;
+    switch (menuItem.tag)
+    {
+        case KFMenuItemTagEditPodfile:
+        case KFMenuItemTagCheckForOutdatedPods:
+        case KFMenuItemTagUpdate:
+            return [KFWorkspaceController currentWorkspaceHasPodfile];
+            break;
+        default:
+            return YES;
+            break;
+    }
 }
 
 
@@ -157,25 +167,31 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 
 - (void)insertMenu
 {
-    NSMenuItem *menuItem = [[NSApp mainMenu] itemWithTitle:@"Product"];
-    if (menuItem)
+    NSMenuItem *productsMenuItem = [[NSApp mainMenu] itemWithTitle:@"Product"];
+    if (productsMenuItem)
     {
-        [[menuItem submenu] addItem:[NSMenuItem separatorItem]];
+        
         NSMenuItem *cocoapodsMenuItem = [[NSMenuItem alloc] initWithTitle:@"CocoaPods" action:nil keyEquivalent:@""];
-        [[menuItem submenu] addItem:cocoapodsMenuItem];
+        NSMenuItem *seperatorItem = [NSMenuItem separatorItem];
+        NSUInteger index = [productsMenuItem.submenu indexOfItemWithTitle:@"Perform Action"] + 1;
+        [[productsMenuItem submenu] insertItem:seperatorItem atIndex:index];
+        [[productsMenuItem submenu] insertItem:cocoapodsMenuItem atIndex:index +1];
         
         NSMenu *submenu = [[NSMenu alloc] initWithTitle:@"CocoaPods Submenu"];
         
         NSMenuItem *editPodfileMenuItem = [[NSMenuItem alloc] initWithTitle:@"Edit Podfile" action:@selector(editPodfileAction:) keyEquivalent:@""];
         [editPodfileMenuItem setTarget:self];
+        editPodfileMenuItem.tag = KFMenuItemTagEditPodfile;
         [submenu addItem:editPodfileMenuItem];
         
-        NSMenuItem *checkMenuItem = [[NSMenuItem alloc] initWithTitle:@"Check Pods" action:@selector(checkOutdatedPodsAction:) keyEquivalent:@""];
+        NSMenuItem *checkMenuItem = [[NSMenuItem alloc] initWithTitle:@"Check For Outdated Pods" action:@selector(checkOutdatedPodsAction:) keyEquivalent:@""];
         [checkMenuItem setTarget:self];
+        checkMenuItem.tag = KFMenuItemTagCheckForOutdatedPods;
         [submenu addItem:checkMenuItem];
         
-        NSMenuItem *updateMenuItem = [[NSMenuItem alloc] initWithTitle:@"Update/Install" action:@selector(podUpdateAction:) keyEquivalent:@""];
+        NSMenuItem *updateMenuItem = [[NSMenuItem alloc] initWithTitle:@"Run Update/Install" action:@selector(podUpdateAction:) keyEquivalent:@""];
         [updateMenuItem setTarget:self];
+        updateMenuItem.tag = KFMenuItemTagUpdate;
         [submenu addItem:updateMenuItem];
         
 
