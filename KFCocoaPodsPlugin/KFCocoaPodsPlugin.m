@@ -14,6 +14,7 @@
 #import "KFNotificationController.h"
 
 #import "KFRepoModel.h"
+#import "KFPodAutomCompletionItem.h"
 
 #import <YAML-Framework/YAMLSerialization.h>
 #import <KSCrypto/KSSHA1Stream.h>
@@ -62,6 +63,7 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 
 #pragma mark -
 
+
 + (BOOL)shouldLoadPlugin
 {
     NSString *bundleIdentifier = [[NSBundle mainBundle] bundleIdentifier];
@@ -71,11 +73,20 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 
 + (void)pluginDidLoad:(NSBundle *)plugin
 {
+    if ([self shouldLoadPlugin]) {
+        [self sharedPlugin];
+    }
+}
+
++ (instancetype)sharedPlugin
+{
     static id sharedPlugin = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        sharedPlugin = [[self alloc] init];
-    });
+	static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
+		sharedPlugin = [[self alloc] init];
+	});
+    
+    return sharedPlugin;
 }
 
 
@@ -221,6 +232,26 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         
         cocoapodsMenuItem.submenu = submenu;
     }
+}
+
+#pragma mark - Static Methods
+
+
+- (NSArray *)autoCompletionItems
+{
+    NSMutableArray *items = [NSMutableArray new];
+    NSArray *repos = [[self.repos allKeys] sortedArrayUsingSelector:@selector(compare:)];
+    for (NSString *repo in repos)
+    {
+        for (KFRepoModel *repoModel in self.repos[repo])
+        {
+            KFPodAutomCompletionItem *item = [[KFPodAutomCompletionItem alloc] initWithTitle:repoModel.pod andVersion:repoModel.version];
+            [items addObject:item];
+        }
+        
+    }
+    
+    return items;
 }
 
 
