@@ -14,6 +14,7 @@
 #import "KFNotificationController.h"
 
 #import "KFRepoModel.h"
+#import "KFPodAutomCompletionItem.h"
 
 #import <YAML-Framework/YAMLSerialization.h>
 #import <KSCrypto/KSSHA1Stream.h>
@@ -231,6 +232,26 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         
         cocoapodsMenuItem.submenu = submenu;
     }
+}
+
+#pragma mark - Static Methods
+
+
+- (NSArray *)autoCompletionItems
+{
+    NSMutableArray *items = [NSMutableArray new];
+    NSArray *repos = [[self.repos allKeys] sortedArrayUsingSelector:@selector(compare:)];
+    for (NSString *repo in repos)
+    {
+        for (KFRepoModel *repoModel in self.repos[repo])
+        {
+            KFPodAutomCompletionItem *item = [[KFPodAutomCompletionItem alloc] initWithTitle:repoModel.pod andVersion:repoModel.version];
+            [items addObject:item];
+        }
+        
+    }
+    
+    return items;
 }
 
 

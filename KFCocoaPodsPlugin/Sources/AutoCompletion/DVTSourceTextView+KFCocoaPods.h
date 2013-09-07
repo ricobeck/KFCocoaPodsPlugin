@@ -8,6 +8,9 @@
 
 #import "DVTKit.h"
 
+/**
+ *  Adds support for opening the AutoCompletion when 'pod ' was typed.
+ */
 @interface DVTSourceTextView (KFCocoaPods)
 
 @end

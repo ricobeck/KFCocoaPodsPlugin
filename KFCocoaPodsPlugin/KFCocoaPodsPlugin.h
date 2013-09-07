@@ -16,4 +16,7 @@
 + (BOOL)shouldLoadPlugin;
 
 
+- (NSArray *)autoCompletionItems;
+
+
 @end

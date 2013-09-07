@@ -10,4 +10,8 @@
 
 @interface KFPodAutomCompletionItem : IDEIndexCompletionItem
 
+
+- (id)initWithTitle:(NSString *)title andVersion:(NSString *)version;
+
+
 @end
