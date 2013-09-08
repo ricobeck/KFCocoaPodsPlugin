@@ -2,8 +2,25 @@
 //  KFCocoaPodsPlugin.m
 //  KFCocoaPodsPlugin
 //
-//  Created by rick on 04.09.13.
-//    Copyright (c) 2013 KF Interactive. All rights reserved.
+//  Copyright (c) 2013 Rico Becker, KF Interactive
+//
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to deal
+//  in the Software without restriction, including without limitation the rights
+//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+//
+//  The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//  THE SOFTWARE.
 //
 
 #import "KFCocoaPodsPlugin.h"
@@ -19,6 +36,8 @@
 #import <YAML-Framework/YAMLSerialization.h>
 #import <KSCrypto/KSSHA1Stream.h>
 
+
+#define SHOW_REPO_MENU 0
 
 typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 {
@@ -205,7 +224,7 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         updateMenuItem.tag = KFMenuItemTagUpdate;
         [submenu addItem:updateMenuItem];
         
-
+#if SHOW_REPO_MENU
         NSMenuItem *reposMenuItem = [[NSMenuItem alloc] initWithTitle:@"Repos" action:nil keyEquivalent:@""];
         
         NSMenu *repoMenu = [[NSMenu alloc] initWithTitle:@"CocoaPods Repos"];
@@ -228,7 +247,7 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         }
         reposMenuItem.submenu = repoMenu;
         [submenu addItem:reposMenuItem];
-
+#endif
         
         cocoapodsMenuItem.submenu = submenu;
     }
@@ -362,14 +381,12 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         
         if ([podsWithUpdates count] > 0)
         {
-            [self printMessageBold:NSLocalizedString(@"The following Pods have updates available", nil)];
+            [self printMessageBold:NSLocalizedString(@"The following Pods have updates available:", nil)];
             for (KFRepoModel *repoModel in podsWithUpdates)
             {
                 [self printMessage:[repoModel description]];
             }
             [self.notificationController showNotificationWithTitle:[NSString stringWithFormat:NSLocalizedString(@"%d Updateable Pods", nil), [podsWithUpdates count]] andMessage:[[podsWithUpdates valueForKey:@"pod"] componentsJoinedByString:@", "]];
-            
-            [self openFileInIDE:[KFWorkspaceController currentWorkspacePodfilePath]];
         }
         else
         {
@@ -380,32 +397,6 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
     {
         [self printMessage:error.description];
     }
-}
-
-
-- (void)parseYAMLForPodfile:(NSString *)podfile
-{
-     __weak typeof(self) weakSelf = self;
-    [[KFTaskController new] runShellCommand:kPodCommand withArguments:@[kCommandInterprocessCommunication, kCommandConvertPodFileToYAML, podfile] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:nil completion:^(NSTask *task, BOOL success, NSString *output, NSException *exception)
-    {
-        if (success)
-        {
-            [weakSelf printMessageBold:@"parsed podfile:" forTask:task];
-            NSMutableArray *lines = [[output componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] mutableCopy];
-            [lines removeObjectAtIndex:0];
-            output = [lines componentsJoinedByString:@"\n"];
-            NSError *error = nil;
-            NSMutableArray *yaml = [YAMLSerialization YAMLWithData:[output dataUsingEncoding:NSUTF8StringEncoding] options:kYAMLReadOptionStringScalars error:&error];
-            if (error == nil)
-            {
-                [weakSelf printMessage:[yaml description] forTask:task];
-            }
-            else
-            {
-                [weakSelf printMessageBold:error.description forTask:task];
-            }
-        }
-    }];
 }
 
 
@@ -454,6 +445,35 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 - (void)openFileInIDE:(NSString *)file
 {
     [[[NSApplication sharedApplication] delegate] application:[NSApplication sharedApplication] openFile:file];
+}
+
+
+#pragma mark - YAML
+
+
+- (void)parseYAMLForPodfile:(NSString *)podfile
+{
+    __weak typeof(self) weakSelf = self;
+    [[KFTaskController new] runShellCommand:kPodCommand withArguments:@[kCommandInterprocessCommunication, kCommandConvertPodFileToYAML, podfile] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:nil completion:^(NSTask *task, BOOL success, NSString *output, NSException *exception)
+     {
+         if (success)
+         {
+             [weakSelf printMessageBold:@"parsed podfile:" forTask:task];
+             NSMutableArray *lines = [[output componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] mutableCopy];
+             [lines removeObjectAtIndex:0];
+             output = [lines componentsJoinedByString:@"\n"];
+             NSError *error = nil;
+             NSMutableArray *yaml = [YAMLSerialization YAMLWithData:[output dataUsingEncoding:NSUTF8StringEncoding] options:kYAMLReadOptionStringScalars error:&error];
+             if (error == nil)
+             {
+                 [weakSelf printMessage:[yaml description] forTask:task];
+             }
+             else
+             {
+                 [weakSelf printMessageBold:error.description forTask:task];
+             }
+         }
+     }];
 }
 
 
