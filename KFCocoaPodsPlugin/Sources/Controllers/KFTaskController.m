@@ -40,7 +40,6 @@
     
     __block NSMutableData *outputData = [NSMutableData new];
     __block NSMutableData *errorData = [NSMutableData new];
-    
 
     [[task.standardOutput fileHandleForReading] setReadabilityHandler:^(NSFileHandle *file)
     {
@@ -66,7 +65,6 @@
     {
         [task.standardOutput fileHandleForReading].readabilityHandler = nil;
         [task.standardError fileHandleForReading].readabilityHandler  = nil;
-
     }];
     
     @try
@@ -77,6 +75,7 @@
     @catch (NSException *exception)
     {
         completionBlock(task, NO, [[NSString alloc] initWithData:errorData encoding:NSUTF8StringEncoding], exception);
+        return;
     }
     @finally
     {
