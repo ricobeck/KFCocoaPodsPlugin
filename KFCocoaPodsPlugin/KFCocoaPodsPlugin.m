@@ -37,6 +37,8 @@
 #import <KSCrypto/KSSHA1Stream.h>
 
 
+#define SHOW_REPO_MENU 0
+
 typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 {
     KFMenuItemTagEditPodfile,
@@ -222,7 +224,7 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         updateMenuItem.tag = KFMenuItemTagUpdate;
         [submenu addItem:updateMenuItem];
         
-
+#if SHOW_REPO_MENU
         NSMenuItem *reposMenuItem = [[NSMenuItem alloc] initWithTitle:@"Repos" action:nil keyEquivalent:@""];
         
         NSMenu *repoMenu = [[NSMenu alloc] initWithTitle:@"CocoaPods Repos"];
@@ -245,7 +247,7 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         }
         reposMenuItem.submenu = repoMenu;
         [submenu addItem:reposMenuItem];
-
+#endif
         
         cocoapodsMenuItem.submenu = submenu;
     }
@@ -379,14 +381,12 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         
         if ([podsWithUpdates count] > 0)
         {
-            [self printMessageBold:NSLocalizedString(@"The following Pods have updates available", nil)];
+            [self printMessageBold:NSLocalizedString(@"The following Pods have updates available:", nil)];
             for (KFRepoModel *repoModel in podsWithUpdates)
             {
                 [self printMessage:[repoModel description]];
             }
             [self.notificationController showNotificationWithTitle:[NSString stringWithFormat:NSLocalizedString(@"%d Updateable Pods", nil), [podsWithUpdates count]] andMessage:[[podsWithUpdates valueForKey:@"pod"] componentsJoinedByString:@", "]];
-            
-            [self openFileInIDE:[KFWorkspaceController currentWorkspacePodfilePath]];
         }
         else
         {
@@ -397,32 +397,6 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
     {
         [self printMessage:error.description];
     }
-}
-
-
-- (void)parseYAMLForPodfile:(NSString *)podfile
-{
-     __weak typeof(self) weakSelf = self;
-    [[KFTaskController new] runShellCommand:kPodCommand withArguments:@[kCommandInterprocessCommunication, kCommandConvertPodFileToYAML, podfile] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:nil completion:^(NSTask *task, BOOL success, NSString *output, NSException *exception)
-    {
-        if (success)
-        {
-            [weakSelf printMessageBold:@"parsed podfile:" forTask:task];
-            NSMutableArray *lines = [[output componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] mutableCopy];
-            [lines removeObjectAtIndex:0];
-            output = [lines componentsJoinedByString:@"\n"];
-            NSError *error = nil;
-            NSMutableArray *yaml = [YAMLSerialization YAMLWithData:[output dataUsingEncoding:NSUTF8StringEncoding] options:kYAMLReadOptionStringScalars error:&error];
-            if (error == nil)
-            {
-                [weakSelf printMessage:[yaml description] forTask:task];
-            }
-            else
-            {
-                [weakSelf printMessageBold:error.description forTask:task];
-            }
-        }
-    }];
 }
 
 
@@ -471,6 +445,35 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 - (void)openFileInIDE:(NSString *)file
 {
     [[[NSApplication sharedApplication] delegate] application:[NSApplication sharedApplication] openFile:file];
+}
+
+
+#pragma mark - YAML
+
+
+- (void)parseYAMLForPodfile:(NSString *)podfile
+{
+    __weak typeof(self) weakSelf = self;
+    [[KFTaskController new] runShellCommand:kPodCommand withArguments:@[kCommandInterprocessCommunication, kCommandConvertPodFileToYAML, podfile] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:nil completion:^(NSTask *task, BOOL success, NSString *output, NSException *exception)
+     {
+         if (success)
+         {
+             [weakSelf printMessageBold:@"parsed podfile:" forTask:task];
+             NSMutableArray *lines = [[output componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] mutableCopy];
+             [lines removeObjectAtIndex:0];
+             output = [lines componentsJoinedByString:@"\n"];
+             NSError *error = nil;
+             NSMutableArray *yaml = [YAMLSerialization YAMLWithData:[output dataUsingEncoding:NSUTF8StringEncoding] options:kYAMLReadOptionStringScalars error:&error];
+             if (error == nil)
+             {
+                 [weakSelf printMessage:[yaml description] forTask:task];
+             }
+             else
+             {
+                 [weakSelf printMessageBold:error.description forTask:task];
+             }
+         }
+     }];
 }
 
 
