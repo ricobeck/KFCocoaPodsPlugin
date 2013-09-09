@@ -1,5 +1,5 @@
 //
-//  KFPodAutomCompletionItem.h
+//  KFPodAutomCompletionItem.m
 //  KFCocoaPodsPlugin
 //
 //  Copyright (c) 2013 Rico Becker, KF Interactive
@@ -23,12 +23,87 @@
 //  THE SOFTWARE.
 //
 
-#import "IDEFoundation.h"
-
-@interface KFPodAutomCompletionItem : IDEIndexCompletionItem
+#import "KFPodAutoCompletionItem.h"
 
 
-- (id)initWithTitle:(NSString *)title andVersion:(NSString *)version;
+@interface KFPodAutoCompletionItem ()
+
+
+@property (nonatomic, strong) NSString *title;
+
+@property (nonatomic, strong) NSString *version;
+
+
+@end
+
+
+@implementation KFPodAutoCompletionItem
+
+
+- (id)initWithTitle:(NSString *)title andVersion:(NSString *)version
+{
+    self = [super init];
+    if (self)
+    {
+        _title = title;
+        _version = version;
+    }
+    return self;
+}
+
+
+- (NSString *)name
+{
+    return self.title;
+}
+
+
+- (long long)priority
+{
+    return 50;
+    
+}
+
+
+- (DVTSourceCodeSymbolKind *)symbolKind
+{
+    return nil;
+}
+
+
+- (BOOL)notRecommended
+{
+    return NO;
+}
+
+
+- (void)_fillInTheRest
+{
+    
+}
+
+- (NSAttributedString *)descriptionText
+{
+    return [[NSAttributedString alloc] initWithString:self.title];
+}
+
+
+- (NSString *)displayType
+{
+    return @"CocoaPod";
+}
+
+
+- (NSString *)displayText
+{
+    return [NSString stringWithFormat:@"%@, %@", self.title, self.version];
+}
+
+
+- (NSString *)completionText
+{
+    return [NSString stringWithFormat:@"'%@', '~> %@'", self.title, self.version];
+}
 
 
 @end

@@ -31,7 +31,7 @@
 #import "KFNotificationController.h"
 
 #import "KFRepoModel.h"
-#import "KFPodAutomCompletionItem.h"
+#import "KFPodAutoCompletionItem.h"
 #import "KFSyntaxAutoCompletionItem.h"
 
 #import <YAML-Framework/YAMLSerialization.h>
@@ -265,7 +265,7 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
     {
         for (KFRepoModel *repoModel in self.repos[repo])
         {
-            KFPodAutomCompletionItem *item = [[KFPodAutomCompletionItem alloc] initWithTitle:repoModel.pod andVersion:repoModel.version];
+            KFPodAutoCompletionItem *item = [[KFPodAutoCompletionItem alloc] initWithTitle:repoModel.pod andVersion:repoModel.version];
             [items addObject:item];
         }
         

@@ -16,7 +16,7 @@
 		1D35C32217D8BBE9006A9BDC /* KFWorkspaceController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D35C32117D8BBE9006A9BDC /* KFWorkspaceController.m */; };
 		1D44D6AE17DBAEDB00CBE93B /* DVTSourceTextView+KFCocoaPods.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D44D6A917DBAEDB00CBE93B /* DVTSourceTextView+KFCocoaPods.m */; };
 		1D44D6AF17DBAEDB00CBE93B /* DVTTextCompletionWordsInFileStrategy+KFCocoaPods.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D44D6AB17DBAEDB00CBE93B /* DVTTextCompletionWordsInFileStrategy+KFCocoaPods.m */; };
-		1D44D6B017DBAEDB00CBE93B /* KFPodAutomCompletionItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D44D6AD17DBAEDB00CBE93B /* KFPodAutomCompletionItem.m */; };
+		1D44D6B017DBAEDB00CBE93B /* KFPodAutoCompletionItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D44D6AD17DBAEDB00CBE93B /* KFPodAutoCompletionItem.m */; };
 		1D5C6C6117DB63E80009B936 /* MethodSwizzle.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D5C6C6017DB63E80009B936 /* MethodSwizzle.m */; };
 		1D5C6C6B17DB64130009B936 /* IDEFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5C6C6917DB64130009B936 /* IDEFoundation.framework */; };
 		1D5C6C6C17DB64130009B936 /* IDEKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5C6C6A17DB64130009B936 /* IDEKit.framework */; };
@@ -48,8 +48,8 @@
 		1D44D6A917DBAEDB00CBE93B /* DVTSourceTextView+KFCocoaPods.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "DVTSourceTextView+KFCocoaPods.m"; sourceTree = "<group>"; };
 		1D44D6AA17DBAEDB00CBE93B /* DVTTextCompletionWordsInFileStrategy+KFCocoaPods.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "DVTTextCompletionWordsInFileStrategy+KFCocoaPods.h"; sourceTree = "<group>"; };
 		1D44D6AB17DBAEDB00CBE93B /* DVTTextCompletionWordsInFileStrategy+KFCocoaPods.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "DVTTextCompletionWordsInFileStrategy+KFCocoaPods.m"; sourceTree = "<group>"; };
-		1D44D6AC17DBAEDB00CBE93B /* KFPodAutomCompletionItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KFPodAutomCompletionItem.h; sourceTree = "<group>"; };
-		1D44D6AD17DBAEDB00CBE93B /* KFPodAutomCompletionItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KFPodAutomCompletionItem.m; sourceTree = "<group>"; };
+		1D44D6AC17DBAEDB00CBE93B /* KFPodAutoCompletionItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KFPodAutoCompletionItem.h; sourceTree = "<group>"; };
+		1D44D6AD17DBAEDB00CBE93B /* KFPodAutoCompletionItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KFPodAutoCompletionItem.m; sourceTree = "<group>"; };
 		1D5C6C5F17DB63E80009B936 /* MethodSwizzle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MethodSwizzle.h; sourceTree = "<group>"; };
 		1D5C6C6017DB63E80009B936 /* MethodSwizzle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MethodSwizzle.m; sourceTree = "<group>"; };
 		1D5C6C6917DB64130009B936 /* IDEFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IDEFoundation.framework; path = "../../../../../../../Applications/Xcode5-DP6.app/Contents/Frameworks/IDEFoundation.framework"; sourceTree = "<group>"; };
@@ -172,8 +172,8 @@
 				1D44D6A917DBAEDB00CBE93B /* DVTSourceTextView+KFCocoaPods.m */,
 				1D44D6AA17DBAEDB00CBE93B /* DVTTextCompletionWordsInFileStrategy+KFCocoaPods.h */,
 				1D44D6AB17DBAEDB00CBE93B /* DVTTextCompletionWordsInFileStrategy+KFCocoaPods.m */,
-				1D44D6AC17DBAEDB00CBE93B /* KFPodAutomCompletionItem.h */,
-				1D44D6AD17DBAEDB00CBE93B /* KFPodAutomCompletionItem.m */,
+				1D44D6AC17DBAEDB00CBE93B /* KFPodAutoCompletionItem.h */,
+				1D44D6AD17DBAEDB00CBE93B /* KFPodAutoCompletionItem.m */,
 				1DD2CD0917DE4B72006A1355 /* KFSyntaxAutoCompletionItem.h */,
 				1DD2CD0A17DE4B72006A1355 /* KFSyntaxAutoCompletionItem.m */,
 			);
@@ -320,7 +320,7 @@
 				1D44D6AE17DBAEDB00CBE93B /* DVTSourceTextView+KFCocoaPods.m in Sources */,
 				1DD2CD0B17DE4B72006A1355 /* KFSyntaxAutoCompletionItem.m in Sources */,
 				1D44D6AF17DBAEDB00CBE93B /* DVTTextCompletionWordsInFileStrategy+KFCocoaPods.m in Sources */,
-				1D44D6B017DBAEDB00CBE93B /* KFPodAutomCompletionItem.m in Sources */,
+				1D44D6B017DBAEDB00CBE93B /* KFPodAutoCompletionItem.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
