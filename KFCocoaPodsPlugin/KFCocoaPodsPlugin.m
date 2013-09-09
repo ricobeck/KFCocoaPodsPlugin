@@ -32,6 +32,7 @@
 
 #import "KFRepoModel.h"
 #import "KFPodAutomCompletionItem.h"
+#import "KFSyntaxAutoCompletionItem.h"
 
 #import <YAML-Framework/YAMLSerialization.h>
 #import <KSCrypto/KSSHA1Stream.h>
@@ -256,7 +257,7 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 #pragma mark - Static Methods
 
 
-- (NSArray *)autoCompletionItems
+- (NSArray *)podCompletionItems
 {
     NSMutableArray *items = [NSMutableArray new];
     NSArray *repos = [[self.repos allKeys] sortedArrayUsingSelector:@selector(compare:)];
@@ -269,6 +270,15 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         }
         
     }
+    
+    return items;
+}
+
+
+- (NSArray *)syntaxCompletionItems
+{
+    NSMutableArray *items = [NSMutableArray new];
+
     
     return items;
 }

@@ -68,7 +68,7 @@
             
             if ([[itemString lowercaseString] hasSuffix:@"pod "])
             {
-                items = [[KFCocoaPodsPlugin sharedPlugin] autoCompletionItems];
+                items = [[KFCocoaPodsPlugin sharedPlugin] podCompletionItems];
             }
         }
     }

@@ -1,5 +1,5 @@
 //
-//  KFCocoaPodsPlugin.h
+//  KFSyntaxAutoCompletionItem.m
 //  KFCocoaPodsPlugin
 //
 //  Copyright (c) 2013 Rico Becker, KF Interactive
@@ -23,18 +23,90 @@
 //  THE SOFTWARE.
 //
 
-
-#import <AppKit/AppKit.h>
-
-@interface KFCocoaPodsPlugin : NSObject
+#import "KFSyntaxAutoCompletionItem.h"
 
 
-+ (instancetype)sharedPlugin;
-
-+ (BOOL)shouldLoadPlugin;
+@interface KFSyntaxAutoCompletionItem ()
 
 
-- (NSArray *)podCompletionItems;
+@property (nonatomic, strong) NSString *itemName;
 
+@property (nonatomic, strong) NSString *template;
+
+@property (nonatomic, strong) NSString *templateDescription;
+
+
+@end
+
+
+@implementation KFSyntaxAutoCompletionItem
+
+
+- (id)initWithName:(NSString *)name template:(NSString *)template andTemplateDescription:(NSString *)templateDescription
+{
+    self = [super init];
+    if (self)
+    {
+        _itemName = name;
+        _template = template;
+        _templateDescription = templateDescription;
+    }
+    return self;
+}
+
+
+- (NSString *)name
+{
+    return _itemName;
+}
+
+
+- (long long)priority
+{
+    return 50;
+    
+}
+
+
+- (DVTSourceCodeSymbolKind *)symbolKind
+{
+    return nil;
+}
+
+
+- (BOOL)notRecommended
+{
+    return NO;
+}
+
+
+- (void)_fillInTheRest
+{
+    
+}
+
+
+- (NSAttributedString *)descriptionText
+{
+    return [[NSAttributedString alloc] initWithString:self.templateDescription];
+}
+
+
+- (NSString *)displayType
+{
+    return @"Syntax";
+}
+
+
+- (NSString *)displayText
+{
+    return self.template;
+}
+
+
+- (NSString *)completionText
+{
+    return self.template;
+}
 
 @end
