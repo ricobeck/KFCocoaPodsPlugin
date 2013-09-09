@@ -31,7 +31,8 @@
 #import "KFNotificationController.h"
 
 #import "KFRepoModel.h"
-#import "KFPodAutomCompletionItem.h"
+#import "KFPodAutoCompletionItem.h"
+#import "KFSyntaxAutoCompletionItem.h"
 
 #import <YAML-Framework/YAMLSerialization.h>
 #import <KSCrypto/KSSHA1Stream.h>
@@ -256,21 +257,42 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 #pragma mark - Static Methods
 
 
-- (NSArray *)autoCompletionItems
+- (NSArray *)podCompletionItems
 {
-    NSMutableArray *items = [NSMutableArray new];
+    NSMutableArray *completionItems = [NSMutableArray new];
+    
     NSArray *repos = [[self.repos allKeys] sortedArrayUsingSelector:@selector(compare:)];
     for (NSString *repo in repos)
     {
         for (KFRepoModel *repoModel in self.repos[repo])
         {
-            KFPodAutomCompletionItem *item = [[KFPodAutomCompletionItem alloc] initWithTitle:repoModel.pod andVersion:repoModel.version];
-            [items addObject:item];
+            KFPodAutoCompletionItem *item = [[KFPodAutoCompletionItem alloc] initWithTitle:repoModel.pod andVersion:repoModel.version];
+            [completionItems addObject:item];
         }
-        
     }
     
-    return items;
+    return [completionItems copy];
+}
+
+
+- (NSArray *)syntaxCompletionItems
+{
+    NSURL *definitionsURL = [[NSBundle bundleForClass:[self class]] URLForResource:@"PodSyntax" withExtension:@"plist"];
+    NSArray *syntaxDefinitions = [NSArray arrayWithContentsOfURL:definitionsURL];
+    NSMutableArray *completionItems = [NSMutableArray new];
+    
+    for (NSDictionary *syntaxItem in syntaxDefinitions)
+    {
+        NSString *itemName = syntaxItem[@"itemName"];
+        NSString *template = syntaxItem[@"template"];
+        NSString *templateDescription = syntaxItem[@"templateDescription"];
+        
+        KFSyntaxAutoCompletionItem *completionItem = [[KFSyntaxAutoCompletionItem alloc] initWithName:itemName template:template andTemplateDescription:templateDescription];
+        
+        [completionItems addObject:completionItem];
+    }
+    
+    return [completionItems copy];
 }
 
 

@@ -1,5 +1,5 @@
 //
-//  KFPodAutomCompletionItem.h
+//  KFSyntaxAutoCompletionItem.h
 //  KFCocoaPodsPlugin
 //
 //  Copyright (c) 2013 Rico Becker, KF Interactive
@@ -25,10 +25,15 @@
 
 #import "IDEFoundation.h"
 
-@interface KFPodAutomCompletionItem : IDEIndexCompletionItem
+@interface KFSyntaxAutoCompletionItem : IDEIndexCompletionItem
 
 
-- (id)initWithTitle:(NSString *)title andVersion:(NSString *)version;
+@property (nonatomic, strong) NSString *itemName;
+
+@property (nonatomic, strong) NSString *template;
+
+
+- (id)initWithName:(NSString *)name template:(NSString *)template andTemplateDescription:(NSString *)templateDescription;
 
 
 @end

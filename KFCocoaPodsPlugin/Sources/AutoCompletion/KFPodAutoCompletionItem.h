@@ -1,5 +1,5 @@
 //
-//  KFCocoaPodsPlugin.h
+//  KFPodAutomCompletionItem.h
 //  KFCocoaPodsPlugin
 //
 //  Copyright (c) 2013 Rico Becker, KF Interactive
@@ -23,20 +23,12 @@
 //  THE SOFTWARE.
 //
 
+#import "IDEFoundation.h"
 
-#import <AppKit/AppKit.h>
-
-@interface KFCocoaPodsPlugin : NSObject
-
-
-+ (instancetype)sharedPlugin;
-
-+ (BOOL)shouldLoadPlugin;
+@interface KFPodAutoCompletionItem : IDEIndexCompletionItem
 
 
-- (NSArray *)podCompletionItems;
-
-- (NSArray *)syntaxCompletionItems;
+- (id)initWithTitle:(NSString *)title andVersion:(NSString *)version;
 
 
 @end

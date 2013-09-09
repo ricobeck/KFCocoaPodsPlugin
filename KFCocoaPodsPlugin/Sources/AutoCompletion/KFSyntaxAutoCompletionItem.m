@@ -1,5 +1,5 @@
 //
-//  KFPodAutomCompletionItem.m
+//  KFSyntaxAutoCompletionItem.m
 //  KFCocoaPodsPlugin
 //
 //  Copyright (c) 2013 Rico Becker, KF Interactive
@@ -23,30 +23,29 @@
 //  THE SOFTWARE.
 //
 
-#import "KFPodAutomCompletionItem.h"
+#import "KFSyntaxAutoCompletionItem.h"
 
 
-@interface KFPodAutomCompletionItem ()
+@interface KFSyntaxAutoCompletionItem ()
 
 
-@property (nonatomic, strong) NSString *title;
-
-@property (nonatomic, strong) NSString *version;
+@property (nonatomic, strong) NSString *templateDescription;
 
 
 @end
 
 
-@implementation KFPodAutomCompletionItem
+@implementation KFSyntaxAutoCompletionItem
 
 
-- (id)initWithTitle:(NSString *)title andVersion:(NSString *)version
+- (id)initWithName:(NSString *)name template:(NSString *)template andTemplateDescription:(NSString *)templateDescription
 {
     self = [super init];
     if (self)
     {
-        _title = title;
-        _version = version;
+        _itemName = name;
+        _template = template;
+        _templateDescription = templateDescription;
     }
     return self;
 }
@@ -54,7 +53,7 @@
 
 - (NSString *)name
 {
-    return self.title;
+    return _itemName;
 }
 
 
@@ -82,28 +81,28 @@
     
 }
 
+
 - (NSAttributedString *)descriptionText
 {
-    return [[NSAttributedString alloc] initWithString:self.title];
+    return [[NSAttributedString alloc] initWithString:self.templateDescription];
 }
 
 
 - (NSString *)displayType
 {
-    return @"CocoaPod";
+    return @"Syntax";
 }
 
 
 - (NSString *)displayText
 {
-    return [NSString stringWithFormat:@"%@, %@", self.title, self.version];
+    return self.template;
 }
 
 
 - (NSString *)completionText
 {
-    return [NSString stringWithFormat:@"'%@', '~> %@'", self.title, self.version];
+    return self.template;
 }
-
 
 @end

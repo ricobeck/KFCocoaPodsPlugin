@@ -26,6 +26,7 @@
 #import "DVTTextCompletionWordsInFileStrategy+KFCocoaPods.h"
 #import "MethodSwizzle.h"
 #import "KFCocoaPodsPlugin.h"
+#import "KFSyntaxAutoCompletionItem.h"
 
 
 @implementation DVTTextCompletionWordsInFileStrategy (KFCocoaPods)
@@ -55,20 +56,36 @@
             
             NSRange newlineRange = [itemString rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet] options:NSBackwardsSearch];
             
+            
             if (newlineRange.location != NSNotFound)
             {
-                itemRange.length = itemRange.length - newlineRange.location;
-                itemRange.location = itemRange.location + newlineRange.location;
-                
-                if (itemRange.length < [string length] && NSMaxRange(itemRange) < [string length])
-                {
-                    itemString = [string substringWithRange:itemRange];
-                }
+                itemString = [[string substringFromIndex:newlineRange.location + 1] lowercaseString];
             }
             
-            if ([[itemString lowercaseString] hasSuffix:@"pod "])
+            if ([itemString hasSuffix:@"pod "])
             {
-                items = [[KFCocoaPodsPlugin sharedPlugin] autoCompletionItems];
+                items = [[KFCocoaPodsPlugin sharedPlugin] podCompletionItems];
+            }
+            else
+            {
+                NSArray *allItems = [[KFCocoaPodsPlugin sharedPlugin] syntaxCompletionItems];
+                
+                if ([itemString length] == 0)
+                {
+                    items = allItems;
+                }
+                else
+                {
+                    items = [allItems filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(KFSyntaxAutoCompletionItem *evaluatedItem, NSDictionary *bindings)
+                    {
+                        return [evaluatedItem.template hasPrefix:itemString] || [evaluatedItem.name hasPrefix:itemString];
+                    }]];
+                    
+                    if ([items count] == 0)
+                    {
+                        items = nil;
+                    }
+                }
             }
         }
     }
