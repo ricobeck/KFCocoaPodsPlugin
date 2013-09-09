@@ -26,6 +26,7 @@
 #import "DVTTextCompletionWordsInFileStrategy+KFCocoaPods.h"
 #import "MethodSwizzle.h"
 #import "KFCocoaPodsPlugin.h"
+#import "KFSyntaxAutoCompletionItem.h"
 
 
 @implementation DVTTextCompletionWordsInFileStrategy (KFCocoaPods)
@@ -65,9 +66,26 @@
             {
                 items = [[KFCocoaPodsPlugin sharedPlugin] podCompletionItems];
             }
-            else if ([itemString length] == 0)
+            else
             {
-                items = [[KFCocoaPodsPlugin sharedPlugin] syntaxCompletionItems];
+                NSArray *allItems = [[KFCocoaPodsPlugin sharedPlugin] syntaxCompletionItems];
+                
+                if ([itemString length] == 0)
+                {
+                    items = allItems;
+                }
+                else
+                {
+                    items = [allItems filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(KFSyntaxAutoCompletionItem *evaluatedItem, NSDictionary *bindings)
+                    {
+                        return [evaluatedItem.template hasPrefix:itemString] || [evaluatedItem.name hasPrefix:itemString];
+                    }]];
+                    
+                    if ([items count] == 0)
+                    {
+                        items = nil;
+                    }
+                }
             }
         }
     }

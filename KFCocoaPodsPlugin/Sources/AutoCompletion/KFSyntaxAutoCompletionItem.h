@@ -28,6 +28,11 @@
 @interface KFSyntaxAutoCompletionItem : IDEIndexCompletionItem
 
 
+@property (nonatomic, strong) NSString *itemName;
+
+@property (nonatomic, strong) NSString *template;
+
+
 - (id)initWithName:(NSString *)name template:(NSString *)template andTemplateDescription:(NSString *)templateDescription;
 
 

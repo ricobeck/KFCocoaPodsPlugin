@@ -29,10 +29,6 @@
 @interface KFSyntaxAutoCompletionItem ()
 
 
-@property (nonatomic, strong) NSString *itemName;
-
-@property (nonatomic, strong) NSString *template;
-
 @property (nonatomic, strong) NSString *templateDescription;
 
 
