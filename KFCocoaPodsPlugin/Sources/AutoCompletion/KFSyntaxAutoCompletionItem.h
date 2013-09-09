@@ -27,4 +27,8 @@
 
 @interface KFSyntaxAutoCompletionItem : IDEIndexCompletionItem
 
+
+- (id)initWithName:(NSString *)name template:(NSString *)template andTemplateDescription:(NSString *)templateDescription;
+
+
 @end

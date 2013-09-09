@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+	<dict>
+		<key>itemName</key>
+		<string>inhibit_all_warnings</string>
+		<key>template</key>
+		<string>inhibit_all_warnings!</string>
+		<key>templateDescription</key>
+		<string>Inhibits all Warnings in Pods</string>
+	</dict>
+</array>
+</plist>

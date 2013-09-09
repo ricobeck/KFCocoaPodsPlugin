@@ -55,20 +55,19 @@
             
             NSRange newlineRange = [itemString rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet] options:NSBackwardsSearch];
             
+            
             if (newlineRange.location != NSNotFound)
             {
-                itemRange.length = itemRange.length - newlineRange.location;
-                itemRange.location = itemRange.location + newlineRange.location;
-                
-                if (itemRange.length < [string length] && NSMaxRange(itemRange) < [string length])
-                {
-                    itemString = [string substringWithRange:itemRange];
-                }
+                itemString = [[string substringFromIndex:newlineRange.location + 1] lowercaseString];
             }
             
-            if ([[itemString lowercaseString] hasSuffix:@"pod "])
+            if ([itemString hasSuffix:@"pod "])
             {
                 items = [[KFCocoaPodsPlugin sharedPlugin] podCompletionItems];
+            }
+            else if ([itemString length] == 0)
+            {
+                items = [[KFCocoaPodsPlugin sharedPlugin] syntaxCompletionItems];
             }
         }
     }

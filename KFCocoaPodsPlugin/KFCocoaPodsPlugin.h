@@ -36,5 +36,7 @@
 
 - (NSArray *)podCompletionItems;
 
+- (NSArray *)syntaxCompletionItems;
+
 
 @end
