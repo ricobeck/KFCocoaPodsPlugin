@@ -381,8 +381,8 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         [self printMessage:[[yaml firstObject] description]];
          */
         
-        NSDictionary *specChecksums = [yaml firstObject][@"SPEC CHECKSUMS"];
-        NSArray *installedPods = [yaml firstObject][@"PODS"];
+        NSDictionary *specChecksums = yaml[0][@"SPEC CHECKSUMS"];
+        NSArray *installedPods = yaml[0][@"PODS"];
         
         NSMutableArray *podsWithUpdates = [NSMutableArray new];
         NSCharacterSet *trimSet = [NSCharacterSet characterSetWithCharactersInString:@" ()"];
