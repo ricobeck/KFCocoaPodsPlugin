@@ -32,13 +32,13 @@
 
 + (void)load
 {
-    MethodSwizzle(self, @selector(shouldAutoCompleteAtLocation:), @selector(swizzle_shouldAutoCompleteAtLocation:));
+    MethodSwizzle(self, @selector(shouldAutoCompleteAtLocation:), @selector(kf_swizzle_shouldAutoCompleteAtLocation:));
 }
 
 
-- (BOOL)swizzle_shouldAutoCompleteAtLocation:(unsigned long long)arg1
+- (BOOL)kf_swizzle_shouldAutoCompleteAtLocation:(unsigned long long)arg1
 {
-    BOOL shouldAutoComplete = [self swizzle_shouldAutoCompleteAtLocation:arg1];
+    BOOL shouldAutoComplete = [self kf_swizzle_shouldAutoCompleteAtLocation:arg1];
     
     if (!shouldAutoComplete)
     {

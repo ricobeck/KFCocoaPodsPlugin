@@ -315,9 +315,18 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
     {
         if ([KFWorkspaceController currentWorkspaceHasPodfile])
         {
-            [weakSelf printMessageBold:@"start pod update"];
+            BOOL shouldUpdate = [KFWorkspaceController currentWorkspaceHasPodfileLock];
+            NSString *command = shouldUpdate ? kCommandUpdate : kCommandInstall;
             
-            NSString *command =[KFWorkspaceController currentWorkspaceHasPodfileLock] ? kCommandUpdate : kCommandInstall;
+            if (shouldUpdate)
+            {
+                [weakSelf printMessageBold:@"start pod update"];
+            }
+            else
+            {
+                [weakSelf printMessageBold:@"start pod install"];
+            }
+            
             [[KFTaskController new] runShellCommand:kPodCommand withArguments:@[command, kParamdNoColor] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:^(NSTask *task, NSString *output, NSString *error)
              {
                  if (output != nil)
