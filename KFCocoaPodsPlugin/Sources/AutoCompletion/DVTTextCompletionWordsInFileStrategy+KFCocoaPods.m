@@ -34,12 +34,12 @@
 
 + (void)load
 {
-    MethodSwizzle(self, @selector(completionItemsForDocumentLocation:context:areDefinitive:), @selector(swizzle_completionItemsForDocumentLocation:context:areDefinitive:));
+    MethodSwizzle(self, @selector(completionItemsForDocumentLocation:context:areDefinitive:), @selector(kf_swizzle_completionItemsForDocumentLocation:context:areDefinitive:));
 }
 
-- (id)swizzle_completionItemsForDocumentLocation:(id)arg1 context:(id)arg2 areDefinitive:(char *)arg3
+- (id)kf_swizzle_completionItemsForDocumentLocation:(id)arg1 context:(id)arg2 areDefinitive:(char *)arg3
 {
-    id items = [self swizzle_completionItemsForDocumentLocation:arg1 context:arg2 areDefinitive:arg3];
+    id items = [self kf_swizzle_completionItemsForDocumentLocation:arg1 context:arg2 areDefinitive:arg3];
     @try
     {
         DVTSourceCodeLanguage *sourceCodeLanguage = [arg2 valueForKey:@"DVTTextCompletionContextSourceCodeLanguage"];
