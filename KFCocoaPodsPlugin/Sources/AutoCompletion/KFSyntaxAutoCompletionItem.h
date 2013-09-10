@@ -30,10 +30,10 @@
 
 @property (nonatomic, strong) NSString *itemName;
 
-@property (nonatomic, strong) NSString *template;
+@property (nonatomic, strong) NSString *itemTemplate;
 
 
-- (id)initWithName:(NSString *)name template:(NSString *)template andTemplateDescription:(NSString *)templateDescription;
+- (id)initWithName:(NSString *)name type:(NSString *)type template:(NSString *)itemTemplate templateDisplay:(NSString *)templateDisplay andTemplateDescription:(NSString *)templateDescription;
 
 
 @end

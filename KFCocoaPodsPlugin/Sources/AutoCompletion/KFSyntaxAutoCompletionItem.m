@@ -29,6 +29,10 @@
 @interface KFSyntaxAutoCompletionItem ()
 
 
+@property (nonatomic, strong) NSString *itemType;
+    
+@property (nonatomic, strong) NSString *templateDisplay;
+    
 @property (nonatomic, strong) NSString *templateDescription;
 
 
@@ -38,13 +42,15 @@
 @implementation KFSyntaxAutoCompletionItem
 
 
-- (id)initWithName:(NSString *)name template:(NSString *)template andTemplateDescription:(NSString *)templateDescription
+- (id)initWithName:(NSString *)name type:(NSString *)type template:(NSString *)itemTemplate templateDisplay:(NSString *)templateDisplay andTemplateDescription:(NSString *)templateDescription
 {
     self = [super init];
     if (self)
     {
         _itemName = name;
-        _template = template;
+        _itemType = type;
+        _itemTemplate = itemTemplate;
+        _templateDisplay = templateDisplay;
         _templateDescription = templateDescription;
     }
     return self;
@@ -90,19 +96,19 @@
 
 - (NSString *)displayType
 {
-    return @"Syntax";
+    return self.itemType;
 }
 
 
 - (NSString *)displayText
 {
-    return self.template;
+    return self.templateDisplay;
 }
 
 
 - (NSString *)completionText
 {
-    return self.template;
+    return self.itemTemplate;
 }
 
 @end

@@ -4,11 +4,168 @@
 <array>
 	<dict>
 		<key>itemName</key>
+		<string>pod</string>
+		<key>itemType</key>
+		<string>Dependencies</string>
+		<key>template</key>
+		<string>pod</string>
+		<key>templateDisplay</key>
+		<string>pod</string>
+		<key>templateDescription</key>
+		<string>Specifies a dependency of the project.
+A dependency requirement is defined by the name of the Pod and optionally a list of version requirements.</string>
+	</dict>
+	<dict>
+		<key>itemName</key>
+		<string>podspec with Name</string>
+		<key>itemType</key>
+		<string>Dependencies</string>
+		<key>template</key>
+		<string>podspec :name =&gt; &apos;&lt;#PodName#&gt;&apos;</string>
+		<key>templateDisplay</key>
+		<string>podspec, name</string>
+		<key>templateDescription</key>
+		<string>Use the dependencies of a Pod defined in the given podspec file. If no arguments are passed the first podspec in the root of the Podfile is used. It is intended to be used by the project of a library.</string>
+	</dict>
+	<dict>
+		<key>itemName</key>
+		<string>podspec with Path</string>
+		<key>itemType</key>
+		<string>Dependencies</string>
+		<key>template</key>
+		<string>podspec :path =&gt; &apos;&lt;#Path to podspec#&gt;&apos;</string>
+		<key>templateDisplay</key>
+		<string>podspec, path</string>
+		<key>templateDescription</key>
+		<string>Use the dependencies of a Pod defined in the given podspec file. If no arguments are passed the first podspec in the root of the Podfile is used. It is intended to be used by the project of a library.</string>
+	</dict>
+	<dict>
+		<key>itemName</key>
+		<string>target</string>
+		<key>itemType</key>
+		<string>Dependencies</string>
+		<key>template</key>
+		<string>target :&lt;#TargetName#&gt; do
+  pod &apos;&lt;#Pod#&gt;&apos;
+end</string>
+		<key>templateDisplay</key>
+		<string>target :TargetName do</string>
+		<key>templateDescription</key>
+		<string>Defines a new static library target and scopes dependencies defined from the given block. The target will by default include the dependencies defined outside of the block, unless the :exclusive =&gt; true option is given.</string>
+	</dict>
+	<dict>
+		<key>itemName</key>
+		<string>platform</string>
+		<key>itemType</key>
+		<string>Target configuration</string>
+		<key>template</key>
+		<string>platform :&lt;#ios or osx#&gt;</string>
+		<key>templateDisplay</key>
+		<string>platform: plattform</string>
+		<key>templateDescription</key>
+		<string>Specifies the platform for which a static library should be build.
+CocoaPods provides a default deployment target if one is not specified. The current default values are 4.3 for iOS and 10.6 for OS X.</string>
+	</dict>
+	<dict>
+		<key>itemName</key>
+		<string>xcodeproj</string>
+		<key>itemType</key>
+		<string>Target configuration</string>
+		<key>template</key>
+		<string>xcodeproj `&lt;#Project#&gt;`</string>
+		<key>templateDisplay</key>
+		<string>xcodeproj `Project`</string>
+		<key>templateDescription</key>
+		<string>Specifies the Xcode project that contains the target that the Pods library should be linked with.</string>
+	</dict>
+	<dict>
+		<key>itemName</key>
+		<string>link_with</string>
+		<key>itemType</key>
+		<string>Target configuration</string>
+		<key>template</key>
+		<string>link_with &apos;&lt;#MyApp#&gt;&apos;</string>
+		<key>templateDisplay</key>
+		<string>link_with &apos;MyApp&apos;</string>
+		<key>templateDescription</key>
+		<string>Specifies the target(s) in the user’s project that this Pods library should be linked in. If no explicit target is specified, then the Pods target will be linked with the first target in your project. So if you only have one target you do not need to specify the target to link with.</string>
+	</dict>
+	<dict>
+		<key>itemName</key>
 		<string>inhibit_all_warnings</string>
+		<key>itemType</key>
+		<string>Target configuration</string>
 		<key>template</key>
 		<string>inhibit_all_warnings!</string>
+		<key>templateDisplay</key>
+		<string>inhibit_all_warnings!</string>
 		<key>templateDescription</key>
-		<string>Inhibits all Warnings in Pods</string>
+		<string>Inhibits all the warnings from the CocoaPods libraries.
+This attribute is inherited by child target definitions.</string>
+	</dict>
+	<dict>
+		<key>itemName</key>
+		<string>workspace</string>
+		<key>itemType</key>
+		<string>Workspace</string>
+		<key>template</key>
+		<string>workspace &apos;&lt;#MyWorkspace#&gt;&apos;</string>
+		<key>templateDisplay</key>
+		<string>workspace &apos;MyWorkspace&apos;</string>
+		<key>templateDescription</key>
+		<string>Specifies the Xcode workspace that should contain all the projects. If no explicit Xcode workspace is specified and only one project exists in the same directory as the Podfile, then the name of that project is used as the workspace’s name.</string>
+	</dict>
+	<dict>
+		<key>itemName</key>
+		<string>generate_bridge_support!</string>
+		<key>itemType</key>
+		<string>Workspace</string>
+		<key>template</key>
+		<string>generate_bridge_support!</string>
+		<key>templateDisplay</key>
+		<string>generate_bridge_support!</string>
+		<key>templateDescription</key>
+		<string>Specifies that a BridgeSupport metadata document should be generated from the headers of all installed Pods.</string>
+	</dict>
+	<dict>
+		<key>itemName</key>
+		<string>set_arc_compatibility_flag!</string>
+		<key>itemType</key>
+		<string>Workspace</string>
+		<key>template</key>
+		<string>set_arc_compatibility_flag!</string>
+		<key>templateDisplay</key>
+		<string>set_arc_compatibility_flag!</string>
+		<key>templateDescription</key>
+		<string>Specifies that the -fobjc-arc flag should be added to the OTHER_LD_FLAGS.</string>
+	</dict>
+	<dict>
+		<key>itemName</key>
+		<string>pre_install</string>
+		<key>itemType</key>
+		<string>Hooks</string>
+		<key>template</key>
+		<string>pre_install do |installer_representation|
+  # Do something fancy!
+end</string>
+		<key>templateDisplay</key>
+		<string>pre_install do end</string>
+		<key>templateDescription</key>
+		<string>This hook allows you to make any changes to the Pods after they have been downloaded but before they are installed. It receives the Pod::Hooks::InstallerRepresentation as its only argument.</string>
+	</dict>
+	<dict>
+		<key>itemName</key>
+		<string>post_install</string>
+		<key>itemType</key>
+		<string>Hooks</string>
+		<key>template</key>
+		<string>post_install do |installer_representation|
+  # Do something fancy!
+end</string>
+		<key>templateDisplay</key>
+		<string>post_install do end</string>
+		<key>templateDescription</key>
+		<string>This hook allows you to make any last changes to the generated Xcode project before it is written to disk, or any other tasks you might want to perform. It receives the Pod::Hooks::InstallerRepresentation as its only argument.</string>
 	</dict>
 </array>
 </plist>

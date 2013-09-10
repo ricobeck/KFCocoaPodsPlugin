@@ -78,7 +78,7 @@
                 {
                     items = [allItems filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(KFSyntaxAutoCompletionItem *evaluatedItem, NSDictionary *bindings)
                     {
-                        return [evaluatedItem.template hasPrefix:itemString] || [evaluatedItem.name hasPrefix:itemString];
+                        return [evaluatedItem.itemTemplate hasPrefix:itemString] || [evaluatedItem.name hasPrefix:itemString];
                     }]];
                     
                     if ([items count] == 0)
