@@ -284,10 +284,12 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
     for (NSDictionary *syntaxItem in syntaxDefinitions)
     {
         NSString *itemName = syntaxItem[@"itemName"];
+        NSString *itemType = syntaxItem[@"itemType"];
         NSString *template = syntaxItem[@"template"];
+        NSString *templateDisplay = syntaxItem[@"templateDisplay"];
         NSString *templateDescription = syntaxItem[@"templateDescription"];
         
-        KFSyntaxAutoCompletionItem *completionItem = [[KFSyntaxAutoCompletionItem alloc] initWithName:itemName template:template andTemplateDescription:templateDescription];
+        KFSyntaxAutoCompletionItem *completionItem = [[KFSyntaxAutoCompletionItem alloc] initWithName:itemName type:itemType template:template templateDisplay:templateDisplay andTemplateDescription:templateDescription];
         
         [completionItems addObject:completionItem];
     }
