@@ -62,6 +62,9 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 
 @property (nonatomic, strong) KFNotificationController *notificationController;
 
+@property (nonatomic, strong) NSString *podLaunchPath;
+
+
 
 @end
 
@@ -93,7 +96,8 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 
 + (void)pluginDidLoad:(NSBundle *)plugin
 {
-    if ([self shouldLoadPlugin]) {
+    if ([self shouldLoadPlugin])
+    {
         [self sharedPlugin];
     }
 }
@@ -117,6 +121,23 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         _consoleController = [KFConsoleController new];
         _taskController = [KFTaskController new];
         _notificationController = [KFNotificationController new];
+        
+        
+         __weak typeof(self) weakSelf = self;
+        
+        
+        @try
+        {
+            [_taskController runShellCommand:@"/usr/bin/which" withArguments:@[@"pod"] directory:nil progress:nil completion:^(NSTask *task, BOOL success, NSString *output, NSException *exception)
+             {
+                 weakSelf.podLaunchPath = output;
+             }];
+        }
+        @catch (NSException *exception)
+        {
+            weakSelf.podLaunchPath = kPodCommand;
+        }
+
         
         [self buildRepoIndex];
         [self insertMenu];

@@ -32,7 +32,10 @@
 {
     NSTask *task = [NSTask new];
     
-    task.currentDirectoryPath = directory;
+    if (directory != nil)
+    {
+        task.currentDirectoryPath = directory;
+    }
     task.launchPath = command;
     task.arguments  = arguments;
     task.standardOutput = [NSPipe pipe];
