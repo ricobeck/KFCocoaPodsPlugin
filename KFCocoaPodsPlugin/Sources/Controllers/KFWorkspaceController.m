@@ -61,9 +61,8 @@
 + (id)workspaceForKeyWindow
 {
     /*
-     
-    IDEWorkspaceWindowController *workspaceController = [IDEWorkspaceWindowController workspaceWindowControllerForWindow:[NSApp mainWindow]];
-    [workspaceController ]
+    IDEWorkspaceWindowController *workspaceController = [IDEWorkspaceWindowController workspaceWindowControllerForWindow:[NSApp keyWindow]];
+    return workspaceController.window;
      */
     
     NSArray *workspaceWindowControllers = [NSClassFromString(@"IDEWorkspaceWindowController") valueForKey:@"workspaceWindowControllers"];
@@ -99,6 +98,12 @@
     NSString *filePath = [[self currentWorkspaceDirectoryPath] stringByAppendingPathComponent:fileName];
     NSLog(@"file exists at path: %@", filePath);
     return [[NSFileManager defaultManager] fileExistsAtPath:filePath];
+}
+
+
++ (BOOL)isCurrentFilePodfile
+{
+    return [[[[[[IDEWorkspaceWindowController workspaceWindowControllerForWindow:[NSApp keyWindow]] editorArea] primaryEditorDocument] filePath] fileName] isEqualToString:@"Podfile"];
 }
 
 
