@@ -350,7 +350,7 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
                 [weakSelf printMessageBold:@"start pod install"];
             }
             
-            [[KFTaskController new] runShellCommand:kPodCommand withArguments:@[command, kParamdNoColor] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:^(NSTask *task, NSString *output, NSString *error)
+            [[KFTaskController new] runShellCommand:weakSelf.podLaunchPath withArguments:@[command, kParamdNoColor] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:^(NSTask *task, NSString *output, NSString *error)
              {
                  if (output != nil)
                  {
@@ -465,7 +465,7 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         {
             [weakSelf printMessageBold:@"start pod outdated check"];
 
-            [[KFTaskController new] runShellCommand:kPodCommand withArguments:@[kCommandOutdated, kParamdNoColor] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:^(NSTask *task, NSString *output, NSString *error)
+            [[KFTaskController new] runShellCommand:weakSelf.podLaunchPath withArguments:@[kCommandOutdated, kParamdNoColor] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:^(NSTask *task, NSString *output, NSString *error)
             {
                 if (output != nil)
                 {
@@ -508,7 +508,7 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 - (void)parseYAMLForPodfile:(NSString *)podfile
 {
     __weak typeof(self) weakSelf = self;
-    [[KFTaskController new] runShellCommand:kPodCommand withArguments:@[kCommandInterprocessCommunication, kCommandConvertPodFileToYAML, podfile] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:nil completion:^(NSTask *task, BOOL success, NSString *output, NSException *exception)
+    [[KFTaskController new] runShellCommand:weakSelf.podLaunchPath withArguments:@[kCommandInterprocessCommunication, kCommandConvertPodFileToYAML, podfile] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:nil completion:^(NSTask *task, BOOL success, NSString *output, NSException *exception)
      {
          if (success)
          {
