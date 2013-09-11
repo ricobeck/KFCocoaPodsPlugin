@@ -27,6 +27,7 @@
 #import "MethodSwizzle.h"
 #import "KFCocoaPodsPlugin.h"
 #import "KFSyntaxAutoCompletionItem.h"
+#import "KFWorkspaceController.h"
 
 
 @implementation DVTTextCompletionWordsInFileStrategy (KFCocoaPods)
@@ -37,6 +38,7 @@
     MethodSwizzle(self, @selector(completionItemsForDocumentLocation:context:areDefinitive:), @selector(kf_swizzle_completionItemsForDocumentLocation:context:areDefinitive:));
 }
 
+
 - (id)kf_swizzle_completionItemsForDocumentLocation:(id)arg1 context:(id)arg2 areDefinitive:(char *)arg3
 {
     id items = [self kf_swizzle_completionItemsForDocumentLocation:arg1 context:arg2 areDefinitive:arg3];
@@ -44,7 +46,7 @@
     {
         DVTSourceCodeLanguage *sourceCodeLanguage = [arg2 valueForKey:@"DVTTextCompletionContextSourceCodeLanguage"];
         
-        if ([sourceCodeLanguage.identifier isEqualToString:@"Xcode.SourceCodeLanguage.Ruby"])
+        if ([sourceCodeLanguage.identifier isEqualToString:@"Xcode.SourceCodeLanguage.Ruby"] && [KFWorkspaceController isCurrentFilePodfile])
         {
             DVTSourceTextView *sourceTextView = [arg2 objectForKey:@"DVTTextCompletionContextTextView"];
             DVTTextStorage *textStorage = [arg2 valueForKey:@"DVTTextCompletionContextTextStorage"];

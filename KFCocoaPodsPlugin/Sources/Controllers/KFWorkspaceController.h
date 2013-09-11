@@ -40,5 +40,7 @@
 
 + (NSString *)currentWorkspacePodfileLockPath;
 
++ (BOOL)isCurrentFilePodfile;
+
 
 @end
