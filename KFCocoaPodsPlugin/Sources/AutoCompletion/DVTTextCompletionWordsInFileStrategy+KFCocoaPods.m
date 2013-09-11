@@ -56,10 +56,9 @@
             
             NSRange newlineRange = [itemString rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet] options:NSBackwardsSearch];
             
-            
             if (newlineRange.location != NSNotFound)
             {
-                itemString = [[string substringFromIndex:newlineRange.location + 1] lowercaseString];
+                itemString = [[itemString substringFromIndex:newlineRange.location + 1] lowercaseString];
             }
             
             if ([itemString hasSuffix:@"pod "])
@@ -70,9 +69,9 @@
             {
                 NSArray *allItems = [[KFCocoaPodsPlugin sharedPlugin] syntaxCompletionItems];
                 
-                if ([itemString length] == 0)
+                if (itemString == nil || [[itemString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] length] == 0)
                 {
-                    items = allItems;
+                    return allItems;
                 }
                 else
                 {
