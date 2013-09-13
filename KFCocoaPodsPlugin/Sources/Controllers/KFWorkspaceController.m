@@ -96,7 +96,6 @@
 + (BOOL)fileNameExistsInCurrentWorkspace:(NSString *)fileName
 {
     NSString *filePath = [[self currentWorkspaceDirectoryPath] stringByAppendingPathComponent:fileName];
-    NSLog(@"file exists at path: %@", filePath);
     return [[NSFileManager defaultManager] fileExistsAtPath:filePath];
 }
 

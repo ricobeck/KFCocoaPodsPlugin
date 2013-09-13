@@ -63,14 +63,9 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 
 @property (nonatomic, strong) KFNotificationController *notificationController;
 
-@property (nonatomic, strong) NSString *podLaunchPath;
-
-
 
 @end
 
-
-#define kPodCommand @"/usr/bin/pod"
 
 #define kCommandInstall @"install"
 #define kCommandUpdate @"update"
@@ -121,7 +116,6 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
     {
         _consoleController = [KFConsoleController new];
         _taskController = [KFTaskController new];
-        self.podLaunchPath = kPodCommand;
         
         _notificationController = [KFNotificationController new];
 
@@ -156,7 +150,7 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 - (void)buildRepoIndex
 {
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    [self printMessage:@"building repo index"];
+    [self printMessage:NSLocalizedString(@"Building repo index", nil)];
     
     NSMutableDictionary *parsedRepos = [NSMutableDictionary new];
     NSArray *repos = [fileManager contentsOfDirectoryAtPath:[@"~/.cocoapods/repos/" stringByExpandingTildeInPath] error:nil];
