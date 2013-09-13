@@ -25,6 +25,7 @@
 
 #import "KFConsoleController.h"
 #import "IDEKit.h"
+#import <DSUnixTask/DSUnixTask.h>
 
 
 @interface KFConsoleController ()
@@ -52,13 +53,13 @@
 
 
 
-- (void)logMessage:(id)object forTask:(NSTask *)task
+- (void)logMessage:(id)object forTask:(DSUnixTask *)task
 {
     [self logMessage:object printBold:NO forTask:task];
 }
 
 
-- (void)logMessage:(id)object printBold:(BOOL)isBold forTask:(NSTask *)task
+- (void)logMessage:(id)object printBold:(BOOL)isBold forTask:(DSUnixTask *)task
 {
     IDEConsoleTextView *console;
     if (task == nil)
@@ -71,7 +72,11 @@
         if (console == nil)
         {
             console = [self consoleView:[NSApp mainWindow].contentView];
-            [self.consoleForTask setObject:console forKey:@(task.processIdentifier)];
+            
+            if (console)
+            {
+                [self.consoleForTask setObject:console forKey:@(task.processIdentifier)];
+            }
         }
     }
     
@@ -85,7 +90,7 @@
 }
 
 
-- (void)removeTask:(NSTask *)task
+- (void)removeTask:(DSUnixTask *)task
 {
     [self.consoleForTask removeObjectForKey:@(task.processIdentifier)];
 }

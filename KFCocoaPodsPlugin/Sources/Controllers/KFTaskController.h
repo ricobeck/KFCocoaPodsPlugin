@@ -26,14 +26,29 @@
 #import <Foundation/Foundation.h>
 
 
+@class DSUnixTask;
+
+
 typedef void(^KFTaskControllerProgressBlock)(NSTask *task, NSString *output, NSString *error);
 
 typedef void(^KFTaskControllerCompletionBlock)(NSTask *task, BOOL success, NSString *output, NSException *exception);
 
+
+
+typedef void(^KFTaskOutputHandler)(DSUnixTask *taskLauncher, NSString *newOutput);
+
+typedef void(^KFTaskTerminationHandler)(DSUnixTask *taskLauncher);
+
+typedef void(^KFTaskFailureHandler)(DSUnixTask *taskLauncher);
+
+
+
 @interface KFTaskController : NSObject
 
 
-- (void)runShellCommand:(NSString *)command withArguments:(NSArray *)arguments directory:(NSString *)directory progress:(KFTaskControllerProgressBlock)progressBlock completion:(KFTaskControllerCompletionBlock)completionBlock;
+
+- (void)runPodCommand:(NSArray *)arguments directory:(NSString *)directory outputHandler:(KFTaskOutputHandler)outpuBlock terminationHandler:(KFTaskTerminationHandler)terminationBlock failureHandler:(KFTaskFailureHandler)failureBlock;
+
 
 
 @end

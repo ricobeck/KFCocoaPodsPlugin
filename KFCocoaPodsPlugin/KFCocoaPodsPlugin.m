@@ -36,6 +36,7 @@
 
 #import <YAML-Framework/YAMLSerialization.h>
 #import <KSCrypto/KSSHA1Stream.h>
+#import <DSUnixTask/DSUnixTask.h>
 
 
 #define SHOW_REPO_MENU 0
@@ -66,8 +67,6 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 @end
 
 
-#define kPodCommand @"/usr/bin/pod"
-
 #define kCommandInstall @"install"
 #define kCommandUpdate @"update"
 #define kCommandInterprocessCommunication @"ipc"
@@ -93,7 +92,8 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 
 + (void)pluginDidLoad:(NSBundle *)plugin
 {
-    if ([self shouldLoadPlugin]) {
+    if ([self shouldLoadPlugin])
+    {
         [self sharedPlugin];
     }
 }
@@ -116,8 +116,9 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
     {
         _consoleController = [KFConsoleController new];
         _taskController = [KFTaskController new];
-        _notificationController = [KFNotificationController new];
         
+        _notificationController = [KFNotificationController new];
+
         [self buildRepoIndex];
         [self insertMenu];
 
@@ -149,7 +150,7 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 - (void)buildRepoIndex
 {
     NSFileManager *fileManager = [NSFileManager defaultManager];
-    [self printMessage:@"building repo index"];
+    [self printMessage:NSLocalizedString(@"Building repo index", nil)];
     
     NSMutableDictionary *parsedRepos = [NSMutableDictionary new];
     NSArray *repos = [fileManager contentsOfDirectoryAtPath:[@"~/.cocoapods/repos/" stringByExpandingTildeInPath] error:nil];
@@ -312,56 +313,38 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
     NSString *workspaceTitle = [KFWorkspaceController currentRepresentingTitle];
     __weak typeof(self) weakSelf = self;
     
-    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
-    dispatch_async(queue, ^
+    BOOL shouldUpdate = [KFWorkspaceController currentWorkspaceHasPodfileLock];
+    NSString *command = shouldUpdate ? kCommandUpdate : kCommandInstall;
+    
+    if (shouldUpdate)
     {
-        if ([KFWorkspaceController currentWorkspaceHasPodfile])
-        {
-            BOOL shouldUpdate = [KFWorkspaceController currentWorkspaceHasPodfileLock];
-            NSString *command = shouldUpdate ? kCommandUpdate : kCommandInstall;
-            
-            if (shouldUpdate)
-            {
-                [weakSelf printMessageBold:@"start pod update"];
-            }
-            else
-            {
-                [weakSelf printMessageBold:@"start pod install"];
-            }
-            
-            [[KFTaskController new] runShellCommand:kPodCommand withArguments:@[command, kParamdNoColor] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:^(NSTask *task, NSString *output, NSString *error)
-             {
-                 if (output != nil)
-                 {
-                     [weakSelf printMessage:output forTask:task];
-                 }
-                 else
-                 {
-                     [weakSelf printMessage:error forTask:task];
-                 }
-             }
-             completion:^(NSTask *task, BOOL success, NSString *output, NSException *exception)
-             {
-                 NSString *title;
-                 NSString *message = workspaceTitle;
-                 if (success)
-                 {
-                     title = NSLocalizedString(@"Cocoapods update succeeded", nil);
-                 }
-                 else
-                 {
-                     title = NSLocalizedString(@"Cocoapods update failed", nil);
-                 }
-                 [weakSelf printMessageBold:title forTask:task];
-                 [weakSelf.notificationController showNotificationWithTitle:title andMessage:message];
-                 [weakSelf.consoleController removeTask:task];
-             }];
-        }
-        else
-        {
-            [weakSelf printMessageBold:@"no podfile - no pod update"];
-        }
-    });
+        [self printMessageBold:NSLocalizedString(@"Start pod update", nil)];
+    }
+    else
+    {
+        [self printMessageBold:NSLocalizedString(@"Start pod install", nil)];
+    }
+    
+    [_taskController runPodCommand:@[command, kParamdNoColor] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] outputHandler:^(DSUnixTask *taskLauncher, NSString *newOutput)
+    {
+        [weakSelf printMessage:newOutput forTask:taskLauncher];
+        
+    } terminationHandler:^(DSUnixTask *task)
+    {
+        NSString *title = NSLocalizedString(@"Cocoapods update succeeded", nil);
+        NSString *message = workspaceTitle;
+        [weakSelf printMessageBold:title forTask:task];
+        [weakSelf.notificationController showNotificationWithTitle:title andMessage:message];
+        [weakSelf.consoleController removeTask:task];
+        
+    } failureHandler:^(DSUnixTask *task)
+    {
+        NSString *title = NSLocalizedString(@"Cocoapods update failed", nil);;
+        NSString *message = workspaceTitle;
+        [weakSelf printMessageBold:title forTask:task];
+        [weakSelf.notificationController showNotificationWithTitle:title andMessage:message];
+        [weakSelf.consoleController removeTask:task];
+    }];
 }
 
 
@@ -444,26 +427,16 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         {
             [weakSelf printMessageBold:@"start pod outdated check"];
 
-            [[KFTaskController new] runShellCommand:kPodCommand withArguments:@[kCommandOutdated, kParamdNoColor] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:^(NSTask *task, NSString *output, NSString *error)
+            [_taskController runPodCommand:@[kCommandOutdated, kParamdNoColor] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] outputHandler:^(DSUnixTask *task, NSString *newOutput)
             {
-                if (output != nil)
-                {
-                    [weakSelf printMessage:output forTask:task];
-                }
-                else
-                {
-                    [weakSelf printMessage:error forTask:task];
-                }
-            } completion:^(NSTask *task, BOOL success, NSString *output, NSException *exception)
+                [weakSelf printMessage:newOutput forTask:task];
+            } terminationHandler:^(DSUnixTask *task)
             {
-                if (success)
-                {
-                    [weakSelf printMessageBold:@"pod outdated done" forTask:task];
-                }
-                else
-                {
-                    [weakSelf printMessageBold:@"pod outdated failed" forTask:task];
-                }
+                [weakSelf printMessageBold:@"Pod outdated done" forTask:task];
+                [weakSelf.consoleController removeTask:task];
+            } failureHandler:^(DSUnixTask *task)
+            {
+                [weakSelf printMessageBold:@"pod outdated failed" forTask:task];
                 [weakSelf.consoleController removeTask:task];
             }];
         }
@@ -487,26 +460,29 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 - (void)parseYAMLForPodfile:(NSString *)podfile
 {
     __weak typeof(self) weakSelf = self;
-    [[KFTaskController new] runShellCommand:kPodCommand withArguments:@[kCommandInterprocessCommunication, kCommandConvertPodFileToYAML, podfile] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] progress:nil completion:^(NSTask *task, BOOL success, NSString *output, NSException *exception)
-     {
-         if (success)
-         {
-             [weakSelf printMessageBold:@"parsed podfile:" forTask:task];
-             NSMutableArray *lines = [[output componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] mutableCopy];
-             [lines removeObjectAtIndex:0];
-             output = [lines componentsJoinedByString:@"\n"];
-             NSError *error = nil;
-             NSMutableArray *yaml = [YAMLSerialization YAMLWithData:[output dataUsingEncoding:NSUTF8StringEncoding] options:kYAMLReadOptionStringScalars error:&error];
-             if (error == nil)
-             {
-                 [weakSelf printMessage:[yaml description] forTask:task];
-             }
-             else
-             {
-                 [weakSelf printMessageBold:error.description forTask:task];
-             }
-         }
-     }];
+    
+    [_taskController runPodCommand:@[kCommandInterprocessCommunication, kCommandConvertPodFileToYAML, podfile] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] outputHandler:^(DSUnixTask *taskLauncher, NSString *newOutput) {
+        
+    } terminationHandler:^(DSUnixTask *task)
+    {
+        [weakSelf printMessageBold:NSLocalizedString(@"Parsed podfile:", nil) forTask:task];
+        NSMutableArray *lines = [[task.standardOutput componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] mutableCopy];
+        [lines removeObjectAtIndex:0];
+        NSString *output = [lines componentsJoinedByString:@"\n"];
+        NSError *error = nil;
+        NSMutableArray *yaml = [YAMLSerialization YAMLWithData:[output dataUsingEncoding:NSUTF8StringEncoding] options:kYAMLReadOptionStringScalars error:&error];
+        if (error == nil)
+        {
+            [weakSelf printMessage:[yaml description] forTask:task];
+        }
+        else
+        {
+            [weakSelf printMessageBold:error.description forTask:task];
+        }
+    } failureHandler:^(DSUnixTask *taskLauncher)
+    {
+        
+    }];
 }
 
 
@@ -519,7 +495,7 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 }
 
 
-- (void)printMessage:(NSString *)message forTask:(NSTask *)task
+- (void)printMessage:(NSString *)message forTask:(DSUnixTask *)task
 {
      __weak typeof(self) weakSelf = self;
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -534,7 +510,7 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 }
 
 
-- (void)printMessageBold:(NSString *)message forTask:(NSTask *)task
+- (void)printMessageBold:(NSString *)message forTask:(DSUnixTask *)task
 {
      __weak typeof(self) weakSelf = self;
     dispatch_async(dispatch_get_main_queue(), ^{

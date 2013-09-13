@@ -26,17 +26,18 @@
 #import <Foundation/Foundation.h>
 
 @class IDEConsoleTextView;
+@class DSUnixTask;
 
 
 @interface KFConsoleController : NSObject
 
 
-- (void)logMessage:(id)object forTask:(NSTask *)task;
+- (void)logMessage:(id)object forTask:(DSUnixTask *)task;
 
-- (void)logMessage:(id)object printBold:(BOOL)isBold forTask:(NSTask *)task;
+- (void)logMessage:(id)object printBold:(BOOL)isBold forTask:(DSUnixTask *)task;
 
 
-- (void)removeTask:(NSTask *)task;
+- (void)removeTask:(DSUnixTask *)task;
 
 
 @end
