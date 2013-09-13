@@ -14,16 +14,18 @@ PODS:
 DEPENDENCIES:
   - DSUnixTask/Core (from `https://github.com/ricobeck/DSUnixTask.git`)
   - KSCrypto (~> 1.2.2)
-  - YAML-Framework
+  - YAML-Framework (from `https://github.com/ricobeck/YAML.framework.git`)
 
 EXTERNAL SOURCES:
   DSUnixTask:
     :git: https://github.com/ricobeck/DSUnixTask.git
+  YAML-Framework:
+    :git: https://github.com/ricobeck/YAML.framework.git
 
 SPEC CHECKSUMS:
   DSUnixTask: a22f7ce58c9379f97e20bd32b307caadb9edd5b8
   KSCrypto: f010e3bb8db23f1bb4fe30b18c0236477d0d6270
   LibYAML: 49b77e5b3f4417fa512a8f1f4675a78480bf6b3d
-  YAML-Framework: 4ada9225119ffb13a206f251fe4434e660bca16d
+  YAML-Framework: 2bd865885aeb3152c32d30a657ad4a38da6aa804
 
 COCOAPODS: 0.23.0
