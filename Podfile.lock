@@ -12,9 +12,13 @@ PODS:
     - LibYAML (~> 0.1.4)
 
 DEPENDENCIES:
-  - DSUnixTask/Core
+  - DSUnixTask/Core (from `https://github.com/ricobeck/DSUnixTask.git`)
   - KSCrypto (~> 1.2.2)
   - YAML-Framework
+
+EXTERNAL SOURCES:
+  DSUnixTask:
+    :git: https://github.com/ricobeck/DSUnixTask.git
 
 SPEC CHECKSUMS:
   DSUnixTask: a22f7ce58c9379f97e20bd32b307caadb9edd5b8
