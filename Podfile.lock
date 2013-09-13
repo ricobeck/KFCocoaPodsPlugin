@@ -1,14 +1,27 @@
 PODS:
+  - DSUnixTask/Core (0.1.0):
+    - DSUnixTask/Core/TaskManagers
+    - DSUnixTask/Core/TaskRunner
+    - DSUnixTask/Core/Tasks
+  - DSUnixTask/Core/TaskManagers (0.1.0)
+  - DSUnixTask/Core/TaskRunner (0.1.0)
+  - DSUnixTask/Core/Tasks (0.1.0)
   - KSCrypto (1.2.2)
   - LibYAML (0.1.4)
   - YAML-Framework (0.0.1):
     - LibYAML (~> 0.1.4)
 
 DEPENDENCIES:
+  - DSUnixTask/Core (from `https://github.com/ricobeck/DSUnixTask.git`)
   - KSCrypto (~> 1.2.2)
   - YAML-Framework
 
+EXTERNAL SOURCES:
+  DSUnixTask:
+    :git: https://github.com/ricobeck/DSUnixTask.git
+
 SPEC CHECKSUMS:
+  DSUnixTask: a22f7ce58c9379f97e20bd32b307caadb9edd5b8
   KSCrypto: f010e3bb8db23f1bb4fe30b18c0236477d0d6270
   LibYAML: 49b77e5b3f4417fa512a8f1f4675a78480bf6b3d
   YAML-Framework: 4ada9225119ffb13a206f251fe4434e660bca16d
