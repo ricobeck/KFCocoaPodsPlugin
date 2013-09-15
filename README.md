@@ -27,6 +27,10 @@ Rico Becker | @ricobeck https://twitter.com/ricobeck
 #Acknowledgements
 Inspired by the [CocoaPod Plugin][1].
 Some information were taken from the awesome [KSImageNamed][2].
+For executing commands [DSUnixTask][3] is used.
+
+#Troubleshooting
+When no command is executed you can try putting the path to your pod binary into .bashrc.
 
 #Screenshots
 
@@ -39,3 +43,4 @@ NotificationCenter
 
 [1]: https://github.com/kattrali/cocoapods-xcode-plugin "CocoaPods Plugin Repo"
 [2]: https://github.com/ksuther/KSImageNamed-Xcode "KSImageNamed Repo"
+[3]: https://github.com/Discontinuity-srl/DSUnixTask
