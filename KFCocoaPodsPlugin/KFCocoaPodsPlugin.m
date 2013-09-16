@@ -188,7 +188,7 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
                     }
                     [specs addObject:repoModel];
                 }
-                [parsedRepos setValue:[specs sortedArrayUsingDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"version" ascending:YES]]] forKey:podDirectory];
+                [parsedRepos setValue:[specs sortedArrayUsingDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"version" ascending:NO]]] forKey:podDirectory];
             }
         }
     }
