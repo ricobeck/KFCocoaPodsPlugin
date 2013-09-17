@@ -63,7 +63,7 @@
                 itemString = [[itemString substringFromIndex:newlineRange.location + 1] lowercaseString];
             }
             
-            if ([itemString hasSuffix:@"pod "])
+            if ([itemString rangeOfString:@"pod " options:NSCaseInsensitiveSearch].location != NSNotFound)
             {
                 items = [[KFCocoaPodsPlugin sharedPlugin] podCompletionItems];
             }

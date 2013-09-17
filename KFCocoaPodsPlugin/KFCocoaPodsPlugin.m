@@ -262,7 +262,7 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 {
     NSMutableArray *completionItems = [NSMutableArray new];
     
-    NSArray *repos = [[self.repos allKeys] sortedArrayUsingSelector:@selector(compare:)];
+    NSArray *repos = [[self.repos allKeys] sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
     for (NSString *repo in repos)
     {
         for (KFRepoModel *repoModel in self.repos[repo])
