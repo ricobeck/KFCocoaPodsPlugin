@@ -74,9 +74,6 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 
 #define kCommandConvertPodFileToYAML @"podfile"
 
-#define kParamdNoColor @"--no-color"
-
-
 @implementation KFCocoaPodsPlugin
 
 
@@ -325,7 +322,7 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         [self printMessageBold:NSLocalizedString(@"Start pod install", nil)];
     }
     
-    [_taskController runPodCommand:@[command, kParamdNoColor] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] outputHandler:^(DSUnixTask *taskLauncher, NSString *newOutput)
+    [_taskController runPodCommand:@[command] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] outputHandler:^(DSUnixTask *taskLauncher, NSString *newOutput)
     {
         [weakSelf printMessage:newOutput forTask:taskLauncher];
         
@@ -427,7 +424,7 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         {
             [weakSelf printMessageBold:@"start pod outdated check"];
 
-            [_taskController runPodCommand:@[kCommandOutdated, kParamdNoColor] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] outputHandler:^(DSUnixTask *task, NSString *newOutput)
+            [_taskController runPodCommand:@[kCommandOutdated] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] outputHandler:^(DSUnixTask *task, NSString *newOutput)
             {
                 [weakSelf printMessage:newOutput forTask:task];
             } terminationHandler:^(DSUnixTask *task)
