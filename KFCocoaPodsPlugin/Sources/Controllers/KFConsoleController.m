@@ -25,6 +25,7 @@
 
 #import "KFConsoleController.h"
 #import "IDEKit.h"
+#import "AMR_ANSIEscapeHelper.h"
 #import <DSUnixTask/DSUnixTask.h>
 
 
@@ -32,6 +33,8 @@
 
 
 @property (nonatomic, strong) NSMutableDictionary *consoleForTask;
+
+@property (nonatomic, strong) AMR_ANSIEscapeHelper *ansiEscapeHelper;
 
 
 @end
@@ -47,6 +50,7 @@
     if (self)
     {
         _consoleForTask = [NSMutableDictionary new];
+        _ansiEscapeHelper = [[AMR_ANSIEscapeHelper alloc] init];
     }
     return self;
 }
@@ -61,6 +65,11 @@
 
 - (void)logMessage:(id)object printBold:(BOOL)isBold forTask:(DSUnixTask *)task
 {
+    if ([object isKindOfClass:[NSString class]])
+    {
+        NSAttributedString *attributedString = [self.ansiEscapeHelper attributedStringWithANSIEscapedString:object];
+        object = attributedString;
+    }
     IDEConsoleTextView *console;
     if (task == nil)
     {
