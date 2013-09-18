@@ -123,7 +123,6 @@ THE SOFTWARE.
     NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc]
                                                    initWithString:cleanString
                                                    attributes:@{
-                                                   NSFontAttributeName: self.font ?: kDefaultFontSize,
                                                    NSForegroundColorAttributeName: self.defaultStringColor ?: kDefaultForegroundColor
                                                    }];
 
@@ -966,7 +965,7 @@ BOOL floatsEqual(CGFloat first, CGFloat second, CGFloat maxAbsError)
         // below.)
         //
         // subjective ordering of colors from most to least 'distinctive':
-        int colorDistinctivenessOrder[6] = {
+        NSInteger colorDistinctivenessOrder[6] = {
             AMR_SGRCodeFgRed+AMR_SGRCodeShift,
             AMR_SGRCodeFgMagenta+AMR_SGRCodeShift,
             AMR_SGRCodeFgBlue+AMR_SGRCodeShift,
