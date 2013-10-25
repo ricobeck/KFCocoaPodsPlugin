@@ -24,6 +24,7 @@
 //
 
 #import "KFConsoleController.h"
+#import "KFConsoleThemeModel.h"
 #import "IDEKit.h"
 #import "AMR_ANSIEscapeHelper.h"
 #import <DSUnixTask/DSUnixTask.h>
@@ -56,6 +57,19 @@
 }
 
 
+- (KFConsoleThemeModel *)currentConsoleTheme
+{
+    DVTSourceTextView *sourceTextView = [self sourceTextView:[NSApp mainWindow].contentView];
+    DVTFontAndColorTheme *currentTheme = [sourceTextView currentTheme];
+    
+    KFConsoleThemeModel *themeModel = [KFConsoleThemeModel new];
+    themeModel.outputTextColor = [currentTheme consoleDebuggerOutputTextColor];
+    themeModel.outputTextFont = [currentTheme consoleDebuggerOutputTextFont];
+    
+    return themeModel;
+}
+
+
 
 - (void)logMessage:(id)object forTask:(DSUnixTask *)task
 {
@@ -65,6 +79,9 @@
 
 - (void)logMessage:(id)object printBold:(BOOL)isBold forTask:(DSUnixTask *)task
 {
+    
+    
+    
     if ([object isKindOfClass:[NSString class]])
     {
         NSAttributedString *attributedString = [self.ansiEscapeHelper attributedStringWithANSIEscapedString:object];
@@ -126,5 +143,25 @@
     return nil;
 }
 
+
+- (DVTSourceTextView *)sourceTextView:(NSView *)parentView
+{
+    for (NSView *view in [parentView subviews])
+    {
+        if ([view isKindOfClass:NSClassFromString(@"DVTSourceTextView")])
+        {
+            return (DVTSourceTextView *)view;
+        }
+        else
+        {
+            NSView *childView = [self sourceTextView:view];
+            if ([childView isKindOfClass:NSClassFromString(@"DVTSourceTextView")])
+            {
+                return (DVTSourceTextView *)childView;
+            }
+        }
+    }
+    return nil;
+}
 
 @end
