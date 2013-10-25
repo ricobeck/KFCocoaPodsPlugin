@@ -32,13 +32,7 @@
 @interface KFConsoleController : NSObject
 
 
-- (KFConsoleThemeModel *)currentConsoleTheme;
-
-
-- (void)logMessage:(id)object forTask:(DSUnixTask *)task;
-
 - (void)logMessage:(id)object printBold:(BOOL)isBold forTask:(DSUnixTask *)task;
-
 
 - (void)removeTask:(DSUnixTask *)task;
 

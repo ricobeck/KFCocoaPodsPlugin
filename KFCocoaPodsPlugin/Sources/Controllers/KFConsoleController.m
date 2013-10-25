@@ -62,30 +62,49 @@
     DVTSourceTextView *sourceTextView = [self sourceTextView:[NSApp mainWindow].contentView];
     DVTFontAndColorTheme *currentTheme = [sourceTextView currentTheme];
     
-    KFConsoleThemeModel *themeModel = [KFConsoleThemeModel new];
-    themeModel.outputTextColor = [currentTheme consoleDebuggerOutputTextColor];
-    themeModel.outputTextFont = [currentTheme consoleDebuggerOutputTextFont];
-    
-    return themeModel;
-}
-
-
-
-- (void)logMessage:(id)object forTask:(DSUnixTask *)task
-{
-    [self logMessage:object printBold:NO forTask:task];
+    if (currentTheme != nil)
+    {
+        KFConsoleThemeModel *themeModel = [KFConsoleThemeModel new];
+        themeModel.outputTextColor = [currentTheme consoleDebuggerOutputTextColor];
+        themeModel.outputTextFont = [currentTheme consoleDebuggerOutputTextFont];
+        
+        return themeModel;
+    }
+    else
+    {
+        return nil;
+    }
 }
 
 
 - (void)logMessage:(id)object printBold:(BOOL)isBold forTask:(DSUnixTask *)task
 {
-    
-    
-    
     if ([object isKindOfClass:[NSString class]])
     {
-        NSAttributedString *attributedString = [self.ansiEscapeHelper attributedStringWithANSIEscapedString:object];
-        object = attributedString;
+        KFConsoleThemeModel *model = [self currentConsoleTheme];
+        
+        NSString *cleanString = nil;
+        if ([[self.ansiEscapeHelper escapeCodesForString:object cleanString:&cleanString] count] > 0)
+        {
+            if (model != nil)
+            {
+                self.ansiEscapeHelper.defaultStringColor = model.outputTextColor;
+            }
+            
+             NSAttributedString *attributedString = attributedString = [self.ansiEscapeHelper attributedStringWithANSIEscapedString:object];
+            object = attributedString;
+        }
+        else
+        {
+            
+            
+            if (model != nil)
+            {
+                NSDictionary *attributes = @{NSFontAttributeName:model.outputTextFont, NSForegroundColorAttributeName:model.outputTextColor};
+                NSAttributedString *attributedString = [[NSAttributedString alloc] initWithString:object attributes:attributes];
+                object = attributedString;
+            }
+        }
     }
     IDEConsoleTextView *console;
     if (task == nil)

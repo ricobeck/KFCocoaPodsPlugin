@@ -27,4 +27,11 @@
 
 @implementation KFConsoleThemeModel
 
+
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<%@> output color: %@, font: %@", NSStringFromClass([self class]), self.outputTextColor, self.outputTextFont];
+}
+
+
 @end
