@@ -23,6 +23,7 @@
 		1D5C6C6C17DB64130009B936 /* IDEKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5C6C6A17DB64130009B936 /* IDEKit.framework */; };
 		1D5C6C6F17DB64290009B936 /* DVTFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5C6C6D17DB64290009B936 /* DVTFoundation.framework */; };
 		1D5C6C7017DB64290009B936 /* DVTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5C6C6E17DB64290009B936 /* DVTKit.framework */; };
+		1D81CE40181AB41C00D45D84 /* KFConsoleThemeModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D81CE3F181AB41C00D45D84 /* KFConsoleThemeModel.m */; };
 		1DAC167617D9F09300287BA0 /* KFRepoModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DAC167517D9F09300287BA0 /* KFRepoModel.m */; };
 		1DC1B35917E08B2000CBC31F /* DVTTextCompletionKeywordsStrategy+KFCocoaPods.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DC1B35817E08B2000CBC31F /* DVTTextCompletionKeywordsStrategy+KFCocoaPods.m */; };
 		1DD2CD0B17DE4B72006A1355 /* KFSyntaxAutoCompletionItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DD2CD0A17DE4B72006A1355 /* KFSyntaxAutoCompletionItem.m */; };
@@ -61,6 +62,8 @@
 		1D5C6C6A17DB64130009B936 /* IDEKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IDEKit.framework; path = "../../../../../../../Applications/Xcode5-DP6.app/Contents/Frameworks/IDEKit.framework"; sourceTree = "<group>"; };
 		1D5C6C6D17DB64290009B936 /* DVTFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DVTFoundation.framework; path = "../../../../../../../Applications/Xcode5-DP6.app/Contents/SharedFrameworks/DVTFoundation.framework"; sourceTree = "<group>"; };
 		1D5C6C6E17DB64290009B936 /* DVTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DVTKit.framework; path = "../../../../../../../Applications/Xcode5-DP6.app/Contents/SharedFrameworks/DVTKit.framework"; sourceTree = "<group>"; };
+		1D81CE3E181AB41C00D45D84 /* KFConsoleThemeModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KFConsoleThemeModel.h; sourceTree = "<group>"; };
+		1D81CE3F181AB41C00D45D84 /* KFConsoleThemeModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KFConsoleThemeModel.m; sourceTree = "<group>"; };
 		1DAC167417D9F09300287BA0 /* KFRepoModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KFRepoModel.h; sourceTree = "<group>"; };
 		1DAC167517D9F09300287BA0 /* KFRepoModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KFRepoModel.m; sourceTree = "<group>"; };
 		1DC1B35717E08B2000CBC31F /* DVTTextCompletionKeywordsStrategy+KFCocoaPods.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "DVTTextCompletionKeywordsStrategy+KFCocoaPods.h"; sourceTree = "<group>"; };
@@ -208,6 +211,8 @@
 			children = (
 				1DAC167417D9F09300287BA0 /* KFRepoModel.h */,
 				1DAC167517D9F09300287BA0 /* KFRepoModel.m */,
+				1D81CE3E181AB41C00D45D84 /* KFConsoleThemeModel.h */,
+				1D81CE3F181AB41C00D45D84 /* KFConsoleThemeModel.m */,
 			);
 			name = Models;
 			path = Sources/Models;
@@ -334,6 +339,7 @@
 				1D03ECB117E9B64F00F183EB /* AMR_ANSIEscapeHelper.m in Sources */,
 				1D5C6C6117DB63E80009B936 /* MethodSwizzle.m in Sources */,
 				1D44D6AE17DBAEDB00CBE93B /* DVTSourceTextView+KFCocoaPods.m in Sources */,
+				1D81CE40181AB41C00D45D84 /* KFConsoleThemeModel.m in Sources */,
 				1DD2CD0B17DE4B72006A1355 /* KFSyntaxAutoCompletionItem.m in Sources */,
 				1D44D6AF17DBAEDB00CBE93B /* DVTTextCompletionWordsInFileStrategy+KFCocoaPods.m in Sources */,
 				1D44D6B017DBAEDB00CBE93B /* KFPodAutoCompletionItem.m in Sources */,
