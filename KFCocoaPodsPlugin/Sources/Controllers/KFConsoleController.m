@@ -24,6 +24,7 @@
 //
 
 #import "KFConsoleController.h"
+#import "KFConsoleThemeModel.h"
 #import "IDEKit.h"
 #import "AMR_ANSIEscapeHelper.h"
 #import <DSUnixTask/DSUnixTask.h>
@@ -56,10 +57,23 @@
 }
 
 
-
-- (void)logMessage:(id)object forTask:(DSUnixTask *)task
+- (KFConsoleThemeModel *)currentConsoleTheme
 {
-    [self logMessage:object printBold:NO forTask:task];
+    DVTSourceTextView *sourceTextView = [self sourceTextView:[NSApp mainWindow].contentView];
+    DVTFontAndColorTheme *currentTheme = [sourceTextView currentTheme];
+    
+    if (currentTheme != nil)
+    {
+        KFConsoleThemeModel *themeModel = [KFConsoleThemeModel new];
+        themeModel.outputTextColor = [currentTheme consoleDebuggerOutputTextColor];
+        themeModel.outputTextFont = [currentTheme consoleDebuggerOutputTextFont];
+        
+        return themeModel;
+    }
+    else
+    {
+        return nil;
+    }
 }
 
 
@@ -67,8 +81,30 @@
 {
     if ([object isKindOfClass:[NSString class]])
     {
-        NSAttributedString *attributedString = [self.ansiEscapeHelper attributedStringWithANSIEscapedString:object];
-        object = attributedString;
+        KFConsoleThemeModel *model = [self currentConsoleTheme];
+        
+        NSString *cleanString = nil;
+        if ([[self.ansiEscapeHelper escapeCodesForString:object cleanString:&cleanString] count] > 0)
+        {
+            if (model != nil)
+            {
+                self.ansiEscapeHelper.defaultStringColor = model.outputTextColor;
+            }
+            
+             NSAttributedString *attributedString = attributedString = [self.ansiEscapeHelper attributedStringWithANSIEscapedString:object];
+            object = attributedString;
+        }
+        else
+        {
+            
+            
+            if (model != nil)
+            {
+                NSDictionary *attributes = @{NSFontAttributeName:model.outputTextFont, NSForegroundColorAttributeName:model.outputTextColor};
+                NSAttributedString *attributedString = [[NSAttributedString alloc] initWithString:object attributes:attributes];
+                object = attributedString;
+            }
+        }
     }
     IDEConsoleTextView *console;
     if (task == nil)
@@ -126,5 +162,25 @@
     return nil;
 }
 
+
+- (DVTSourceTextView *)sourceTextView:(NSView *)parentView
+{
+    for (NSView *view in [parentView subviews])
+    {
+        if ([view isKindOfClass:NSClassFromString(@"DVTSourceTextView")])
+        {
+            return (DVTSourceTextView *)view;
+        }
+        else
+        {
+            NSView *childView = [self sourceTextView:view];
+            if ([childView isKindOfClass:NSClassFromString(@"DVTSourceTextView")])
+            {
+                return (DVTSourceTextView *)childView;
+            }
+        }
+    }
+    return nil;
+}
 
 @end

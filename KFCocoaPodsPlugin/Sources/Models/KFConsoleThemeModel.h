@@ -1,5 +1,5 @@
 //
-//  KFConsoleController.h
+//  KFConsoleThemeModel.h
 //  KFCocoaPodsPlugin
 //
 //  Copyright (c) 2013 Rico Becker, KF Interactive
@@ -25,16 +25,13 @@
 
 #import <Foundation/Foundation.h>
 
-@class IDEConsoleTextView;
-@class DSUnixTask;
-@class KFConsoleThemeModel;
-
-@interface KFConsoleController : NSObject
+@interface KFConsoleThemeModel : NSObject
 
 
-- (void)logMessage:(id)object printBold:(BOOL)isBold forTask:(DSUnixTask *)task;
+@property (nonatomic, strong) NSColor *outputTextColor;
 
-- (void)removeTask:(DSUnixTask *)task;
+@property (nonatomic, strong) NSFont *outputTextFont;
+
 
 
 @end
