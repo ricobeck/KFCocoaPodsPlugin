@@ -352,45 +352,20 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
     
     if (error == nil)
     {
-        [self printMessageBold:NSLocalizedString(@"Start checking for updated Pods", nil)];
+        [self printMessageBold:NSLocalizedString(@"\nStart checking for updated Pods\n", nil)];
         
         NSMutableArray *yaml = [YAMLSerialization YAMLWithData:[content dataUsingEncoding:NSUTF8StringEncoding] options:kYAMLReadOptionStringScalars error:&error];
         
         /*
         [self printMessageBold:@"parsed lock file"];
-        [self printMessage:[[yaml firstObject] description]];
+        [self printMessage:[yaml[0] description]];
          */
-        
+         
         NSDictionary *specChecksums = yaml[0][@"SPEC CHECKSUMS"];
         NSArray *installedPods = yaml[0][@"PODS"];
         
-        NSMutableArray *podsWithUpdates = [NSMutableArray new];
-        NSCharacterSet *trimSet = [NSCharacterSet characterSetWithCharactersInString:@" ()"];
-        
-        for (NSString *spec in specChecksums)
-        {
-            NSString *checksum = specChecksums[spec];
-            KFRepoModel *latestVersionRepoModel = [self.repos[spec] lastObject];
-            
-            for (id object in installedPods)
-            {
-                if ([object isKindOfClass:[NSString class]])
-                {
-                    NSString *installedPod = object;
-                    if ([installedPod hasPrefix:spec])
-                    {
-                        installedPod = [installedPod substringFromIndex:[spec length]];
-                        latestVersionRepoModel.installedVersion = [installedPod stringByTrimmingCharactersInSet:trimSet];
-                        break;
-                    }
-                }
-            }
-            
-            if (latestVersionRepoModel != nil && ![latestVersionRepoModel.checksum isEqualToString:checksum])
-            {
-                [podsWithUpdates addObject:latestVersionRepoModel];
-            }
-        }
+        NSArray *podsWithUpdates = [self updateInstalledVersionWithPods:installedPods checkSums:specChecksums];
+        podsWithUpdates = [[[NSOrderedSet orderedSetWithArray:podsWithUpdates] objectEnumerator] allObjects];
         
         if ([podsWithUpdates count] > 0)
         {
@@ -410,6 +385,46 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
     {
         [self printMessage:error.description];
     }
+}
+
+
+- (NSMutableArray *)updateInstalledVersionWithPods:(NSArray *)installedPods checkSums:(NSDictionary *)specChecksums
+{
+    NSMutableArray *podsWithUpdates = [NSMutableArray new];
+    NSCharacterSet *trimSet = [NSCharacterSet characterSetWithCharactersInString:@" ()"];
+    
+    
+    for (id spec in specChecksums)
+    {
+        NSString *checksum = specChecksums[spec];
+        KFRepoModel *latestVersionRepoModel = [self.repos[spec] lastObject];
+        
+        for (id object in installedPods)
+        {
+            if ([object isKindOfClass:[NSString class]])
+            {
+                NSString *installedPod = object;
+                if ([installedPod hasPrefix:spec])
+                {
+                    installedPod = [installedPod substringFromIndex:[spec length]];
+                    latestVersionRepoModel.installedVersion = [installedPod stringByTrimmingCharactersInSet:trimSet];
+                    break;
+                }
+            }
+            else if ([object isKindOfClass:[NSDictionary class]])
+            {
+                [podsWithUpdates addObjectsFromArray:[self updateInstalledVersionWithPods:object checkSums:specChecksums]];
+            }
+        }
+        
+        
+        if (latestVersionRepoModel != nil && ![latestVersionRepoModel.checksum isEqualToString:checksum])
+        {
+            [podsWithUpdates addObject:latestVersionRepoModel];
+        }
+    }
+    
+    return podsWithUpdates;
 }
 
 
