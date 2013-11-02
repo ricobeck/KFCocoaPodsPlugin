@@ -336,10 +336,14 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         
     } failureHandler:^(DSUnixTask *task)
     {
-        NSString *title = NSLocalizedString(@"Cocoapods update failed", nil);;
-        NSString *message = workspaceTitle;
-        [weakSelf printMessageBold:title forTask:task];
-        [weakSelf.notificationController showNotificationWithTitle:title andMessage:message];
+        NSString *title = NSLocalizedString(@"Cocoapods update failed", nil);
+        
+        NSString *notificationMessage = [NSString stringWithFormat:@"%@: %@", workspaceTitle, task.standardError];
+        [weakSelf.notificationController showNotificationWithTitle:title andMessage:notificationMessage];
+        
+        NSString *consoleMessage = [NSString stringWithFormat:@"%@: %@", title, task.standardError];
+        [weakSelf printMessageBold:consoleMessage forTask:task];
+        
         [weakSelf.consoleController removeTask:task];
     }];
 }
