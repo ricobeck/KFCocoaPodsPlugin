@@ -45,7 +45,8 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 {
     KFMenuItemTagEditPodfile,
     KFMenuItemTagCheckForOutdatedPods,
-    KFMenuItemTagUpdate
+    KFMenuItemTagUpdate,
+    KFMenuItemTagPodInit
 };
 
 
@@ -63,10 +64,13 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 
 @property (nonatomic, strong) KFTaskController *taskController;
 
+@property (nonatomic, strong) NSMenuItem *podInitItem;
+
 
 @end
 
 
+#define kCommandInit @"init"
 #define kCommandInstall @"install"
 #define kCommandUpdate @"update"
 #define kCommandInterprocessCommunication @"ipc"
@@ -133,6 +137,9 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         case KFMenuItemTagCheckForOutdatedPods:
         case KFMenuItemTagUpdate:
             return [KFWorkspaceController currentWorkspaceHasPodfile];
+            break;
+        case KFMenuItemTagPodInit:
+            return ![KFWorkspaceController currentWorkspaceHasPodfile];
             break;
         default:
             return YES;
@@ -211,17 +218,17 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         
         NSMenuItem *editPodfileMenuItem = [[NSMenuItem alloc] initWithTitle:@"Edit Podfile" action:@selector(editPodfileAction:) keyEquivalent:@""];
         [editPodfileMenuItem setTarget:self];
-        editPodfileMenuItem.tag = KFMenuItemTagEditPodfile;
+        [editPodfileMenuItem setTag:KFMenuItemTagEditPodfile];
         [submenu addItem:editPodfileMenuItem];
         
         NSMenuItem *checkMenuItem = [[NSMenuItem alloc] initWithTitle:@"Check For Outdated Pods" action:@selector(checkOutdatedPodsAction:) keyEquivalent:@""];
         [checkMenuItem setTarget:self];
-        checkMenuItem.tag = KFMenuItemTagCheckForOutdatedPods;
+        [checkMenuItem setTag:KFMenuItemTagCheckForOutdatedPods];
         [submenu addItem:checkMenuItem];
         
         NSMenuItem *updateMenuItem = [[NSMenuItem alloc] initWithTitle:@"Run Update/Install" action:@selector(podUpdateAction:) keyEquivalent:@""];
         [updateMenuItem setTarget:self];
-        updateMenuItem.tag = KFMenuItemTagUpdate;
+        [updateMenuItem setTag:KFMenuItemTagUpdate];
         [submenu addItem:updateMenuItem];
         
 #if SHOW_REPO_MENU
@@ -249,6 +256,11 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         [submenu addItem:reposMenuItem];
 #endif
         [submenu addItem:[NSMenuItem separatorItem]];
+        
+        self.podInitItem = [[NSMenuItem alloc] initWithTitle:@"Initialize Project" action:@selector(podInitAction:) keyEquivalent:@""];
+        [self.podInitItem setTarget:self];
+        [self.podInitItem setTag:KFMenuItemTagPodInit];
+        [submenu addItem:self.podInitItem];
         
         NSMenuItem *versionItem = [[NSMenuItem alloc] initWithTitle:@"CocoaPods Version: " action:nil keyEquivalent:@""];
         [self.cocoaPodController cocoaPodsVersion:^(NSDictionary *version)
@@ -485,6 +497,26 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 - (void)openFileInIDE:(NSString *)file
 {
     [[[NSApplication sharedApplication] delegate] application:[NSApplication sharedApplication] openFile:file];
+}
+
+
+- (void)podInitAction:(id)sender
+{
+    [self printMessageBold:@"pod init"];
+     __weak typeof(self) weakSelf = self;
+    
+    [self.taskController runPodCommand:@[kCommandInstall] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] outputHandler:^(DSUnixTask *task, NSString *newOutput)
+    {
+        [weakSelf printMessage:newOutput forTask:task];
+    }
+    terminationHandler:^(DSUnixTask *task)
+    {
+        [weakSelf.consoleController removeTask:task];
+    }
+    failureHandler:^(DSUnixTask *task)
+    {
+        [weakSelf.consoleController removeTask:task];
+    }];
 }
 
 
