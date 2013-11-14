@@ -25,10 +25,22 @@
 
 #import <Foundation/Foundation.h>
 
+
+extern NSString * const KFMajorVersion;
+
+extern NSString * const KFMinorVersion;
+
+extern NSString * const KFBuildVersion;
+
+
+typedef void(^KFCocoaPodsVersionBlock)(NSDictionary *version);
+
 @interface KFCocoaPodController : NSObject
 
 
 - (id)initWithRepoData:(NSDictionary *)repoData;
+
+- (void)cocoaPodsVersion:(KFCocoaPodsVersionBlock)versionBlock;
 
 - (NSArray *)outdatedPodsForLockFileContents:(NSString *)lockFileContents;
 

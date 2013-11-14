@@ -32,8 +32,21 @@
 - (void)runPodCommand:(NSArray *)arguments directory:(NSString *)directory outputHandler:(KFTaskOutputHandler)outpuBlock terminationHandler:(KFTaskTerminationHandler)terminationBlock failureHandler:(KFTaskFailureHandler)failureBlock
 {    
     DSUnixTask *task = [DSUnixTaskSubProcessManager shellTask];
+    [[DSUnixTaskSubProcessManager sharedManager] setLoggingEnabled:YES];
+    
+    //NSLocale *currentLocale = [NSLocale currentLocale];
+    //NSString *laguage = [[currentLocale localeIdentifier] stringByAppendingString:@".UTF-8"];
+    NSString *laguage = @"en_US.UTF-8";
+    task.environment = @{@"LC_ALL": laguage};
+    
+    
     [task setCommand:@"pod"];
-    [task setWorkingDirectory:directory];
+    
+    if (directory != nil)
+    {
+        [task setWorkingDirectory:directory];
+    }
+        
     [task setArguments:arguments];
     
     [task setStandardErrorHandler:^(DSUnixTask *task, NSString *error)

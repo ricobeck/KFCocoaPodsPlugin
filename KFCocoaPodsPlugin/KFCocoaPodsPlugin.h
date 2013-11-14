@@ -26,6 +26,9 @@
 
 #import <AppKit/AppKit.h>
 
+@class KFTaskController;
+
+
 @interface KFCocoaPodsPlugin : NSObject
 
 
