@@ -361,10 +361,13 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         NSString *title = NSLocalizedString(@"Cocoapods update succeeded", nil);
         NSString *message = workspaceTitle;
         [weakSelf printMessageBold:title forTask:task];
-        [weakSelf.notificationController showNotificationWithTitle:title andMessage:message];
-        [weakSelf.consoleController removeTask:task];
         
-        [weakSelf checkForWorkspaceCreation:task.standardOutput];
+        BOOL didCreateWorkspace = [weakSelf checkForWorkspaceCreation:task.standardOutput];
+        if (!didCreateWorkspace)
+        {
+            [weakSelf.notificationController showNotificationWithTitle:title andMessage:message];
+            [weakSelf.consoleController removeTask:task];
+        }
         
     } failureHandler:^(DSUnixTask *task)
     {
@@ -381,10 +384,8 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 }
 
 
-- (void)checkForWorkspaceCreation:(NSString *)aggregatedOutput
+- (BOOL)checkForWorkspaceCreation:(NSString *)aggregatedOutput
 {
-    //[!] From now on use `TestProject.xcworkspace`.
-    
     NSError *regexError = nil;
     NSRegularExpressionOptions options = 0;
     NSString *pattern = @"(?<=\\[!]\\WFrom\\Wnow\\Won\\Wuse\\W`).*?.xcworkspace(?=`.)";
@@ -400,10 +401,33 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         
         [expression enumerateMatchesInString:aggregatedOutput options:matchingOptions range:range usingBlock:^(NSTextCheckingResult *result, NSMatchingFlags flags, BOOL *stop)
         {
-            projectFilename = [aggregatedOutput substringWithRange:result.range];
+            projectFilename = [aggregatedOutput substringWithRange:[result rangeAtIndex:0]];
         }];
         
         [self printMessageBold:[NSString stringWithFormat:@"You should open Workspace '%@'", projectFilename]];
+        
+        NSString *filePath = [[KFWorkspaceController currentWorkspaceDirectoryPath] stringByAppendingPathComponent:projectFilename];
+        
+        NSBeginAlertSheet(NSLocalizedString(@"Open the created workspace", nil), NSLocalizedString(@"Open", nil), nil, NSLocalizedString(@"Cancel", nil), [[NSApplication sharedApplication] keyWindow], self, nil, @selector(sheetDidDismiss:returnCode:contextInfo:), (__bridge_retained void *)(@{@"filePath": filePath}), @"CocoaPod Projects use Workspaces. You should close this Project and open the newly created '%@'.", projectFilename,nil);
+        
+        return YES;
+    }
+    else
+    {
+        return NO;
+    }
+}
+
+
+- (void)sheetDidDismiss:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
+{
+    if (returnCode == NSOKButton)
+    {
+        NSDictionary *context = (__bridge_transfer NSDictionary *)(contextInfo);
+        NSLog(@"opening file: %@", context[@"filePath"]);
+        
+        [[[NSApplication sharedApplication] keyWindow] close];
+        [[[NSApplication sharedApplication] delegate] application:[NSApplication sharedApplication] openFile:context[@"filePath"]];
     }
 }
 
