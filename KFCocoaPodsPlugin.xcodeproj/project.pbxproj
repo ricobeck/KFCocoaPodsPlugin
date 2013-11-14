@@ -238,6 +238,7 @@
 			buildConfigurationList = 1D02735917D746CC00E8389F /* Build configuration list for PBXNativeTarget "KFCocoaPodsPlugin" */;
 			buildPhases = (
 				C90012E6A43940B78D0347BA /* Check Pods Manifest.lock */,
+				1D97398318352EC7003CDA74 /* Build Version */,
 				1D02734217D746CB00E8389F /* Sources */,
 				1D02734317D746CB00E8389F /* Frameworks */,
 				1D02734417D746CB00E8389F /* Resources */,
@@ -291,6 +292,20 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		1D97398318352EC7003CDA74 /* Build Version */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Build Version";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "buildNumber=`expr $(git rev-list HEAD | wc -l) + 1`\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $buildNumber\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\"";
+		};
 		6864FFC159CF45B5806FA1D4 /* Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
