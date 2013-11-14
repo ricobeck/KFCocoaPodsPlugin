@@ -364,6 +364,8 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         [weakSelf.notificationController showNotificationWithTitle:title andMessage:message];
         [weakSelf.consoleController removeTask:task];
         
+        [weakSelf checkForWorkspaceCreation:task.standardOutput];
+        
     } failureHandler:^(DSUnixTask *task)
     {
         NSString *title = NSLocalizedString(@"Cocoapods update failed", nil);
@@ -376,6 +378,33 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         
         [weakSelf.consoleController removeTask:task];
     }];
+}
+
+
+- (void)checkForWorkspaceCreation:(NSString *)aggregatedOutput
+{
+    //[!] From now on use `TestProject.xcworkspace`.
+    
+    NSError *regexError = nil;
+    NSRegularExpressionOptions options = 0;
+    NSString *pattern = @"(?<=\\[!]\\WFrom\\Wnow\\Won\\Wuse\\W`).*?.xcworkspace(?=`.)";
+    NSRegularExpression *expression = [NSRegularExpression regularExpressionWithPattern:pattern options:options error:&regexError];
+    
+    NSMatchingOptions matchingOptions = 0;
+    NSRange range = NSMakeRange(0, [aggregatedOutput length]);
+    NSUInteger matchCount = [expression numberOfMatchesInString:aggregatedOutput options:matchingOptions range:range];
+    
+    if (matchCount == 1)
+    {
+        __block NSString *projectFilename;
+        
+        [expression enumerateMatchesInString:aggregatedOutput options:matchingOptions range:range usingBlock:^(NSTextCheckingResult *result, NSMatchingFlags flags, BOOL *stop)
+        {
+            projectFilename = [aggregatedOutput substringWithRange:result.range];
+        }];
+        
+        [self printMessageBold:[NSString stringWithFormat:@"You should open Workspace '%@'", projectFilename]];
+    }
 }
 
 
@@ -503,15 +532,17 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 - (void)podInitAction:(id)sender
 {
     [self printMessageBold:@"pod init"];
-     __weak typeof(self) weakSelf = self;
+    [self printMessage:[KFWorkspaceController currentWorkspaceDirectoryPath]];
     
-    [self.taskController runPodCommand:@[kCommandInstall] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] outputHandler:^(DSUnixTask *task, NSString *newOutput)
+     __weak typeof(self) weakSelf = self;
+    [self.taskController runPodCommand:@[kCommandInit] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] outputHandler:^(DSUnixTask *task, NSString *newOutput)
     {
         [weakSelf printMessage:newOutput forTask:task];
     }
     terminationHandler:^(DSUnixTask *task)
     {
         [weakSelf.consoleController removeTask:task];
+        [weakSelf podUpdateAction:nil];
     }
     failureHandler:^(DSUnixTask *task)
     {
