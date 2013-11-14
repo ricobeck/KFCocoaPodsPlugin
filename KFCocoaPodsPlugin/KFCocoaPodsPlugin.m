@@ -57,11 +57,11 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 
 @property (nonatomic, strong) KFConsoleController *consoleController;
 
-@property (nonatomic, strong) KFTaskController *taskController;
-
 @property (nonatomic, strong) KFCocoaPodController *cocoaPodController;
 
 @property (nonatomic, strong) KFNotificationController *notificationController;
+
+@property (nonatomic, strong) KFTaskController *taskController;
 
 
 @end
@@ -111,15 +111,15 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 {
     if (self = [super init])
     {
+        
         _consoleController = [KFConsoleController new];
         _taskController = [KFTaskController new];
-        
         _notificationController = [KFNotificationController new];
 
         [self buildRepoIndex];
-        [self insertMenu];
-
         _cocoaPodController = [[KFCocoaPodController alloc] initWithRepoData:self.repos];
+        
+        [self insertMenu];
     }
     return self;
 }
@@ -208,6 +208,7 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         
         NSMenu *submenu = [[NSMenu alloc] initWithTitle:@"CocoaPods Submenu"];
         
+        
         NSMenuItem *editPodfileMenuItem = [[NSMenuItem alloc] initWithTitle:@"Edit Podfile" action:@selector(editPodfileAction:) keyEquivalent:@""];
         [editPodfileMenuItem setTarget:self];
         editPodfileMenuItem.tag = KFMenuItemTagEditPodfile;
@@ -247,6 +248,23 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         reposMenuItem.submenu = repoMenu;
         [submenu addItem:reposMenuItem];
 #endif
+        [submenu addItem:[NSMenuItem separatorItem]];
+        
+        NSMenuItem *versionItem = [[NSMenuItem alloc] initWithTitle:@"CocoaPods Version: " action:nil keyEquivalent:@""];
+        [self.cocoaPodController checkCocoaPodsVersion:^(NSDictionary *version)
+        {
+            if (version != nil)
+            {
+                NSString *versionString = [NSString stringWithFormat:@"%@.%@.%@", version[KFMajorVersion], version[KFMinorVersion], version[KFBuildVersion]];
+                [versionItem setTitle:versionString];
+            }
+            else
+            {
+                [versionItem setTitle:NSLocalizedString(@"<Unknown CocoaPods Version>", nil)];
+            }
+        }];
+        
+        [submenu addItem:versionItem];
         
         cocoapodsMenuItem.submenu = submenu;
     }

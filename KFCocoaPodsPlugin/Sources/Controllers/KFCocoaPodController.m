@@ -24,11 +24,32 @@
 //
 
 #import "KFCocoaPodController.h"
+#import "KFCocoaPodsPlugin.h"
+#import "KFTaskController.h"
+#import "KFWorkspaceController.h"
+
+#import <DSUnixTask/DSUnixShellTask.h>
+#import <DSUnixTask/DSUnixTaskSubProcessManager.h>
+
+#import <YAML-Framework/YAMLSerialization.h>
+
+#include <signal.h>
+
+
+NSString * const KFMajorVersion = @"majorVersion";
+
+NSString * const KFMinorVersion = @"minorVersion";
+
+NSString * const KFBuildVersion = @"buildVersion";
+
 
 @interface KFCocoaPodController ()
 
 
 @property (nonatomic, strong) NSDictionary *repoData;
+
+@property (nonatomic, strong) KFTaskController *taskController;
+
 @end
 
 
@@ -41,8 +62,82 @@
     if (self)
     {
         _repoData = repoData;
+        _taskController = [KFTaskController new];
     }
     return self;
+}
+
+
+- (void)cocoapodsVersion:(KFCocoaPodsVersionBlock)versionBlock
+{
+    versionBlock(nil);
+    return;
+    
+    NSLog(@"checking cocoapods version");
+    [self.taskController runPodCommand:@[@" --version"] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] outputHandler:^(DSUnixTask *taskLauncher, NSString *newOutput)
+    {
+        NSLog(@"cocoapods version: %@", newOutput);
+    }
+    terminationHandler:^(DSUnixTask *taskLauncher)
+    {
+        NSLog(@"cocoapods version: %@", taskLauncher.standardOutput);
+        NSLog(@"error: %@", taskLauncher.standardError);
+        NSArray *version = [taskLauncher.standardOutput componentsSeparatedByString:@"."];
+        if ([version count] == 3)
+        {
+            versionBlock(@{KFMajorVersion: version[0], KFMinorVersion: version[1], KFBuildVersion: version[2]});
+        }
+        else
+        {
+            versionBlock(nil);
+        }
+    }
+    failureHandler:^(DSUnixTask *taskLauncher)
+    {
+        NSLog(@"failureHandler: %@", taskLauncher.standardError);
+        versionBlock(nil);
+    }];
+}
+
+
+- (void)checkCocoaPodsVersion:(KFCocoaPodsVersionBlock)versionBlock
+{
+    DSUnixShellTask *task = [DSUnixTaskSubProcessManager shellTask];
+    [[DSUnixTaskSubProcessManager sharedManager] setLoggingEnabled:YES];
+    [task setCommand:@"pod"];
+    [task setArguments:@[@"ipc repl"]];
+    
+    [task setStandardOutputHandler:^(DSUnixTask *task, NSString *output)
+    {
+        NSError *error = nil;
+        NSMutableArray *yaml = [YAMLSerialization YAMLWithData:[task.standardOutput dataUsingEncoding:NSUTF8StringEncoding] options:kYAMLReadOptionStringScalars error:&error];
+        
+        if (error == nil)
+        {
+            NSString *version = yaml[0][@"version"];
+            NSArray *versionComponents = [version componentsSeparatedByString:@"."];
+            if ([versionComponents count] == 3)
+            {
+                versionBlock(@{KFMajorVersion: versionComponents[0], KFMinorVersion: versionComponents[1], KFBuildVersion: versionComponents[2]});
+            }
+            else
+            {
+                versionBlock(nil);
+            }
+        }
+        else
+        {
+            NSLog(@"error: %@", error);
+        }
+    }];
+    
+    [task launch];
+    double delayInSeconds = .3;
+    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
+    dispatch_after(popTime, dispatch_get_main_queue(), ^(void)
+    {
+        kill(task.processIdentifier, SIGINT);
+    });
 }
 
 

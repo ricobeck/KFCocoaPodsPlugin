@@ -32,8 +32,14 @@
 - (void)runPodCommand:(NSArray *)arguments directory:(NSString *)directory outputHandler:(KFTaskOutputHandler)outpuBlock terminationHandler:(KFTaskTerminationHandler)terminationBlock failureHandler:(KFTaskFailureHandler)failureBlock
 {    
     DSUnixTask *task = [DSUnixTaskSubProcessManager shellTask];
+    [[DSUnixTaskSubProcessManager sharedManager] setLoggingEnabled:YES];
     [task setCommand:@"pod"];
-    [task setWorkingDirectory:directory];
+    
+    if (directory != nil)
+    {
+        [task setWorkingDirectory:directory];
+    }
+        
     [task setArguments:arguments];
     
     [task setStandardErrorHandler:^(DSUnixTask *task, NSString *error)
