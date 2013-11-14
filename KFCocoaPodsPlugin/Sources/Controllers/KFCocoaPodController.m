@@ -48,7 +48,6 @@ NSString * const KFBuildVersion = @"buildVersion";
 
 @property (nonatomic, strong) NSDictionary *repoData;
 
-@property (nonatomic, strong) KFTaskController *taskController;
 
 @end
 
@@ -62,47 +61,18 @@ NSString * const KFBuildVersion = @"buildVersion";
     if (self)
     {
         _repoData = repoData;
-        _taskController = [KFTaskController new];
     }
     return self;
 }
 
 
-- (void)cocoapodsVersion:(KFCocoaPodsVersionBlock)versionBlock
-{
-    versionBlock(nil);
-    return;
-    
-    NSLog(@"checking cocoapods version");
-    [self.taskController runPodCommand:@[@" --version"] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] outputHandler:^(DSUnixTask *taskLauncher, NSString *newOutput)
-    {
-        NSLog(@"cocoapods version: %@", newOutput);
-    }
-    terminationHandler:^(DSUnixTask *taskLauncher)
-    {
-        NSLog(@"cocoapods version: %@", taskLauncher.standardOutput);
-        NSLog(@"error: %@", taskLauncher.standardError);
-        NSArray *version = [taskLauncher.standardOutput componentsSeparatedByString:@"."];
-        if ([version count] == 3)
-        {
-            versionBlock(@{KFMajorVersion: version[0], KFMinorVersion: version[1], KFBuildVersion: version[2]});
-        }
-        else
-        {
-            versionBlock(nil);
-        }
-    }
-    failureHandler:^(DSUnixTask *taskLauncher)
-    {
-        NSLog(@"failureHandler: %@", taskLauncher.standardError);
-        versionBlock(nil);
-    }];
-}
-
-
-- (void)checkCocoaPodsVersion:(KFCocoaPodsVersionBlock)versionBlock
+- (void)cocoaPodsVersion:(KFCocoaPodsVersionBlock)versionBlock
 {
     DSUnixShellTask *task = [DSUnixTaskSubProcessManager shellTask];
+    //NSLocale *currentLocale = [NSLocale currentLocale];
+    //NSString *laguage = [[currentLocale localeIdentifier] stringByAppendingString:@".UTF-8"];
+    NSString *laguage = @"en_US.UTF-8";
+    task.environment = @{@"LC_ALL": laguage};
     [[DSUnixTaskSubProcessManager sharedManager] setLoggingEnabled:YES];
     [task setCommand:@"pod"];
     [task setArguments:@[@"ipc repl"]];

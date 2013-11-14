@@ -251,7 +251,7 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         [submenu addItem:[NSMenuItem separatorItem]];
         
         NSMenuItem *versionItem = [[NSMenuItem alloc] initWithTitle:@"CocoaPods Version: " action:nil keyEquivalent:@""];
-        [self.cocoaPodController checkCocoaPodsVersion:^(NSDictionary *version)
+        [self.cocoaPodController cocoaPodsVersion:^(NSDictionary *version)
         {
             if (version != nil)
             {

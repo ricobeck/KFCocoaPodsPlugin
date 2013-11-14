@@ -40,9 +40,7 @@ typedef void(^KFCocoaPodsVersionBlock)(NSDictionary *version);
 
 - (id)initWithRepoData:(NSDictionary *)repoData;
 
-- (void)cocoapodsVersion:(KFCocoaPodsVersionBlock)versionBlock;
-
-- (void)checkCocoaPodsVersion:(KFCocoaPodsVersionBlock)versionBlock;
+- (void)cocoaPodsVersion:(KFCocoaPodsVersionBlock)versionBlock;
 
 - (NSArray *)outdatedPodsForLockFileContents:(NSString *)lockFileContents;
 

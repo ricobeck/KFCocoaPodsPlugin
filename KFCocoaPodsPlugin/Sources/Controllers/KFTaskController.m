@@ -33,6 +33,13 @@
 {    
     DSUnixTask *task = [DSUnixTaskSubProcessManager shellTask];
     [[DSUnixTaskSubProcessManager sharedManager] setLoggingEnabled:YES];
+    
+    //NSLocale *currentLocale = [NSLocale currentLocale];
+    //NSString *laguage = [[currentLocale localeIdentifier] stringByAppendingString:@".UTF-8"];
+    NSString *laguage = @"en_US.UTF-8";
+    task.environment = @{@"LC_ALL": laguage};
+    
+    
     [task setCommand:@"pod"];
     
     if (directory != nil)
