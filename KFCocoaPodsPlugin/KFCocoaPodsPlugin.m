@@ -45,7 +45,8 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 {
     KFMenuItemTagEditPodfile,
     KFMenuItemTagCheckForOutdatedPods,
-    KFMenuItemTagUpdate
+    KFMenuItemTagUpdate,
+    KFMenuItemTagPodInit
 };
 
 
@@ -63,10 +64,13 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 
 @property (nonatomic, strong) KFTaskController *taskController;
 
+@property (nonatomic, strong) NSMenuItem *podInitItem;
+
 
 @end
 
 
+#define kCommandInit @"init"
 #define kCommandInstall @"install"
 #define kCommandUpdate @"update"
 #define kCommandInterprocessCommunication @"ipc"
@@ -133,6 +137,9 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         case KFMenuItemTagCheckForOutdatedPods:
         case KFMenuItemTagUpdate:
             return [KFWorkspaceController currentWorkspaceHasPodfile];
+            break;
+        case KFMenuItemTagPodInit:
+            return ![KFWorkspaceController currentWorkspaceHasPodfile];
             break;
         default:
             return YES;
@@ -211,17 +218,17 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         
         NSMenuItem *editPodfileMenuItem = [[NSMenuItem alloc] initWithTitle:@"Edit Podfile" action:@selector(editPodfileAction:) keyEquivalent:@""];
         [editPodfileMenuItem setTarget:self];
-        editPodfileMenuItem.tag = KFMenuItemTagEditPodfile;
+        [editPodfileMenuItem setTag:KFMenuItemTagEditPodfile];
         [submenu addItem:editPodfileMenuItem];
         
         NSMenuItem *checkMenuItem = [[NSMenuItem alloc] initWithTitle:@"Check For Outdated Pods" action:@selector(checkOutdatedPodsAction:) keyEquivalent:@""];
         [checkMenuItem setTarget:self];
-        checkMenuItem.tag = KFMenuItemTagCheckForOutdatedPods;
+        [checkMenuItem setTag:KFMenuItemTagCheckForOutdatedPods];
         [submenu addItem:checkMenuItem];
         
         NSMenuItem *updateMenuItem = [[NSMenuItem alloc] initWithTitle:@"Run Update/Install" action:@selector(podUpdateAction:) keyEquivalent:@""];
         [updateMenuItem setTarget:self];
-        updateMenuItem.tag = KFMenuItemTagUpdate;
+        [updateMenuItem setTag:KFMenuItemTagUpdate];
         [submenu addItem:updateMenuItem];
         
 #if SHOW_REPO_MENU
@@ -249,6 +256,11 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         [submenu addItem:reposMenuItem];
 #endif
         [submenu addItem:[NSMenuItem separatorItem]];
+        
+        self.podInitItem = [[NSMenuItem alloc] initWithTitle:@"Initialize Project" action:@selector(podInitAction:) keyEquivalent:@""];
+        [self.podInitItem setTarget:self];
+        [self.podInitItem setTag:KFMenuItemTagPodInit];
+        [submenu addItem:self.podInitItem];
         
         NSMenuItem *versionItem = [[NSMenuItem alloc] initWithTitle:@"CocoaPods Version: " action:nil keyEquivalent:@""];
         [self.cocoaPodController cocoaPodsVersion:^(NSDictionary *version)
@@ -349,8 +361,13 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         NSString *title = NSLocalizedString(@"Cocoapods update succeeded", nil);
         NSString *message = workspaceTitle;
         [weakSelf printMessageBold:title forTask:task];
-        [weakSelf.notificationController showNotificationWithTitle:title andMessage:message];
-        [weakSelf.consoleController removeTask:task];
+        
+        BOOL didCreateWorkspace = [weakSelf checkForWorkspaceCreation:task.standardOutput];
+        if (!didCreateWorkspace)
+        {
+            [weakSelf.notificationController showNotificationWithTitle:title andMessage:message];
+            [weakSelf.consoleController removeTask:task];
+        }
         
     } failureHandler:^(DSUnixTask *task)
     {
@@ -364,6 +381,51 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         
         [weakSelf.consoleController removeTask:task];
     }];
+}
+
+
+- (BOOL)checkForWorkspaceCreation:(NSString *)aggregatedOutput
+{
+    NSError *regexError = nil;
+    NSRegularExpressionOptions options = 0;
+    NSString *pattern = @"(?<=\\[!]\\WFrom\\Wnow\\Won\\Wuse\\W`).*?.xcworkspace(?=`.)";
+    NSRegularExpression *expression = [NSRegularExpression regularExpressionWithPattern:pattern options:options error:&regexError];
+    
+    NSMatchingOptions matchingOptions = 0;
+    NSRange range = NSMakeRange(0, [aggregatedOutput length]);
+    NSUInteger matchCount = [expression numberOfMatchesInString:aggregatedOutput options:matchingOptions range:range];
+    
+    if (matchCount == 1)
+    {
+        __block NSString *projectFilename;
+        
+        [expression enumerateMatchesInString:aggregatedOutput options:matchingOptions range:range usingBlock:^(NSTextCheckingResult *result, NSMatchingFlags flags, BOOL *stop)
+        {
+            projectFilename = [aggregatedOutput substringWithRange:[result rangeAtIndex:0]];
+        }];
+        
+        NSString *filePath = [[KFWorkspaceController currentWorkspaceDirectoryPath] stringByAppendingPathComponent:projectFilename];
+        
+        NSBeginAlertSheet(NSLocalizedString(@"Open the created Workspace", nil), NSLocalizedString(@"Open", nil), nil, NSLocalizedString(@"Cancel", nil), [[NSApplication sharedApplication] keyWindow], self, nil, @selector(sheetDidDismiss:returnCode:contextInfo:), (__bridge_retained void *)(@{@"filePath": filePath}), @"CocoaPod Projects use Workspaces. You should close this Project and open the newly created '%@'.", projectFilename,nil);
+        return YES;
+    }
+    else
+    {
+        return NO;
+    }
+}
+
+
+- (void)sheetDidDismiss:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
+{
+    if (returnCode == NSOKButton)
+    {
+        NSDictionary *context = (__bridge_transfer NSDictionary *)(contextInfo);
+        NSLog(@"opening file: %@", context[@"filePath"]);
+        
+        [[[NSApplication sharedApplication] keyWindow] close];
+        [[[NSApplication sharedApplication] delegate] application:[NSApplication sharedApplication] openFile:context[@"filePath"]];
+    }
 }
 
 
@@ -433,6 +495,27 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 - (void)openFileInIDE:(NSString *)file
 {
     [[[NSApplication sharedApplication] delegate] application:[NSApplication sharedApplication] openFile:file];
+}
+
+
+- (void)podInitAction:(id)sender
+{
+    [self printMessageBold:@"pod init"];
+    
+     __weak typeof(self) weakSelf = self;
+    [self.taskController runPodCommand:@[kCommandInit] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] outputHandler:^(DSUnixTask *task, NSString *newOutput)
+    {
+        [weakSelf printMessage:newOutput forTask:task];
+    }
+    terminationHandler:^(DSUnixTask *task)
+    {
+        [weakSelf.consoleController removeTask:task];
+        [weakSelf podUpdateAction:nil];
+    }
+    failureHandler:^(DSUnixTask *task)
+    {
+        [weakSelf.consoleController removeTask:task];
+    }];
 }
 
 
