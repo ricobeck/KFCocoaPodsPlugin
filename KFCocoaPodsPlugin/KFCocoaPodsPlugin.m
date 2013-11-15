@@ -362,11 +362,22 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         NSString *message = workspaceTitle;
         [weakSelf printMessageBold:title forTask:task];
         
-        BOOL didCreateWorkspace = [weakSelf checkForWorkspaceCreation:task.standardOutput];
-        if (!didCreateWorkspace)
+        BOOL didCreateWorkspace = NO;
+        
+        @try
         {
-            [weakSelf.notificationController showNotificationWithTitle:title andMessage:message];
-            [weakSelf.consoleController removeTask:task];
+            didCreateWorkspace = [weakSelf checkForWorkspaceCreation:task.standardOutput];
+        }
+        @catch (NSException *exception)
+        {
+        }
+        @finally
+        {
+            if (!didCreateWorkspace)
+            {
+                [weakSelf.notificationController showNotificationWithTitle:title andMessage:message];
+                [weakSelf.consoleController removeTask:task];
+            }
         }
         
     } failureHandler:^(DSUnixTask *task)
