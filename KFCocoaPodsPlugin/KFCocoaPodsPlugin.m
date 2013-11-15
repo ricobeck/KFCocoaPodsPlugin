@@ -404,12 +404,9 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
             projectFilename = [aggregatedOutput substringWithRange:[result rangeAtIndex:0]];
         }];
         
-        [self printMessageBold:[NSString stringWithFormat:@"You should open Workspace '%@'", projectFilename]];
-        
         NSString *filePath = [[KFWorkspaceController currentWorkspaceDirectoryPath] stringByAppendingPathComponent:projectFilename];
         
-        NSBeginAlertSheet(NSLocalizedString(@"Open the created workspace", nil), NSLocalizedString(@"Open", nil), nil, NSLocalizedString(@"Cancel", nil), [[NSApplication sharedApplication] keyWindow], self, nil, @selector(sheetDidDismiss:returnCode:contextInfo:), (__bridge_retained void *)(@{@"filePath": filePath}), @"CocoaPod Projects use Workspaces. You should close this Project and open the newly created '%@'.", projectFilename,nil);
-        
+        NSBeginAlertSheet(NSLocalizedString(@"Open the created Workspace", nil), NSLocalizedString(@"Open", nil), nil, NSLocalizedString(@"Cancel", nil), [[NSApplication sharedApplication] keyWindow], self, nil, @selector(sheetDidDismiss:returnCode:contextInfo:), (__bridge_retained void *)(@{@"filePath": filePath}), @"CocoaPod Projects use Workspaces. You should close this Project and open the newly created '%@'.", projectFilename,nil);
         return YES;
     }
     else
@@ -556,7 +553,6 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 - (void)podInitAction:(id)sender
 {
     [self printMessageBold:@"pod init"];
-    [self printMessage:[KFWorkspaceController currentWorkspaceDirectoryPath]];
     
      __weak typeof(self) weakSelf = self;
     [self.taskController runPodCommand:@[kCommandInit] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] outputHandler:^(DSUnixTask *task, NSString *newOutput)
