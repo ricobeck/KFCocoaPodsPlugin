@@ -392,24 +392,27 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
                 [weakSelf printMessage:newOutput forTask:task];
             } terminationHandler:^(DSUnixTask *task)
             {
-                NSMutableArray *outdatedPods = [NSMutableArray array];
-                NSError *regexError = nil;
-                NSRegularExpressionOptions options = 0;
-                NSString *pattern = @"- (\\w*(/\\w*)?)";
-                NSRegularExpression *expression = [NSRegularExpression regularExpressionWithPattern:pattern options:options error:&regexError];
+                NSError *error = nil;
+                NSArray *outdatedPods = [YAMLSerialization YAMLWithData:[output dataUsingEncoding:NSUTF8StringEncoding] options:kYAMLReadOptionStringScalars error:&error];
 
-                //  count matches
-                NSMatchingOptions matchingOptions = 0;
-                NSRange range = NSMakeRange(0,[output length]);
-
-                //  enumerate matches
-                [expression enumerateMatchesInString:output options:matchingOptions range:range usingBlock:^(NSTextCheckingResult *result, NSMatchingFlags flags, BOOL *stop)
+                if (!error)
                 {
-                    NSRange newRange = NSMakeRange(result.range.location + 2, result.range.length - 2);
-                    [outdatedPods addObject:[output substringWithRange:newRange]];
-                }];
+                    NSMutableArray *pods = [NSMutableArray array];
+                    NSArray *podNames = [outdatedPods firstObject][@"The following updates are available"];
+                    for (NSString *outdatedPod in podNames)
+                    {
+                        [pods addObject:[[outdatedPod componentsSeparatedByString:@" "] firstObject]];
+                    }
 
-                [self.notificationController showNotificationWithTitle:[NSString stringWithFormat:NSLocalizedString(@"%d Updatable Pods", nil), [outdatedPods count]] andMessage:[outdatedPods componentsJoinedByString:@", "]];
+                    if ([pods count] > 0)
+                    {
+                        [self.notificationController showNotificationWithTitle:[NSString stringWithFormat:NSLocalizedString(@"%d outdated Pods", nil), [pods count]] andMessage:[pods componentsJoinedByString:@", "]];
+                    }
+                    else
+                    {
+                        [self.notificationController showNotificationWithTitle:NSLocalizedString(@"No outdated Pods", nil) andMessage:nil];
+                    }
+                }
 
                 [weakSelf printMessageBold:@"Pod outdated done" forTask:task];
                 [weakSelf.consoleController removeTask:task];
