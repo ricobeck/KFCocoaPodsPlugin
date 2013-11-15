@@ -369,84 +369,7 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 
 - (void)checkOutdatedPodsAction:(id)sender
 {
-    NSError *error = nil;
-    NSString *content = [NSString stringWithContentsOfFile:[KFWorkspaceController currentWorkspacePodfileLockPath] encoding:NSUTF8StringEncoding error:&error];
-    
-    if (error == nil)
-    {
-        [self printMessageBold:NSLocalizedString(@"\nStart checking for updated Pods\n", nil)];
-        
-        NSMutableArray *yaml = [YAMLSerialization YAMLWithData:[content dataUsingEncoding:NSUTF8StringEncoding] options:kYAMLReadOptionStringScalars error:&error];
-        
-        /*
-        [self printMessageBold:@"parsed lock file"];
-        [self printMessage:[yaml[0] description]];
-         */
-         
-        NSDictionary *specChecksums = yaml[0][@"SPEC CHECKSUMS"];
-        NSArray *installedPods = yaml[0][@"PODS"];
-        
-        NSArray *podsWithUpdates = [self updateInstalledVersionWithPods:installedPods checkSums:specChecksums];
-        podsWithUpdates = [[[NSOrderedSet orderedSetWithArray:podsWithUpdates] objectEnumerator] allObjects];
-        
-        if ([podsWithUpdates count] > 0)
-        {
-            [self printMessageBold:NSLocalizedString(@"The following Pods have updates available:", nil)];
-            for (KFRepoModel *repoModel in podsWithUpdates)
-            {
-                [self printMessage:[repoModel description]];
-            }
-            [self.notificationController showNotificationWithTitle:[NSString stringWithFormat:NSLocalizedString(@"%d Updateable Pods", nil), [podsWithUpdates count]] andMessage:[[podsWithUpdates valueForKey:@"pod"] componentsJoinedByString:@", "]];
-        }
-        else
-        {
-            [self printMessageBold:NSLocalizedString(@"No updates available", nil)];
-        }
-    }
-    else
-    {
-        [self printMessage:error.description];
-    }
-}
-
-
-- (NSMutableArray *)updateInstalledVersionWithPods:(NSArray *)installedPods checkSums:(NSDictionary *)specChecksums
-{
-    NSMutableArray *podsWithUpdates = [NSMutableArray new];
-    NSCharacterSet *trimSet = [NSCharacterSet characterSetWithCharactersInString:@" ()"];
-    
-    
-    for (id spec in specChecksums)
-    {
-        NSString *checksum = specChecksums[spec];
-        KFRepoModel *latestVersionRepoModel = [self.repos[spec] lastObject];
-        
-        for (id object in installedPods)
-        {
-            if ([object isKindOfClass:[NSString class]])
-            {
-                NSString *installedPod = object;
-                if ([installedPod hasPrefix:spec])
-                {
-                    installedPod = [installedPod substringFromIndex:[spec length]];
-                    latestVersionRepoModel.installedVersion = [installedPod stringByTrimmingCharactersInSet:trimSet];
-                    break;
-                }
-            }
-            else if ([object isKindOfClass:[NSDictionary class]])
-            {
-                [podsWithUpdates addObjectsFromArray:[self updateInstalledVersionWithPods:object checkSums:specChecksums]];
-            }
-        }
-        
-        
-        if (latestVersionRepoModel != nil && ![latestVersionRepoModel.checksum isEqualToString:checksum])
-        {
-            [podsWithUpdates addObject:latestVersionRepoModel];
-        }
-    }
-    
-    return podsWithUpdates;
+    [self checkForOutdatedPodsViaCommand];
 }
 
 
@@ -461,11 +384,33 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         {
             [weakSelf printMessageBold:@"start pod outdated check"];
 
+            NSMutableString *output = [NSMutableString string];
+
             [_taskController runPodCommand:@[kCommandOutdated] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] outputHandler:^(DSUnixTask *task, NSString *newOutput)
             {
+                [output appendString:newOutput];
                 [weakSelf printMessage:newOutput forTask:task];
             } terminationHandler:^(DSUnixTask *task)
             {
+                NSMutableArray *outdatedPods = [NSMutableArray array];
+                NSError *regexError = nil;
+                NSRegularExpressionOptions options = 0;
+                NSString *pattern = @"- (\\w*(/\\w*)?)";
+                NSRegularExpression *expression = [NSRegularExpression regularExpressionWithPattern:pattern options:options error:&regexError];
+
+                //  count matches
+                NSMatchingOptions matchingOptions = 0;
+                NSRange range = NSMakeRange(0,[output length]);
+
+                //  enumerate matches
+                [expression enumerateMatchesInString:output options:matchingOptions range:range usingBlock:^(NSTextCheckingResult *result, NSMatchingFlags flags, BOOL *stop)
+                {
+                    NSRange newRange = NSMakeRange(result.range.location + 2, result.range.length - 2);
+                    [outdatedPods addObject:[output substringWithRange:newRange]];
+                }];
+
+                [self.notificationController showNotificationWithTitle:[NSString stringWithFormat:NSLocalizedString(@"%d Updatable Pods", nil), [outdatedPods count]] andMessage:[outdatedPods componentsJoinedByString:@", "]];
+
                 [weakSelf printMessageBold:@"Pod outdated done" forTask:task];
                 [weakSelf.consoleController removeTask:task];
             } failureHandler:^(DSUnixTask *task)
