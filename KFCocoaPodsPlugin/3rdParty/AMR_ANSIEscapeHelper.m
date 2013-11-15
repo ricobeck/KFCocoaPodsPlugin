@@ -57,9 +57,9 @@ THE SOFTWARE.
 
 // default colors
 #define kDefaultANSIColorFgBlack    NSColor.blackColor
-#define kDefaultANSIColorFgRed      NSColor.redColor
-#define kDefaultANSIColorFgGreen    NSColor.greenColor
-#define kDefaultANSIColorFgYellow   NSColor.yellowColor
+#define kDefaultANSIColorFgRed      [NSColor colorWithCalibratedRed:0.522 green:0.000 blue:0.009 alpha:1.000]
+#define kDefaultANSIColorFgGreen    [NSColor colorWithCalibratedRed:0.079 green:0.602 blue:0.009 alpha:1.000]
+#define kDefaultANSIColorFgYellow   [NSColor colorWithCalibratedRed:0.530 green:0.540 blue:0.017 alpha:1.000]
 #define kDefaultANSIColorFgBlue     NSColor.blueColor
 #define kDefaultANSIColorFgMagenta  NSColor.magentaColor
 #define kDefaultANSIColorFgCyan     NSColor.cyanColor

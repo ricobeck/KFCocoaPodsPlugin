@@ -45,7 +45,8 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 {
     KFMenuItemTagEditPodfile,
     KFMenuItemTagCheckForOutdatedPods,
-    KFMenuItemTagUpdate
+    KFMenuItemTagUpdate,
+    KFMenuItemTagPodInit
 };
 
 
@@ -63,10 +64,13 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 
 @property (nonatomic, strong) KFTaskController *taskController;
 
+@property (nonatomic, strong) NSMenuItem *podInitItem;
+
 
 @end
 
 
+#define kCommandInit @"init"
 #define kCommandInstall @"install"
 #define kCommandUpdate @"update"
 #define kCommandInterprocessCommunication @"ipc"
@@ -133,6 +137,9 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         case KFMenuItemTagCheckForOutdatedPods:
         case KFMenuItemTagUpdate:
             return [KFWorkspaceController currentWorkspaceHasPodfile];
+            break;
+        case KFMenuItemTagPodInit:
+            return ![KFWorkspaceController currentWorkspaceHasPodfile];
             break;
         default:
             return YES;
@@ -211,17 +218,17 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         
         NSMenuItem *editPodfileMenuItem = [[NSMenuItem alloc] initWithTitle:@"Edit Podfile" action:@selector(editPodfileAction:) keyEquivalent:@""];
         [editPodfileMenuItem setTarget:self];
-        editPodfileMenuItem.tag = KFMenuItemTagEditPodfile;
+        [editPodfileMenuItem setTag:KFMenuItemTagEditPodfile];
         [submenu addItem:editPodfileMenuItem];
         
         NSMenuItem *checkMenuItem = [[NSMenuItem alloc] initWithTitle:@"Check For Outdated Pods" action:@selector(checkOutdatedPodsAction:) keyEquivalent:@""];
         [checkMenuItem setTarget:self];
-        checkMenuItem.tag = KFMenuItemTagCheckForOutdatedPods;
+        [checkMenuItem setTag:KFMenuItemTagCheckForOutdatedPods];
         [submenu addItem:checkMenuItem];
         
         NSMenuItem *updateMenuItem = [[NSMenuItem alloc] initWithTitle:@"Run Update/Install" action:@selector(podUpdateAction:) keyEquivalent:@""];
         [updateMenuItem setTarget:self];
-        updateMenuItem.tag = KFMenuItemTagUpdate;
+        [updateMenuItem setTag:KFMenuItemTagUpdate];
         [submenu addItem:updateMenuItem];
         
 #if SHOW_REPO_MENU
@@ -249,6 +256,11 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         [submenu addItem:reposMenuItem];
 #endif
         [submenu addItem:[NSMenuItem separatorItem]];
+        
+        self.podInitItem = [[NSMenuItem alloc] initWithTitle:@"Initialize Project" action:@selector(podInitAction:) keyEquivalent:@""];
+        [self.podInitItem setTarget:self];
+        [self.podInitItem setTag:KFMenuItemTagPodInit];
+        [submenu addItem:self.podInitItem];
         
         NSMenuItem *versionItem = [[NSMenuItem alloc] initWithTitle:@"CocoaPods Version: " action:nil keyEquivalent:@""];
         [self.cocoaPodController cocoaPodsVersion:^(NSDictionary *version)
@@ -349,8 +361,13 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         NSString *title = NSLocalizedString(@"Cocoapods update succeeded", nil);
         NSString *message = workspaceTitle;
         [weakSelf printMessageBold:title forTask:task];
-        [weakSelf.notificationController showNotificationWithTitle:title andMessage:message];
-        [weakSelf.consoleController removeTask:task];
+        
+        BOOL didCreateWorkspace = [weakSelf checkForWorkspaceCreation:task.standardOutput];
+        if (!didCreateWorkspace)
+        {
+            [weakSelf.notificationController showNotificationWithTitle:title andMessage:message];
+            [weakSelf.consoleController removeTask:task];
+        }
         
     } failureHandler:^(DSUnixTask *task)
     {
@@ -367,86 +384,54 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 }
 
 
-- (void)checkOutdatedPodsAction:(id)sender
+- (BOOL)checkForWorkspaceCreation:(NSString *)aggregatedOutput
 {
-    NSError *error = nil;
-    NSString *content = [NSString stringWithContentsOfFile:[KFWorkspaceController currentWorkspacePodfileLockPath] encoding:NSUTF8StringEncoding error:&error];
+    NSError *regexError = nil;
+    NSRegularExpressionOptions options = 0;
+    NSString *pattern = @"(?<=\\[!]\\WFrom\\Wnow\\Won\\Wuse\\W`).*?.xcworkspace(?=`.)";
+    NSRegularExpression *expression = [NSRegularExpression regularExpressionWithPattern:pattern options:options error:&regexError];
     
-    if (error == nil)
+    NSMatchingOptions matchingOptions = 0;
+    NSRange range = NSMakeRange(0, [aggregatedOutput length]);
+    NSUInteger matchCount = [expression numberOfMatchesInString:aggregatedOutput options:matchingOptions range:range];
+    
+    if (matchCount == 1)
     {
-        [self printMessageBold:NSLocalizedString(@"\nStart checking for updated Pods\n", nil)];
+        __block NSString *projectFilename;
         
-        NSMutableArray *yaml = [YAMLSerialization YAMLWithData:[content dataUsingEncoding:NSUTF8StringEncoding] options:kYAMLReadOptionStringScalars error:&error];
-        
-        /*
-        [self printMessageBold:@"parsed lock file"];
-        [self printMessage:[yaml[0] description]];
-         */
-         
-        NSDictionary *specChecksums = yaml[0][@"SPEC CHECKSUMS"];
-        NSArray *installedPods = yaml[0][@"PODS"];
-        
-        NSArray *podsWithUpdates = [self updateInstalledVersionWithPods:installedPods checkSums:specChecksums];
-        podsWithUpdates = [[[NSOrderedSet orderedSetWithArray:podsWithUpdates] objectEnumerator] allObjects];
-        
-        if ([podsWithUpdates count] > 0)
+        [expression enumerateMatchesInString:aggregatedOutput options:matchingOptions range:range usingBlock:^(NSTextCheckingResult *result, NSMatchingFlags flags, BOOL *stop)
         {
-            [self printMessageBold:NSLocalizedString(@"The following Pods have updates available:", nil)];
-            for (KFRepoModel *repoModel in podsWithUpdates)
-            {
-                [self printMessage:[repoModel description]];
-            }
-            [self.notificationController showNotificationWithTitle:[NSString stringWithFormat:NSLocalizedString(@"%d Updateable Pods", nil), [podsWithUpdates count]] andMessage:[[podsWithUpdates valueForKey:@"pod"] componentsJoinedByString:@", "]];
-        }
-        else
-        {
-            [self printMessageBold:NSLocalizedString(@"No updates available", nil)];
-        }
+            projectFilename = [aggregatedOutput substringWithRange:[result rangeAtIndex:0]];
+        }];
+        
+        NSString *filePath = [[KFWorkspaceController currentWorkspaceDirectoryPath] stringByAppendingPathComponent:projectFilename];
+        
+        NSBeginAlertSheet(NSLocalizedString(@"Open the created Workspace", nil), NSLocalizedString(@"Open", nil), nil, NSLocalizedString(@"Cancel", nil), [[NSApplication sharedApplication] keyWindow], self, nil, @selector(sheetDidDismiss:returnCode:contextInfo:), (__bridge_retained void *)(@{@"filePath": filePath}), @"CocoaPod Projects use Workspaces. You should close this Project and open the newly created '%@'.", projectFilename,nil);
+        return YES;
     }
     else
     {
-        [self printMessage:error.description];
+        return NO;
     }
 }
 
 
-- (NSMutableArray *)updateInstalledVersionWithPods:(NSArray *)installedPods checkSums:(NSDictionary *)specChecksums
+- (void)sheetDidDismiss:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
 {
-    NSMutableArray *podsWithUpdates = [NSMutableArray new];
-    NSCharacterSet *trimSet = [NSCharacterSet characterSetWithCharactersInString:@" ()"];
-    
-    
-    for (id spec in specChecksums)
+    if (returnCode == NSOKButton)
     {
-        NSString *checksum = specChecksums[spec];
-        KFRepoModel *latestVersionRepoModel = [self.repos[spec] lastObject];
+        NSDictionary *context = (__bridge_transfer NSDictionary *)(contextInfo);
+        NSLog(@"opening file: %@", context[@"filePath"]);
         
-        for (id object in installedPods)
-        {
-            if ([object isKindOfClass:[NSString class]])
-            {
-                NSString *installedPod = object;
-                if ([installedPod hasPrefix:spec])
-                {
-                    installedPod = [installedPod substringFromIndex:[spec length]];
-                    latestVersionRepoModel.installedVersion = [installedPod stringByTrimmingCharactersInSet:trimSet];
-                    break;
-                }
-            }
-            else if ([object isKindOfClass:[NSDictionary class]])
-            {
-                [podsWithUpdates addObjectsFromArray:[self updateInstalledVersionWithPods:object checkSums:specChecksums]];
-            }
-        }
-        
-        
-        if (latestVersionRepoModel != nil && ![latestVersionRepoModel.checksum isEqualToString:checksum])
-        {
-            [podsWithUpdates addObject:latestVersionRepoModel];
-        }
+        [[[NSApplication sharedApplication] keyWindow] close];
+        [[[NSApplication sharedApplication] delegate] application:[NSApplication sharedApplication] openFile:context[@"filePath"]];
     }
-    
-    return podsWithUpdates;
+}
+
+
+- (void)checkOutdatedPodsAction:(id)sender
+{
+    [self checkForOutdatedPodsViaCommand];
 }
 
 
@@ -461,11 +446,36 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         {
             [weakSelf printMessageBold:@"start pod outdated check"];
 
+            NSMutableString *output = [NSMutableString string];
+
             [_taskController runPodCommand:@[kCommandOutdated] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] outputHandler:^(DSUnixTask *task, NSString *newOutput)
             {
+                [output appendString:newOutput];
                 [weakSelf printMessage:newOutput forTask:task];
             } terminationHandler:^(DSUnixTask *task)
             {
+                NSError *error = nil;
+                NSArray *outdatedPods = [YAMLSerialization YAMLWithData:[output dataUsingEncoding:NSUTF8StringEncoding] options:kYAMLReadOptionStringScalars error:&error];
+
+                if (!error)
+                {
+                    NSMutableArray *pods = [NSMutableArray array];
+                    NSArray *podNames = [outdatedPods firstObject][@"The following updates are available"];
+                    for (NSString *outdatedPod in podNames)
+                    {
+                        [pods addObject:[[outdatedPod componentsSeparatedByString:@" "] firstObject]];
+                    }
+
+                    if ([pods count] > 0)
+                    {
+                        [self.notificationController showNotificationWithTitle:[NSString stringWithFormat:NSLocalizedString(@"%d outdated Pods", nil), [pods count]] andMessage:[pods componentsJoinedByString:@", "]];
+                    }
+                    else
+                    {
+                        [self.notificationController showNotificationWithTitle:NSLocalizedString(@"No outdated Pods", nil) andMessage:nil];
+                    }
+                }
+
                 [weakSelf printMessageBold:@"Pod outdated done" forTask:task];
                 [weakSelf.consoleController removeTask:task];
             } failureHandler:^(DSUnixTask *task)
@@ -485,6 +495,27 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 - (void)openFileInIDE:(NSString *)file
 {
     [[[NSApplication sharedApplication] delegate] application:[NSApplication sharedApplication] openFile:file];
+}
+
+
+- (void)podInitAction:(id)sender
+{
+    [self printMessageBold:@"pod init"];
+    
+     __weak typeof(self) weakSelf = self;
+    [self.taskController runPodCommand:@[kCommandInit] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] outputHandler:^(DSUnixTask *task, NSString *newOutput)
+    {
+        [weakSelf printMessage:newOutput forTask:task];
+    }
+    terminationHandler:^(DSUnixTask *task)
+    {
+        [weakSelf.consoleController removeTask:task];
+        [weakSelf podUpdateAction:nil];
+    }
+    failureHandler:^(DSUnixTask *task)
+    {
+        [weakSelf.consoleController removeTask:task];
+    }];
 }
 
 
