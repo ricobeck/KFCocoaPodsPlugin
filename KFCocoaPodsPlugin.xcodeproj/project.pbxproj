@@ -24,6 +24,8 @@
 		1D5C6C6F17DB64290009B936 /* DVTFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5C6C6D17DB64290009B936 /* DVTFoundation.framework */; };
 		1D5C6C7017DB64290009B936 /* DVTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D5C6C6E17DB64290009B936 /* DVTKit.framework */; };
 		1D81CE40181AB41C00D45D84 /* KFConsoleThemeModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D81CE3F181AB41C00D45D84 /* KFConsoleThemeModel.m */; };
+		1DA3B242183839C60009AC4E /* KFPodSearchWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DA3B240183839C60009AC4E /* KFPodSearchWindowController.m */; };
+		1DA3B243183839C60009AC4E /* KFPodSearchWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DA3B241183839C60009AC4E /* KFPodSearchWindow.xib */; };
 		1DAC167617D9F09300287BA0 /* KFRepoModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DAC167517D9F09300287BA0 /* KFRepoModel.m */; };
 		1DC1B35917E08B2000CBC31F /* DVTTextCompletionKeywordsStrategy+KFCocoaPods.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DC1B35817E08B2000CBC31F /* DVTTextCompletionKeywordsStrategy+KFCocoaPods.m */; };
 		1DD2CD0B17DE4B72006A1355 /* KFSyntaxAutoCompletionItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DD2CD0A17DE4B72006A1355 /* KFSyntaxAutoCompletionItem.m */; };
@@ -64,6 +66,9 @@
 		1D5C6C6E17DB64290009B936 /* DVTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DVTKit.framework; path = "../../../../../../../Applications/Xcode5-DP6.app/Contents/SharedFrameworks/DVTKit.framework"; sourceTree = "<group>"; };
 		1D81CE3E181AB41C00D45D84 /* KFConsoleThemeModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KFConsoleThemeModel.h; sourceTree = "<group>"; };
 		1D81CE3F181AB41C00D45D84 /* KFConsoleThemeModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KFConsoleThemeModel.m; sourceTree = "<group>"; };
+		1DA3B23F183839C60009AC4E /* KFPodSearchWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KFPodSearchWindowController.h; path = Sources/Controllers/KFPodSearchWindowController.h; sourceTree = "<group>"; };
+		1DA3B240183839C60009AC4E /* KFPodSearchWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = KFPodSearchWindowController.m; path = Sources/Controllers/KFPodSearchWindowController.m; sourceTree = "<group>"; };
+		1DA3B241183839C60009AC4E /* KFPodSearchWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = KFPodSearchWindow.xib; path = Sources/Controllers/KFPodSearchWindow.xib; sourceTree = "<group>"; };
 		1DAC167417D9F09300287BA0 /* KFRepoModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KFRepoModel.h; sourceTree = "<group>"; };
 		1DAC167517D9F09300287BA0 /* KFRepoModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KFRepoModel.m; sourceTree = "<group>"; };
 		1DC1B35717E08B2000CBC31F /* DVTTextCompletionKeywordsStrategy+KFCocoaPods.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "DVTTextCompletionKeywordsStrategy+KFCocoaPods.h"; sourceTree = "<group>"; };
@@ -143,6 +148,7 @@
 				1D24305D17D8DB9400E0D3DD /* Controllers */,
 				1D5C6C5E17DB63E80009B936 /* 3rdParty */,
 				1DDE21C017D8B1E70015857D /* XcodeClasses */,
+				1DA3B23E183837750009AC4E /* Resources */,
 				1D02734E17D746CC00E8389F /* Supporting Files */,
 			);
 			path = KFCocoaPodsPlugin;
@@ -165,6 +171,7 @@
 				1D44D6A717DBAEDB00CBE93B /* AutoCompletion */,
 				1D24305A17D8DB8F00E0D3DD /* KFCocoaPodController.h */,
 				1D24305B17D8DB8F00E0D3DD /* KFCocoaPodController.m */,
+				1DA3B244183839D20009AC4E /* PodSearch */,
 				1DDE21BD17D8B08D0015857D /* KFConsoleController.h */,
 				1DDE21BE17D8B08D0015857D /* KFConsoleController.m */,
 				1D35C31D17D8B814006A9BDC /* KFTaskController.h */,
@@ -204,6 +211,23 @@
 				1D03ECB017E9B64F00F183EB /* AMR_ANSIEscapeHelper.m */,
 			);
 			path = 3rdParty;
+			sourceTree = "<group>";
+		};
+		1DA3B23E183837750009AC4E /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				1DA3B241183839C60009AC4E /* KFPodSearchWindow.xib */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		1DA3B244183839D20009AC4E /* PodSearch */ = {
+			isa = PBXGroup;
+			children = (
+				1DA3B23F183839C60009AC4E /* KFPodSearchWindowController.h */,
+				1DA3B240183839C60009AC4E /* KFPodSearchWindowController.m */,
+			);
+			name = PodSearch;
 			sourceTree = "<group>";
 		};
 		1DAC167317D9F09300287BA0 /* Models */ = {
@@ -286,6 +310,7 @@
 			files = (
 				1D02735217D746CC00E8389F /* InfoPlist.strings in Resources */,
 				1DDB9A9B17DE4E4200B69C9D /* PodSyntax.plist in Resources */,
+				1DA3B243183839C60009AC4E /* KFPodSearchWindow.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -357,6 +382,7 @@
 				1D81CE40181AB41C00D45D84 /* KFConsoleThemeModel.m in Sources */,
 				1DD2CD0B17DE4B72006A1355 /* KFSyntaxAutoCompletionItem.m in Sources */,
 				1D44D6AF17DBAEDB00CBE93B /* DVTTextCompletionWordsInFileStrategy+KFCocoaPods.m in Sources */,
+				1DA3B242183839C60009AC4E /* KFPodSearchWindowController.m in Sources */,
 				1D44D6B017DBAEDB00CBE93B /* KFPodAutoCompletionItem.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
