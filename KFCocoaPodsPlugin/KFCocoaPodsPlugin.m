@@ -30,6 +30,7 @@
 #import "KFCocoaPodController.h"
 #import "KFNotificationController.h"
 #import "KFPodSearchWindowController.h"
+#import "KFReplController.h"
 
 #import "KFRepoModel.h"
 #import "KFPodAutoCompletionItem.h"
@@ -123,6 +124,8 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         _consoleController = [KFConsoleController new];
         _taskController = [KFTaskController new];
         _notificationController = [KFNotificationController new];
+        
+        [KFReplController sharedController];
 
         [self buildRepoIndex];
         _cocoaPodController = [[KFCocoaPodController alloc] initWithRepoData:self.repos];
@@ -190,8 +193,11 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
                     {
                         if ([podspec.pathExtension isEqualToString:@"podspec"])
                         {
-                            NSData *contents = [NSData dataWithContentsOfFile:[specPath stringByAppendingPathComponent:podspec]];
+                            NSString *specFilePath = [specPath stringByAppendingPathComponent:podspec];
+                            NSData *contents = [NSData dataWithContentsOfFile:specFilePath];
                             repoModel.checksum = [contents ks_SHA1DigestString];
+                            repoModel.podspec = contents;
+                            repoModel.specFilePath = specFilePath;
                         }
                     }
                     [specs addObject:repoModel];
@@ -543,7 +549,7 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 {
     if (!self.podSearchWindowController)
     {
-        self.podSearchWindowController = [KFPodSearchWindowController new];
+        self.podSearchWindowController = [[KFPodSearchWindowController alloc] initWithRepoData:[self.repos allValues]];
     }
     
     [NSApp beginSheet:self.podSearchWindowController.window modalForWindow:[[NSApplication sharedApplication] keyWindow] modalDelegate:nil didEndSelector:nil contextInfo:nil];

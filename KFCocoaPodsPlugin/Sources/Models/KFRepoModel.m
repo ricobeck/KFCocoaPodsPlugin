@@ -24,6 +24,26 @@
 //
 
 #import "KFRepoModel.h"
+#import "KFReplController.h"
+
+#import <YAML-Framework/YAMLSerialization.h>
+
+@interface KFRepoModel ()
+
+
+@property (nonatomic, strong, readwrite) NSString *summary;
+
+@property (nonatomic, strong, readwrite) NSString *specDescription;
+
+@property (nonatomic, strong, readwrite) NSString *license;
+
+@property (nonatomic, strong, readwrite) NSString *plattforms;
+
+@property (nonatomic, strong, readwrite) NSString *author;
+
+
+@end
+
 
 @implementation KFRepoModel
 
@@ -31,6 +51,82 @@
 - (NSString *)description
 {
     return [NSString stringWithFormat:@"%@, installed: %@, available: %@", self.pod, self.installedVersion, self.version];
+}
+
+
+- (void)setPodspec:(NSData *)podspec
+{
+    _podspec = podspec;
+}
+
+
+- (void)parsePodspec
+{
+    [[KFReplController sharedController] parseSpec:self.specFilePath withCompletionBlock:^(NSDictionary *parsedSpec)
+    {
+        [self performSelectorInBackground:@selector(applyParsedPodspec:) withObject:parsedSpec];
+    }];
+}
+
+
+- (void)applyParsedPodspec:(NSDictionary *)parsedSpec
+{
+    NSError *error = nil;
+    
+    @try
+    {
+        NSDictionary *yaml = [[YAMLSerialization YAMLWithData:[parsedSpec[@"summary"] dataUsingEncoding:NSUTF8StringEncoding] options:kYAMLReadOptionStringScalars error:&error] firstObject];
+        
+        if (yaml)
+        {
+            self.summary = yaml[@"summary"];
+            self.author = [[yaml[@"authors"] allKeys] componentsJoinedByString:@", "];
+            self.license = yaml[@"license"][@"type"];
+            self.plattforms = yaml[@"platforms"];
+            self.specDescription = yaml[@"description"];
+        }
+        else
+        {
+            NSLog(@"error: %@", error);
+            self.summary = parsedSpec[@"summary"];
+        }
+    }
+    @catch (NSException *exception)
+    {
+        self.summary = exception.description;
+    }
+}
+
+
+- (void)matchSummary
+{
+    NSString *podspecString = [[NSString alloc] initWithData:_podspec encoding:NSUTF8StringEncoding];
+    
+    __weak typeof(self) weakSelf = self;
+    NSError *regexError = nil;
+    
+    NSRegularExpressionOptions options = NSRegularExpressionAnchorsMatchLines;
+    NSString *pattern = @"(?<=.(\\w{1,10})\\s{0,10}\\s{0,10}=\\s{0,10}['|\"]).*(?=['|\"])";
+    NSRegularExpression *expression = [NSRegularExpression regularExpressionWithPattern:pattern options:options error:&regexError];
+    
+    [expression enumerateMatchesInString:podspecString options:kNilOptions range: NSMakeRange(0, [podspecString length]) usingBlock:^(NSTextCheckingResult *result, NSMatchingFlags flags, BOOL *stop)
+     {
+         weakSelf.summary = [podspecString substringWithRange:result.range];
+         NSLog(@"summary: %@", weakSelf.summary);
+     }];
+}
+
+
+- (id)copyWithZone:(NSZone *)zone
+{
+    KFRepoModel *copy = [KFRepoModel new];
+    copy.pod = [self.pod copy];
+    copy.installedVersion = [self.installedVersion copy];
+    copy.checksum = [self.checksum copy];
+    copy.installedVersion = [self.installedVersion copy];
+    copy.podspec = [self.podspec copy];
+    
+    return copy;
 }
 
 

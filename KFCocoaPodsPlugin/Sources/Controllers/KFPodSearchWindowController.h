@@ -11,10 +11,12 @@
 @interface KFPodSearchWindowController : NSWindowController
 
 
-@property (nonatomic, strong, readonly) NSDictionary *repoData;
+@property (nonatomic, strong, readonly) NSMutableArray *repoData;
+
+@property (nonatomic, strong, readonly) NSArray *repoSortDescriptors;
 
 
-- (id)initWithRepoData:(NSDictionary *)repoData;
+- (id)initWithRepoData:(NSArray *)repoData;
 
 
 @end

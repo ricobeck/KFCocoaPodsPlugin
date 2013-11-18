@@ -7,13 +7,14 @@
 //
 
 #import "KFPodSearchWindowController.h"
-
+#import "KFRepoModel.h"
 
 @interface KFPodSearchWindowController ()
 
 
-@property (nonatomic, strong, readwrite) NSDictionary *repoData;
+@property (nonatomic, strong, readwrite) NSMutableArray *repoData;
 
+@property (strong) IBOutlet NSArrayController *repoArrayController;
 
 @end
 
@@ -22,14 +23,30 @@
 @implementation KFPodSearchWindowController
 
 
-- (id)initWithRepoData:(NSDictionary *)repoData
+- (id)initWithRepoData:(NSArray *)repoData
 {
     self = [super initWithWindowNibName:@"KFPodSearchWindow"];
     if(self)
     {
-        _repoData = repoData;
+        [self performSelectorInBackground:@selector(parseRepoData:) withObject:repoData];
+        _repoSortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"pod" ascending:YES selector:@selector(caseInsensitiveCompare:)]];
     }
     return self;
+}
+
+
+- (void)parseRepoData:(NSArray *)repoData
+{
+    self.repoData = [NSMutableArray new];
+    for (NSArray *podspec in repoData)
+    {
+        if (podspec.firstObject)
+        {
+            KFRepoModel *repoModel = podspec.firstObject;
+            [repoModel parsePodspec];
+            [self.repoData addObject:repoModel];
+        }
+    }
 }
 
 

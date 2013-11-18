@@ -25,16 +25,32 @@
 
 #import <Foundation/Foundation.h>
 
-@interface KFRepoModel : NSObject
+@interface KFRepoModel : NSObject<NSCopying>
 
 
 @property (nonatomic, strong) NSString *pod;
+
+@property (nonatomic, strong) NSString *specFilePath;
 
 @property (nonatomic, strong) NSString *version;
 
 @property (nonatomic, strong) NSString *checksum;
 
 @property (nonatomic, strong) NSString *installedVersion;
+
+@property (nonatomic, strong) NSData *podspec;
+
+@property (nonatomic, strong, readonly) NSString *summary;
+
+@property (nonatomic, strong, readonly) NSString *specDescription;
+
+@property (nonatomic, strong, readonly) NSString *license;
+
+@property (nonatomic, strong, readonly) NSString *plattform;
+
+@property (nonatomic, strong, readonly) NSString *authors;
+
+- (void)parsePodspec;
 
 
 @end
