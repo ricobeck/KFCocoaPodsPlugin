@@ -24,6 +24,30 @@
 //
 
 #import "KFRepoModel.h"
+#import "KFReplController.h"
+
+#import "NSAttributedString+Hyperlinks.h"
+
+#import <YAML-Framework/YAMLSerialization.h>
+
+@interface KFRepoModel ()
+
+
+@property (nonatomic, strong, readwrite) NSString *summary;
+
+@property (nonatomic, strong, readwrite) NSString *specDescription;
+
+@property (nonatomic, strong, readwrite) NSString *license;
+
+@property (nonatomic, strong, readwrite) NSString *plattforms;
+
+@property (nonatomic, strong, readwrite) NSString *author;
+
+@property (nonatomic, strong, readwrite) NSAttributedString *homepage;
+
+
+@end
+
 
 @implementation KFRepoModel
 
@@ -31,6 +55,128 @@
 - (NSString *)description
 {
     return [NSString stringWithFormat:@"%@, installed: %@, available: %@", self.pod, self.installedVersion, self.version];
+}
+
+
+- (void)setPodspec:(NSData *)podspec
+{
+    _podspec = podspec;
+}
+
+
+- (void)parsePodspec
+{
+    [[KFReplController sharedController] parseSpec:self.specFilePath withCompletionBlock:^(NSDictionary *parsedSpec)
+    {
+        [self performSelectorInBackground:@selector(applyParsedPodspec:) withObject:parsedSpec];
+    }];
+}
+
+
+- (void)applyParsedPodspec:(NSDictionary *)parsedSpec
+{
+    NSError *error = nil;
+    
+    @try
+    {
+        NSDictionary *yaml = [[YAMLSerialization YAMLWithData:[parsedSpec[@"summary"] dataUsingEncoding:NSUTF8StringEncoding] options:kYAMLReadOptionStringScalars error:&error] firstObject];
+        
+        if (yaml != nil && error == nil)
+        {
+            NSString *summary = yaml[@"summary"] != nil ? yaml[@"summary"] : parsedSpec[@"summary"];
+            self.summary = summary;
+            
+            if ([yaml objectForKey:@"authors"] && [yaml[@"authors"] isKindOfClass:[NSDictionary class]])
+            {
+                self.author = [[yaml[@"authors"] allKeys] componentsJoinedByString:@", "];
+            }
+            else
+            {
+                self.author = NSLocalizedString(@"Unknown", nil);
+            }
+            self.author = [NSString stringWithFormat:NSLocalizedString(@"Authors: %@", nil), self.author];
+            
+            if ([yaml objectForKey:@"license"] != nil)
+            {
+                id license = yaml[@"license"];
+                if ([license isKindOfClass:[NSDictionary class]] && [license objectForKey:@"type"] != nil)
+                {
+                    self.license = yaml[@"license"][@"type"];
+                }
+                else if ([license isKindOfClass:[NSString class]])
+                {
+                    self.license = license;
+                }
+                else
+                {
+                    self.license = NSLocalizedString(@"Unknown", nil);
+                }
+            }
+            self.license = [NSString stringWithFormat:NSLocalizedString(@"License: %@", nil), self.license];
+            
+            NSString *homepage = yaml[@"homepage"];
+            if (homepage != nil)
+            {
+                self.homepage = [NSAttributedString hyperlinkFromString:homepage withURL:[NSURL URLWithString:homepage]];
+            }
+            
+            
+            if ([yaml objectForKey:@"platforms"] != nil)
+            {
+                self.plattforms = [[yaml[@"platforms"] allKeys] componentsJoinedByString:@", "];
+            }
+            else
+            {
+                self.plattforms = @"ios";
+            }
+            self.plattforms = [NSString stringWithFormat:NSLocalizedString(@"Plattform: %@", nil), self.plattforms];
+            
+            if ([yaml isKindOfClass:[NSDictionary class]])
+            {
+                id specDescription = [yaml objectForKey:@"description"] != nil ? yaml[@"description"] : self.summary;
+                self.specDescription = specDescription;
+            }
+            else
+            {
+                self.specDescription = [yaml description];
+            }
+        }
+    }
+    @catch (NSException *exception)
+    {
+        self.specDescription = [NSString stringWithFormat:@"Caught exception: %@", exception];
+    }
+}
+
+
+- (void)matchSummary
+{
+    NSString *podspecString = [[NSString alloc] initWithData:_podspec encoding:NSUTF8StringEncoding];
+    
+    __weak typeof(self) weakSelf = self;
+    NSError *regexError = nil;
+    
+    NSRegularExpressionOptions options = NSRegularExpressionAnchorsMatchLines;
+    NSString *pattern = @"(?<=.(\\w{1,10})\\s{0,10}\\s{0,10}=\\s{0,10}['|\"]).*(?=['|\"])";
+    NSRegularExpression *expression = [NSRegularExpression regularExpressionWithPattern:pattern options:options error:&regexError];
+    
+    [expression enumerateMatchesInString:podspecString options:kNilOptions range: NSMakeRange(0, [podspecString length]) usingBlock:^(NSTextCheckingResult *result, NSMatchingFlags flags, BOOL *stop)
+     {
+         weakSelf.summary = [podspecString substringWithRange:result.range];
+     }];
+}
+
+
+- (id)copyWithZone:(NSZone *)zone
+{
+    KFRepoModel *copy = [KFRepoModel new];
+    copy.pod = [self.pod copy];
+    copy.installedVersion = [self.installedVersion copy];
+    copy.checksum = [self.checksum copy];
+    copy.installedVersion = [self.installedVersion copy];
+    copy.podspec = [self.podspec copy];
+    
+    return copy;
 }
 
 

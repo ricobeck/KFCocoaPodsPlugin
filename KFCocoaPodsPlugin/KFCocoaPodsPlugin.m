@@ -29,6 +29,8 @@
 #import "KFWorkspaceController.h"
 #import "KFCocoaPodController.h"
 #import "KFNotificationController.h"
+#import "KFPodSearchWindowController.h"
+#import "KFReplController.h"
 
 #import "KFRepoModel.h"
 #import "KFPodAutoCompletionItem.h"
@@ -46,7 +48,8 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
     KFMenuItemTagEditPodfile,
     KFMenuItemTagCheckForOutdatedPods,
     KFMenuItemTagUpdate,
-    KFMenuItemTagPodInit
+    KFMenuItemTagPodInit,
+    KFMenuItemTagPodSearch
 };
 
 
@@ -65,6 +68,8 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 @property (nonatomic, strong) KFTaskController *taskController;
 
 @property (nonatomic, strong) NSMenuItem *podInitItem;
+
+@property (nonatomic, strong) KFPodSearchWindowController *podSearchWindowController;
 
 
 @end
@@ -119,6 +124,8 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         _consoleController = [KFConsoleController new];
         _taskController = [KFTaskController new];
         _notificationController = [KFNotificationController new];
+        
+        [KFReplController sharedController];
 
         [self buildRepoIndex];
         _cocoaPodController = [[KFCocoaPodController alloc] initWithRepoData:self.repos];
@@ -186,8 +193,11 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
                     {
                         if ([podspec.pathExtension isEqualToString:@"podspec"])
                         {
-                            NSData *contents = [NSData dataWithContentsOfFile:[specPath stringByAppendingPathComponent:podspec]];
+                            NSString *specFilePath = [specPath stringByAppendingPathComponent:podspec];
+                            NSData *contents = [NSData dataWithContentsOfFile:specFilePath];
                             repoModel.checksum = [contents ks_SHA1DigestString];
+                            repoModel.podspec = contents;
+                            repoModel.specFilePath = specFilePath;
                         }
                     }
                     [specs addObject:repoModel];
@@ -262,12 +272,17 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         [self.podInitItem setTag:KFMenuItemTagPodInit];
         [submenu addItem:self.podInitItem];
         
+        NSMenuItem *searchPodItem = [[NSMenuItem alloc] initWithTitle:@"Search Pod ..." action:@selector(podSearchAction:) keyEquivalent:@""];
+        [searchPodItem setTarget:self];
+        [searchPodItem setTag:KFMenuItemTagPodSearch];
+        [submenu addItem:searchPodItem];
+        
         NSMenuItem *versionItem = [[NSMenuItem alloc] initWithTitle:@"CocoaPods Version: " action:nil keyEquivalent:@""];
         [self.cocoaPodController cocoaPodsVersion:^(NSDictionary *version)
         {
             if (version != nil)
             {
-                NSString *versionString = [NSString stringWithFormat:@"%@.%@.%@", version[KFMajorVersion], version[KFMinorVersion], version[KFBuildVersion]];
+                NSString *versionString = [NSString stringWithFormat:@"CocoaPods Version: %@.%@.%@", version[KFMajorVersion], version[KFMinorVersion], version[KFBuildVersion]];
                 [versionItem setTitle:versionString];
             }
             else
@@ -527,6 +542,17 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
     {
         [weakSelf.consoleController removeTask:task];
     }];
+}
+
+
+- (void)podSearchAction:(id)sender
+{
+    if (!self.podSearchWindowController)
+    {
+        self.podSearchWindowController = [[KFPodSearchWindowController alloc] initWithRepoData:[self.repos allValues]];
+    }
+    
+    [NSApp beginSheet:self.podSearchWindowController.window modalForWindow:[[NSApplication sharedApplication] keyWindow] modalDelegate:nil didEndSelector:nil contextInfo:nil];
 }
 
 

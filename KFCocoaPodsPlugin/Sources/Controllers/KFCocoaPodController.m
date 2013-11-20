@@ -73,7 +73,7 @@ NSString * const KFBuildVersion = @"buildVersion";
     //NSString *laguage = [[currentLocale localeIdentifier] stringByAppendingString:@".UTF-8"];
     NSString *fixedLanguage = @"en_US.UTF-8";
     task.environment = @{@"LC_ALL": fixedLanguage};
-    [[DSUnixTaskSubProcessManager sharedManager] setLoggingEnabled:YES];
+    [[DSUnixTaskSubProcessManager sharedManager] setLoggingEnabled:NO];
     [task setCommand:@"pod"];
     [task setArguments:@[@"ipc repl"]];
     

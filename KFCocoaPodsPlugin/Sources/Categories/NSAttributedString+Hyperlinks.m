@@ -1,5 +1,5 @@
 //
-//  KFRepoModel.h
+//  NSAttributedString+Hyperlinks.m
 //  KFCocoaPodsPlugin
 //
 //  Copyright (c) 2013 Rico Becker, KF Interactive
@@ -23,37 +23,30 @@
 //  THE SOFTWARE.
 //
 
-#import <Foundation/Foundation.h>
+#import "NSAttributedString+Hyperlinks.h"
 
-@interface KFRepoModel : NSObject<NSCopying>
-
-
-@property (nonatomic, strong) NSString *pod;
-
-@property (nonatomic, strong) NSString *specFilePath;
-
-@property (nonatomic, strong) NSString *version;
-
-@property (nonatomic, strong) NSString *checksum;
-
-@property (nonatomic, strong) NSString *installedVersion;
-
-@property (nonatomic, strong) NSData *podspec;
-
-@property (nonatomic, strong, readonly) NSString *summary;
-
-@property (nonatomic, strong, readonly) NSString *specDescription;
-
-@property (nonatomic, strong, readonly) NSString *license;
-
-@property (nonatomic, strong, readonly) NSString *plattforms;
-
-@property (nonatomic, strong, readonly) NSString *authors;
-
-@property (nonatomic, strong, readonly) NSAttributedString *homepage;
+@implementation NSAttributedString (Hyperlinks)
 
 
-- (void)parsePodspec;
++ (id)hyperlinkFromString:(NSString*)inString withURL:(NSURL*)aURL
+{
+    NSMutableAttributedString* attrString = [[NSMutableAttributedString alloc] initWithString: inString];
+    NSRange range = NSMakeRange(0, [attrString length]);
+    
+    [attrString beginEditing];
+    [attrString addAttribute:NSLinkAttributeName value:[aURL absoluteString] range:range];
+    
+    // make the text appear in blue
+    [attrString addAttribute:NSForegroundColorAttributeName value:[NSColor blueColor] range:range];
+    
+    // next make the text appear with an underline
+    [attrString addAttribute:
+     NSUnderlineStyleAttributeName value:[NSNumber numberWithInt:NSSingleUnderlineStyle] range:range];
+    
+    [attrString endEditing];
+    
+    return attrString;
+}
 
 
 @end
