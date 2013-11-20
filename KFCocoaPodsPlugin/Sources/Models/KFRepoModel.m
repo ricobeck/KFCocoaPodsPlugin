@@ -26,6 +26,8 @@
 #import "KFRepoModel.h"
 #import "KFReplController.h"
 
+#import "NSAttributedString+Hyperlinks.h"
+
 #import <YAML-Framework/YAMLSerialization.h>
 
 @interface KFRepoModel ()
@@ -41,7 +43,7 @@
 
 @property (nonatomic, strong, readwrite) NSString *author;
 
-@property (nonatomic, strong, readwrite) NSString *homepage;
+@property (nonatomic, strong, readwrite) NSAttributedString *homepage;
 
 
 @end
@@ -92,6 +94,7 @@
             {
                 self.author = NSLocalizedString(@"Unknown", nil);
             }
+            self.author = [NSString stringWithFormat:NSLocalizedString(@"Authors: %@", nil), self.author];
             
             if ([yaml objectForKey:@"license"] != nil)
             {
@@ -106,17 +109,15 @@
                 }
                 else
                 {
-                    self.license = NSLocalizedString(@"Unknown License", nil);
+                    self.license = NSLocalizedString(@"Unknown", nil);
                 }
             }
+            self.license = [NSString stringWithFormat:NSLocalizedString(@"License: %@", nil), self.license];
             
-            if ([yaml objectForKey:@"homepage"] != nil)
+            NSString *homepage = yaml[@"homepage"];
+            if (homepage != nil)
             {
-                self.homepage = yaml[@"homepage"];
-            }
-            else
-            {
-                self.homepage = NSLocalizedString(@"No Homepage", nil);
+                self.homepage = [NSAttributedString hyperlinkFromString:homepage withURL:[NSURL URLWithString:homepage]];
             }
             
             
@@ -128,6 +129,7 @@
             {
                 self.plattforms = @"ios";
             }
+            self.plattforms = [NSString stringWithFormat:NSLocalizedString(@"Plattform: %@", nil), self.plattforms];
             
             if ([yaml isKindOfClass:[NSDictionary class]])
             {

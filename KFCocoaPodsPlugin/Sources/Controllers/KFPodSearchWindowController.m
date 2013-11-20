@@ -56,10 +56,22 @@
     [super windowDidLoad];
 }
 
+
 - (IBAction)confirmAction:(id)sender
 {
     [NSApp endSheet:self.window];
     [self.window orderOut:self];
 }
+
+
+- (IBAction)copyPodnameAction:(id)sender
+{
+    KFRepoModel *repoModel = [[self.repoArrayController selectedObjects] firstObject];
+    
+    NSPasteboard *pasteBoard = [NSPasteboard generalPasteboard];
+    [pasteBoard declareTypes:@[NSStringPboardType] owner:nil];
+    [pasteBoard setString:repoModel.pod forType:NSStringPboardType];
+}
+
 
 @end
