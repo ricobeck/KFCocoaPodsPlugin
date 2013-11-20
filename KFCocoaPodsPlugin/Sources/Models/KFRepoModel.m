@@ -79,21 +79,24 @@
         
         if (yaml)
         {
-            self.summary = yaml[@"summary"];
+            NSString *summary = yaml[@"summary"] != nil ? yaml[@"summary"] : parsedSpec[@"summary"];
+            self.summary = summary;
             self.author = [[yaml[@"authors"] allKeys] componentsJoinedByString:@", "];
             self.license = yaml[@"license"][@"type"];
             self.plattforms = yaml[@"platforms"];
-            self.specDescription = yaml[@"description"];
+            
+            NSString *specDescription = yaml[@"description"] != nil ? yaml[@"description"] : @"";
+            self.specDescription = specDescription;
         }
         else
         {
             NSLog(@"error: %@", error);
-            self.summary = parsedSpec[@"summary"];
+            self.specDescription = error.description;
         }
     }
     @catch (NSException *exception)
     {
-        self.summary = exception.description;
+        self.specDescription = exception.description;
     }
 }
 
@@ -112,7 +115,6 @@
     [expression enumerateMatchesInString:podspecString options:kNilOptions range: NSMakeRange(0, [podspecString length]) usingBlock:^(NSTextCheckingResult *result, NSMatchingFlags flags, BOOL *stop)
      {
          weakSelf.summary = [podspecString substringWithRange:result.range];
-         NSLog(@"summary: %@", weakSelf.summary);
      }];
 }
 

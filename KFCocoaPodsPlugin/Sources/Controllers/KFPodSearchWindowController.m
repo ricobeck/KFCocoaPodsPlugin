@@ -43,10 +43,11 @@
         if (podspec.firstObject)
         {
             KFRepoModel *repoModel = podspec.firstObject;
-            [repoModel parsePodspec];
             [self.repoData addObject:repoModel];
         }
     }
+    [self.repoData sortUsingDescriptors:self.repoSortDescriptors];
+    [self.repoData makeObjectsPerformSelector:@selector(parsePodspec)];
 }
 
 
