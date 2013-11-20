@@ -41,6 +41,8 @@
 
 @property (nonatomic, strong, readwrite) NSString *author;
 
+@property (nonatomic, strong, readwrite) NSString *homepage;
+
 
 @end
 
@@ -77,26 +79,70 @@
     {
         NSDictionary *yaml = [[YAMLSerialization YAMLWithData:[parsedSpec[@"summary"] dataUsingEncoding:NSUTF8StringEncoding] options:kYAMLReadOptionStringScalars error:&error] firstObject];
         
-        if (yaml)
+        if (yaml != nil && error == nil)
         {
             NSString *summary = yaml[@"summary"] != nil ? yaml[@"summary"] : parsedSpec[@"summary"];
             self.summary = summary;
-            self.author = [[yaml[@"authors"] allKeys] componentsJoinedByString:@", "];
-            self.license = yaml[@"license"][@"type"];
-            self.plattforms = yaml[@"platforms"];
             
-            NSString *specDescription = yaml[@"description"] != nil ? yaml[@"description"] : @"";
-            self.specDescription = specDescription;
-        }
-        else
-        {
-            NSLog(@"error: %@", error);
-            self.specDescription = error.description;
+            if ([yaml objectForKey:@"authors"] && [yaml[@"authors"] isKindOfClass:[NSDictionary class]])
+            {
+                self.author = [[yaml[@"authors"] allKeys] componentsJoinedByString:@", "];
+            }
+            else
+            {
+                self.author = NSLocalizedString(@"Unknown", nil);
+            }
+            
+            if ([yaml objectForKey:@"license"] != nil)
+            {
+                id license = yaml[@"license"];
+                if ([license isKindOfClass:[NSDictionary class]] && [license objectForKey:@"type"] != nil)
+                {
+                    self.license = yaml[@"license"][@"type"];
+                }
+                else if ([license isKindOfClass:[NSString class]])
+                {
+                    self.license = license;
+                }
+                else
+                {
+                    self.license = NSLocalizedString(@"Unknown License", nil);
+                }
+            }
+            
+            if ([yaml objectForKey:@"homepage"] != nil)
+            {
+                self.homepage = yaml[@"homepage"];
+            }
+            else
+            {
+                self.homepage = NSLocalizedString(@"No Homepage", nil);
+            }
+            
+            
+            if ([yaml objectForKey:@"platforms"] != nil)
+            {
+                self.plattforms = [[yaml[@"platforms"] allKeys] componentsJoinedByString:@", "];
+            }
+            else
+            {
+                self.plattforms = @"ios";
+            }
+            
+            if ([yaml isKindOfClass:[NSDictionary class]])
+            {
+                id specDescription = [yaml objectForKey:@"description"] != nil ? yaml[@"description"] : self.summary;
+                self.specDescription = specDescription;
+            }
+            else
+            {
+                self.specDescription = [yaml description];
+            }
         }
     }
     @catch (NSException *exception)
     {
-        self.specDescription = exception.description;
+        self.specDescription = [NSString stringWithFormat:@"Caught exception: %@", exception];
     }
 }
 

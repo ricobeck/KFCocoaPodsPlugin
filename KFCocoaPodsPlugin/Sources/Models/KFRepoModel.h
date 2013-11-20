@@ -50,6 +50,9 @@
 
 @property (nonatomic, strong, readonly) NSString *authors;
 
+@property (nonatomic, strong, readonly) NSString *homepage;
+
+
 - (void)parsePodspec;
 
 

@@ -108,24 +108,12 @@
          }
          else
          {
-             NSLog(@"lastChar: %hu penultimateCharacter:%hu", lastCharacter, penultimateCharacter);
-             
              if (lastCharacter == NSNewlineCharacter)
              {
                  NSLog(@"current output: %@\nfile: %@", weakSelf.currentOutput, [weakSelf.queue firstObject]);
              }
          }
      }];
-    
-    [self.task setStandardErrorHandler:^(DSUnixTask *task, NSString *output)
-    {
-        NSLog(@"standard error: %@", output);
-    }];
-    
-    [self.task setTerminationHandler:^(DSUnixTask *task)
-    {
-        NSLog(@"repl task terminated");
-    }];
     
     self.isProcessing = NO;
 }
@@ -135,7 +123,6 @@
 {
     if (_queue == nil)
     {
-        NSLog(@"pod spec start");
         _queue = [NSMutableArray new];
     }
 
@@ -150,7 +137,6 @@
     {
         completionBlock(@{@"summary": @"Path containts spaces. This will lead to an error."});
     }
-    
 }
 
 
@@ -161,10 +147,6 @@
         self.isProcessing = YES;
         self.currentOutput = [NSMutableString new];
         [self.task writeStringToStandardInput:[NSString stringWithFormat:@"spec %@\n", [self.queue firstObject]]];
-    }
-    else if ([self.queue count] == 0)
-    {
-        NSLog(@"pod spec done");
     }
 }
 
