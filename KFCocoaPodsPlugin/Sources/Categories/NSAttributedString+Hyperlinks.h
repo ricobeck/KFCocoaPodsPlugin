@@ -1,5 +1,5 @@
 //
-//  KFRepoModel.h
+//  NSAttributedString+Hyperlinks.h
 //  KFCocoaPodsPlugin
 //
 //  Copyright (c) 2013 Rico Becker, KF Interactive
@@ -25,35 +25,10 @@
 
 #import <Foundation/Foundation.h>
 
-@interface KFRepoModel : NSObject<NSCopying>
+@interface NSAttributedString (Hyperlinks)
 
 
-@property (nonatomic, strong) NSString *pod;
-
-@property (nonatomic, strong) NSString *specFilePath;
-
-@property (nonatomic, strong) NSString *version;
-
-@property (nonatomic, strong) NSString *checksum;
-
-@property (nonatomic, strong) NSString *installedVersion;
-
-@property (nonatomic, strong) NSData *podspec;
-
-@property (nonatomic, strong, readonly) NSString *summary;
-
-@property (nonatomic, strong, readonly) NSString *specDescription;
-
-@property (nonatomic, strong, readonly) NSString *license;
-
-@property (nonatomic, strong, readonly) NSString *plattforms;
-
-@property (nonatomic, strong, readonly) NSString *authors;
-
-@property (nonatomic, strong, readonly) NSAttributedString *homepage;
-
-
-- (void)parsePodspec;
++ (id)hyperlinkFromString:(NSString*)inString withURL:(NSURL*)aURL;
 
 
 @end
