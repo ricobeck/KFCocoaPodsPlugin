@@ -13,12 +13,17 @@
 
 #import <YAML-Framework/YAMLSerialization.h>
 
+
+NSString * const KFReplControllerParsingCountDidChange = @"ReplControllerParsingCountDidChange";
+
+NSString * const KFReplParseCount = @"ReplParseCount";
+
 @interface KFReplController ()
 
 
 @property (nonatomic, strong) DSUnixShellTask *task;
 
-@property (nonatomic, strong) NSMutableArray *queue;
+@property (strong) NSMutableArray *queue;
 
 @property (nonatomic, strong) NSMutableDictionary *completionBlockMap;
 
@@ -90,6 +95,9 @@
                  NSString *currentSpec = [weakSelf.queue firstObject];
                  [weakSelf.queue removeObjectAtIndex:0];
                  
+                 [[NSNotificationCenter defaultCenter] postNotificationName:KFReplControllerParsingCountDidChange object:weakSelf userInfo:@{KFReplParseCount: @([weakSelf.queue count])}];
+                 
+                 
                  KFReplSpecParseCompletionBlock block = weakSelf.completionBlockMap[currentSpec];
                  [weakSelf.completionBlockMap removeObjectForKey:currentSpec];
                  
@@ -132,6 +140,7 @@
         [self.queue addObject:specFilePath];
         self.completionBlockMap[specFilePath] = completionBlock;
         [self processNextSpec];
+        [[NSNotificationCenter defaultCenter] postNotificationName:KFReplControllerParsingCountDidChange object:@([self.queue count])];
     }
     else
     {

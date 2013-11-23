@@ -929,6 +929,22 @@ AAEAAQAAAT0AAwAAAAEAAgAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
+						<string key="label">enabled: self.searchEnabled</string>
+						<reference key="source" ref="827833108"/>
+						<reference key="destination" ref="1001"/>
+						<object class="NSNibBindingConnector" key="connector">
+							<reference key="NSSource" ref="827833108"/>
+							<reference key="NSDestination" ref="1001"/>
+							<string key="NSLabel">enabled: self.searchEnabled</string>
+							<string key="NSBinding">enabled</string>
+							<string key="NSKeyPath">self.searchEnabled</string>
+							<int key="NSNibBindingConnectorVersion">2</int>
+						</object>
+					</object>
+					<int key="connectionID">284</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBBindingConnection" key="connection">
 						<string key="label">value: selection.plattforms</string>
 						<reference key="source" ref="573413011"/>
 						<reference key="destination" ref="664202227"/>
@@ -993,19 +1009,23 @@ AAEAAQAAAT0AAwAAAAEAAgAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
-						<string key="label">value: selection.specDescription</string>
+						<string key="label">attributedString: selection.specDescription</string>
 						<reference key="source" ref="383433061"/>
 						<reference key="destination" ref="664202227"/>
 						<object class="NSNibBindingConnector" key="connector">
 							<reference key="NSSource" ref="383433061"/>
 							<reference key="NSDestination" ref="664202227"/>
-							<string key="NSLabel">value: selection.specDescription</string>
-							<string key="NSBinding">value</string>
+							<string key="NSLabel">attributedString: selection.specDescription</string>
+							<string key="NSBinding">attributedString</string>
 							<string key="NSKeyPath">selection.specDescription</string>
+							<object class="NSDictionary" key="NSOptions">
+								<string key="NS.key.0">NSValueTransformerName</string>
+								<string key="NS.object.0">KFPodDescriptionValueTransformer</string>
+							</object>
 							<int key="NSNibBindingConnectorVersion">2</int>
 						</object>
 					</object>
-					<int key="connectionID">234</int>
+					<int key="connectionID">281</int>
 				</object>
 				<object class="IBConnectionRecord">
 					<object class="IBBindingConnection" key="connection">
@@ -2464,7 +2484,7 @@ AAEAAQAAAT0AAwAAAAEAAgAAAVIAAwAAAAEAAQAAAVMAAwAAAAIAAQABAAAAAA</bytes>
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">276</int>
+			<int key="maxID">284</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">

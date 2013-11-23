@@ -15,6 +15,8 @@
 
 @property (nonatomic, strong, readonly) NSArray *repoSortDescriptors;
 
+@property (nonatomic) BOOL searchEnabled;
+
 
 - (id)initWithRepoData:(NSArray *)repoData;
 

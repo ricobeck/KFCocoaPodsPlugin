@@ -8,6 +8,7 @@
 
 #import "KFPodSearchWindowController.h"
 #import "KFRepoModel.h"
+#import "KFReplController.h"
 
 @interface KFPodSearchWindowController ()
 
@@ -30,6 +31,8 @@
     {
         [self performSelectorInBackground:@selector(parseRepoData:) withObject:repoData];
         _repoSortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"pod" ascending:YES selector:@selector(caseInsensitiveCompare:)]];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(replParseCountDidChange:) name:KFReplControllerParsingCountDidChange object:nil];
     }
     return self;
 }
@@ -48,6 +51,26 @@
     }
     [self.repoData sortUsingDescriptors:self.repoSortDescriptors];
     [self.repoData makeObjectsPerformSelector:@selector(parsePodspec)];
+    
+    self.searchEnabled = NO;
+}
+
+
+- (void)replParseCountDidChange:(NSNotification *)notification
+{
+    NSDictionary *userInfo = [notification userInfo];
+    NSNumber *countObj = userInfo[KFReplParseCount];
+    NSUInteger count = [countObj unsignedIntegerValue];
+    
+    NSLog(@"count update notification. value: %lu", count);
+    
+    BOOL changeEnabledNewValue = count == 0;
+    
+    if (changeEnabledNewValue != self.searchEnabled)
+    {
+        NSLog(@"Search enabled changed state: %@", changeEnabledNewValue ? @"YES" : @"NO");
+        self.searchEnabled = changeEnabledNewValue;
+    }
 }
 
 
