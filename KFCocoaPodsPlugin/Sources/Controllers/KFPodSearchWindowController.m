@@ -62,13 +62,10 @@
     NSNumber *countObj = userInfo[KFReplParseCount];
     NSUInteger count = [countObj unsignedIntegerValue];
     
-    NSLog(@"count update notification. value: %lu", count);
-    
     BOOL changeEnabledNewValue = count == 0;
     
     if (changeEnabledNewValue != self.searchEnabled)
     {
-        NSLog(@"Search enabled changed state: %@", changeEnabledNewValue ? @"YES" : @"NO");
         self.searchEnabled = changeEnabledNewValue;
     }
 }
