@@ -12,6 +12,7 @@
 		1D02735217D746CC00E8389F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1D02735017D746CC00E8389F /* InfoPlist.strings */; };
 		1D02735517D746CC00E8389F /* KFCocoaPodsPlugin.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D02735417D746CC00E8389F /* KFCocoaPodsPlugin.m */; };
 		1D03ECB117E9B64F00F183EB /* AMR_ANSIEscapeHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D03ECB017E9B64F00F183EB /* AMR_ANSIEscapeHelper.m */; };
+		1D08FB88184148B300DE7442 /* KFPodDescriptionValueTransformer.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D08FB87184148B300DE7442 /* KFPodDescriptionValueTransformer.m */; };
 		1D24305C17D8DB8F00E0D3DD /* KFCocoaPodController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D24305B17D8DB8F00E0D3DD /* KFCocoaPodController.m */; };
 		1D29407918396F4D00079BC4 /* KFReplController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D29407818396F4D00079BC4 /* KFReplController.m */; };
 		1D2A5368183D01250010858E /* NSAttributedString+Hyperlinks.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D2A5367183D01250010858E /* NSAttributedString+Hyperlinks.m */; };
@@ -48,6 +49,8 @@
 		1D02735617D746CC00E8389F /* KFCocoaPodsPlugin-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "KFCocoaPodsPlugin-Prefix.pch"; sourceTree = "<group>"; };
 		1D03ECAF17E9B64F00F183EB /* AMR_ANSIEscapeHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AMR_ANSIEscapeHelper.h; sourceTree = "<group>"; };
 		1D03ECB017E9B64F00F183EB /* AMR_ANSIEscapeHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AMR_ANSIEscapeHelper.m; sourceTree = "<group>"; };
+		1D08FB86184148B300DE7442 /* KFPodDescriptionValueTransformer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KFPodDescriptionValueTransformer.h; sourceTree = "<group>"; };
+		1D08FB87184148B300DE7442 /* KFPodDescriptionValueTransformer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KFPodDescriptionValueTransformer.m; sourceTree = "<group>"; };
 		1D24305A17D8DB8F00E0D3DD /* KFCocoaPodController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KFCocoaPodController.h; path = Sources/Controllers/KFCocoaPodController.h; sourceTree = "<group>"; };
 		1D24305B17D8DB8F00E0D3DD /* KFCocoaPodController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = KFCocoaPodController.m; path = Sources/Controllers/KFCocoaPodController.m; sourceTree = "<group>"; };
 		1D29407718396F4D00079BC4 /* KFReplController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KFReplController.h; path = Sources/Controllers/KFReplController.h; sourceTree = "<group>"; };
@@ -153,6 +156,7 @@
 				1D2A5365183D01090010858E /* Categories */,
 				1DAC167317D9F09300287BA0 /* Models */,
 				1D24305D17D8DB9400E0D3DD /* Controllers */,
+				1D08FB851841488800DE7442 /* Value Transformers */,
 				1D5C6C5E17DB63E80009B936 /* 3rdParty */,
 				1DDE21C017D8B1E70015857D /* XcodeClasses */,
 				1DA3B23E183837750009AC4E /* Resources */,
@@ -170,6 +174,16 @@
 				1DDB9A9A17DE4E4200B69C9D /* PodSyntax.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		1D08FB851841488800DE7442 /* Value Transformers */ = {
+			isa = PBXGroup;
+			children = (
+				1D08FB86184148B300DE7442 /* KFPodDescriptionValueTransformer.h */,
+				1D08FB87184148B300DE7442 /* KFPodDescriptionValueTransformer.m */,
+			);
+			name = "Value Transformers";
+			path = "Sources/Categories/Value Transformers";
 			sourceTree = "<group>";
 		};
 		1D24305D17D8DB9400E0D3DD /* Controllers */ = {
@@ -394,6 +408,7 @@
 				1D35C32217D8BBE9006A9BDC /* KFWorkspaceController.m in Sources */,
 				1D24305C17D8DB8F00E0D3DD /* KFCocoaPodController.m in Sources */,
 				1D2A5368183D01250010858E /* NSAttributedString+Hyperlinks.m in Sources */,
+				1D08FB88184148B300DE7442 /* KFPodDescriptionValueTransformer.m in Sources */,
 				1D29407918396F4D00079BC4 /* KFReplController.m in Sources */,
 				1DAC167617D9F09300287BA0 /* KFRepoModel.m in Sources */,
 				1DF28C9017DA5B6B00DFBD5C /* KFNotificationController.m in Sources */,

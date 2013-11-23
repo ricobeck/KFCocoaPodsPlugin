@@ -12,6 +12,11 @@
 typedef void(^KFReplSpecParseCompletionBlock)(NSDictionary *parsedSpec);
 
 
+extern NSString * const KFReplControllerParsingCountDidChange;
+
+extern NSString * const KFReplParseCount;
+
+
 @interface KFReplController : NSObject
 
 
