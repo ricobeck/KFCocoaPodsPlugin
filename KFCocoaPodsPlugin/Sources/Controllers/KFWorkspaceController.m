@@ -26,6 +26,12 @@
 #import "KFWorkspaceController.h"
 #import "IDEKit.h"
 
+/* the signature in IDEFoundation.h is incorrect (oudated?) for xcode5 
+ * @see https://github.com/questbeat/Lin/blob/master/Lin/Lin.m
+ */
+@interface IDEIndex (fix)
+- (id)filesContaining:(id)arg1 anchorStart:(BOOL)arg2 anchorEnd:(BOOL)arg3 subsequence:(BOOL)arg4 ignoreCase:(BOOL)arg5 cancelWhen:(id)arg6;
+@end
 
 #define kPodfile @"Podfile"
 #define kPodfileLock @"Podfile.lock"
@@ -36,25 +42,25 @@
 
 + (BOOL)currentWorkspaceHasPodfile
 {
-    return [self fileNameExistsInCurrentWorkspace:kPodfile];
+    return [[NSFileManager defaultManager] fileExistsAtPath:[self currentWorkspacePodfilePath]];
 }
 
 
 + (BOOL)currentWorkspaceHasPodfileLock
 {
-    return [self fileNameExistsInCurrentWorkspace:kPodfileLock];
+    return [[NSFileManager defaultManager] fileExistsAtPath:[self currentWorkspacePodfileLockPath]];
 }
 
 
 + (NSString *)currentWorkspacePodfilePath
 {
-    return [[self currentWorkspaceDirectoryPath] stringByAppendingPathComponent:kPodfile];
+    return [self pathForFileNameInCurrentWorkspace:kPodfile];
 }
 
 
 + (NSString *)currentWorkspacePodfileLockPath
 {
-    return [[self currentWorkspaceDirectoryPath] stringByAppendingPathComponent:kPodfileLock];
+    return [[[self pathForFileNameInCurrentWorkspace:kPodfile] stringByDeletingLastPathComponent] stringByAppendingPathComponent:kPodfileLock];
 }
 
 
@@ -92,10 +98,26 @@
     return [workspacePath stringByDeletingLastPathComponent];
 }
 
++ (NSString *)pathForFileNameInCurrentWorkspace:(NSString *)fileName
+{
+    IDEWorkspace *workspace = [self workspaceForKeyWindow];
+    IDEIndexCollection *indexCollection = [workspace.index filesContaining:fileName anchorStart:NO anchorEnd:NO subsequence:NO ignoreCase:NO cancelWhen:nil];
+    for(DVTFilePath *filePath in indexCollection) {
+        return filePath.pathString;
+    }
+    return nil;
+}
 
 + (BOOL)fileNameExistsInCurrentWorkspace:(NSString *)fileName
 {
-    NSString *filePath = [[self currentWorkspaceDirectoryPath] stringByAppendingPathComponent:fileName];
+    /* try to find in workspace first */
+    NSString * filePath = [self pathForFileNameInCurrentWorkspace:fileName];
+    if(filePath) {
+        return [[NSFileManager defaultManager] fileExistsAtPath:filePath];
+    }
+    /* if that fails, try to locate it relative to the current workspace
+     * directory */
+    filePath = [[self currentWorkspaceDirectoryPath] stringByAppendingPathComponent:fileName];
     return [[NSFileManager defaultManager] fileExistsAtPath:filePath];
 }
 
