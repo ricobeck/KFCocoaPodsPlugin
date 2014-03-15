@@ -10,6 +10,7 @@
 #import "KFRepoModel.h"
 #import "KFReplController.h"
 #import "KFCocoaPodsPlugin.h"
+#import <DSUnixTask/DSUnixTask.h>
 
 @interface KFPodSearchWindowController ()
 
@@ -19,6 +20,9 @@
 @property (strong) IBOutlet NSArrayController *repoArrayController;
 @property (strong) IBOutlet NSButton *tryButton;
 @property (strong) IBOutlet NSProgressIndicator *progressIndicator;
+
+// shows a simple error for pod try
+- (void)showPodTryErrorWithMessage:(NSString *)message;
 
 @end
 
@@ -94,14 +98,52 @@
     // try the pod.
     KFRepoModel *repoModel = [[self.repoArrayController selectedObjects] firstObject];
     
-    [[[KFCocoaPodsPlugin sharedPlugin] taskController] runPodCommand:@[@"try", repoModel.pod] directory:nil outputHandler:^(DSUnixTask *taskLauncher, NSString *newOutput) {
+    // capture all output to figure out a failure if we get one.
+    NSMutableString *totalOutput = [NSMutableString string];
+    
+    DSUnixTask *task = [[[KFCocoaPodsPlugin sharedPlugin] taskController] runPodCommand:@[@"try", @"--no-color", repoModel.pod] directory:nil outputHandler:^(DSUnixTask *taskLauncher, NSString *newOutput) {
+        [totalOutput appendString:newOutput];
     } terminationHandler:^(DSUnixTask *taskLauncher) {
         [self.progressIndicator stopAnimation:self];
         [self.tryButton setEnabled:YES];
     } failureHandler:^(DSUnixTask *taskLauncher) {
+        
         [self.progressIndicator stopAnimation:self];
         [self.tryButton setEnabled:YES];
+        
+        // "Unknown arguments" is displayed when the 'pod' doesn't recognize the command.
+        NSRange unknownRange = [totalOutput rangeOfString:@"Unknown arguments"];
+        
+        // "Unable to find any projects" is show when a pod doesn't have any projects to open.
+        NSRange unableRange = [totalOutput rangeOfString:@"Unable to find any project"];
+        
+        if (unknownRange.location != NSNotFound) {
+            // this is a version before try was supported?
+            [self showPodTryErrorWithMessage:@"This version of Cocoapods does not support 'pod try'"];
+        } else if (unableRange.location != NSNotFound) {
+            // we weren't able to find a project.
+            [self showPodTryErrorWithMessage:@"Unable to find an example project in the repository."];
+        } else {
+            // we just had an error or had multiple options.
+            // it's hard to really tell the difference, so assume the common case.
+            [self showPodTryErrorWithMessage:@"There were several projects found. Please use 'pod try' from the command line."];
+        }
     }];
+    
+    // writing this to the standard input helps us exit the multiple options case.
+    // it doesn't seem to have any ill effect on the other cases.
+    [task writeStringToStandardInput:@"n\n"];
+}
+
+
+- (void)showPodTryErrorWithMessage:(NSString *)message
+{
+    NSAlert *alert = [[NSAlert alloc] init];
+    [alert setMessageText:@"Error Running 'pod try'"];
+    [alert addButtonWithTitle:@"OK"];
+    [alert setInformativeText:message];
+    
+    [alert beginSheetModalForWindow:self.window completionHandler:NULL];
 }
 
 - (IBAction)copyPodnameAction:(id)sender
