@@ -130,7 +130,13 @@
         // "Unable to find any projects" is show when a pod doesn't have any projects to open.
         NSRange unableRange = [totalOutput rangeOfString:@"Unable to"];
         
-        if (unknownRange.location != NSNotFound) {
+        // "an error occurred" is shown when cocoapods crashes.
+        NSRange crashRange = [totalOutput rangeOfString:@"an error occurred"];
+        
+        if (crashRange.location != NSNotFound) {
+            // this happens to some pods. See: https://github.com/CocoaPods/cocoapods-try/issues/16
+            [self showPodTryErrorWithMessage:@"There was an error while running 'pod try'. Please use from the command line."];
+        } else if (unknownRange.location != NSNotFound) {
             // this is a version before try was supported?
             [self showPodTryErrorWithMessage:@"This version of Cocoapods does not support 'pod try'"];
         } else if (unableRange.location != NSNotFound) {
