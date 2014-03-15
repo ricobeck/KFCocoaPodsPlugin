@@ -25,11 +25,11 @@
 
 
 #import <AppKit/AppKit.h>
-#import "KFTaskController.h"
+
+@class KFTaskController;
+
 
 @interface KFCocoaPodsPlugin : NSObject
-
-@property (readonly, nonatomic, strong) KFTaskController *taskController;
 
 + (instancetype)sharedPlugin;
 

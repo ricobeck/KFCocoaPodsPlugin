@@ -9,7 +9,7 @@
 #import "KFPodSearchWindowController.h"
 #import "KFRepoModel.h"
 #import "KFReplController.h"
-#import "KFCocoaPodsPlugin.h"
+#import "KFTaskController.h"
 #import <DSUnixTask/DSUnixTask.h>
 
 @interface KFPodSearchWindowController ()
@@ -20,6 +20,8 @@
 @property (strong) IBOutlet NSArrayController *repoArrayController;
 @property (strong) IBOutlet NSButton *tryButton;
 @property (strong) IBOutlet NSProgressIndicator *progressIndicator;
+
+@property (strong) KFTaskController *taskController;
 
 // shows a simple error for pod try
 - (void)showPodTryErrorWithMessage:(NSString *)message;
@@ -95,13 +97,17 @@
     [self.tryButton setEnabled:NO];
     [self.progressIndicator startAnimation:self];
     
+    if (!self.taskController) {
+        self.taskController = [[KFTaskController alloc] init];
+    }
+    
     // try the pod.
     KFRepoModel *repoModel = [[self.repoArrayController selectedObjects] firstObject];
     
     // capture all output to figure out a failure if we get one.
     NSMutableString *totalOutput = [NSMutableString string];
     
-    DSUnixTask *task = [[[KFCocoaPodsPlugin sharedPlugin] taskController] runPodCommand:@[@"try", @"--no-color", repoModel.pod] directory:nil outputHandler:^(DSUnixTask *taskLauncher, NSString *newOutput) {
+    DSUnixTask *task = [self.taskController runPodCommand:@[@"try", @"--no-color", repoModel.pod] directory:nil outputHandler:^(DSUnixTask *taskLauncher, NSString *newOutput) {
         [totalOutput appendString:newOutput];
     } terminationHandler:^(DSUnixTask *taskLauncher) {
         [self.progressIndicator stopAnimation:self];

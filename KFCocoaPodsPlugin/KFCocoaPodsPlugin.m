@@ -25,6 +25,7 @@
 
 #import "KFCocoaPodsPlugin.h"
 #import "KFConsoleController.h"
+#import "KFTaskController.h"
 #import "KFWorkspaceController.h"
 #import "KFCocoaPodController.h"
 #import "KFNotificationController.h"
