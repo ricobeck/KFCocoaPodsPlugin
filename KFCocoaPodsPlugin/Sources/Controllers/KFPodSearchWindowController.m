@@ -9,6 +9,7 @@
 #import "KFPodSearchWindowController.h"
 #import "KFRepoModel.h"
 #import "KFReplController.h"
+#import "KFCocoaPodsPlugin.h"
 
 @interface KFPodSearchWindowController ()
 
@@ -16,6 +17,8 @@
 @property (nonatomic, strong, readwrite) NSMutableArray *repoData;
 
 @property (strong) IBOutlet NSArrayController *repoArrayController;
+@property (strong) IBOutlet NSButton *tryButton;
+@property (strong) IBOutlet NSProgressIndicator *progressIndicator;
 
 @end
 
@@ -83,11 +86,27 @@
     [self.window orderOut:self];
 }
 
+- (IBAction)tryPod:(id)sender
+{
+    [self.tryButton setEnabled:NO];
+    [self.progressIndicator startAnimation:self];
+    
+    // try the pod.
+    KFRepoModel *repoModel = [[self.repoArrayController selectedObjects] firstObject];
+    
+    [[[KFCocoaPodsPlugin sharedPlugin] taskController] runPodCommand:@[@"try", repoModel.pod] directory:nil outputHandler:^(DSUnixTask *taskLauncher, NSString *newOutput) {
+    } terminationHandler:^(DSUnixTask *taskLauncher) {
+        [self.progressIndicator stopAnimation:self];
+        [self.tryButton setEnabled:YES];
+    } failureHandler:^(DSUnixTask *taskLauncher) {
+        [self.progressIndicator stopAnimation:self];
+        [self.tryButton setEnabled:YES];
+    }];
+}
 
 - (IBAction)copyPodnameAction:(id)sender
 {
     KFRepoModel *repoModel = [[self.repoArrayController selectedObjects] firstObject];
-    
     NSPasteboard *pasteBoard = [NSPasteboard generalPasteboard];
     [pasteBoard declareTypes:@[NSStringPboardType] owner:nil];
     [pasteBoard setString:repoModel.pod forType:NSStringPboardType];
