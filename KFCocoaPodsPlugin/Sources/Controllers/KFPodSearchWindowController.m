@@ -94,6 +94,14 @@
 
 - (IBAction)tryPod:(id)sender
 {
+    KFRepoModel *repoModel = [[self.repoArrayController selectedObjects] firstObject];
+    
+    if (repoModel.pod == nil) {
+        // perhaps we don't have a selected object or the repoModel is malformed.
+        // bail, we'll crash later.
+        return;
+    }
+    
     [self.tryButton setEnabled:NO];
     [self.progressIndicator startAnimation:self];
     
@@ -102,7 +110,6 @@
     }
     
     // try the pod.
-    KFRepoModel *repoModel = [[self.repoArrayController selectedObjects] firstObject];
     
     // capture all output to figure out a failure if we get one.
     NSMutableString *totalOutput = [NSMutableString string];
