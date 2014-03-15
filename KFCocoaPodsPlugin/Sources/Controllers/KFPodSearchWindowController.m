@@ -128,7 +128,7 @@
         NSRange unknownRange = [totalOutput rangeOfString:@"Unknown arguments"];
         
         // "Unable to find any projects" is show when a pod doesn't have any projects to open.
-        NSRange unableRange = [totalOutput rangeOfString:@"Unable to find any project"];
+        NSRange unableRange = [totalOutput rangeOfString:@"Unable to"];
         
         if (unknownRange.location != NSNotFound) {
             // this is a version before try was supported?
