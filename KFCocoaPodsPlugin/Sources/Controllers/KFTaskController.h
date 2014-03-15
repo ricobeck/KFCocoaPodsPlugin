@@ -47,7 +47,7 @@ typedef void(^KFTaskFailureHandler)(DSUnixTask *taskLauncher);
 
 
 
-- (void)runPodCommand:(NSArray *)arguments directory:(NSString *)directory outputHandler:(KFTaskOutputHandler)outpuBlock terminationHandler:(KFTaskTerminationHandler)terminationBlock failureHandler:(KFTaskFailureHandler)failureBlock;
+- (DSUnixTask *)runPodCommand:(NSArray *)arguments directory:(NSString *)directory outputHandler:(KFTaskOutputHandler)outpuBlock terminationHandler:(KFTaskTerminationHandler)terminationBlock failureHandler:(KFTaskFailureHandler)failureBlock;
 
 
 
