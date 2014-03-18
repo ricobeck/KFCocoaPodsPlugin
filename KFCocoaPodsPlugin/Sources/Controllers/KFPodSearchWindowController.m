@@ -9,8 +9,7 @@
 #import "KFPodSearchWindowController.h"
 #import "KFRepoModel.h"
 #import "KFReplController.h"
-#import "KFTaskController.h"
-#import <DSUnixTask/DSUnixTask.h>
+#import "KFTryController.h"
 
 @interface KFPodSearchWindowController ()
 
@@ -21,7 +20,7 @@
 @property (strong) IBOutlet NSButton *tryButton;
 @property (strong) IBOutlet NSProgressIndicator *progressIndicator;
 
-@property (strong) KFTaskController *taskController;
+@property (strong) KFTryController *tryController;
 
 // shows a simple error for pod try
 - (void)showPodTryErrorWithMessage:(NSString *)message;
@@ -102,56 +101,35 @@
         return;
     }
     
-    [self.tryButton setEnabled:NO];
-    [self.progressIndicator startAnimation:self];
-    
-    if (!self.taskController) {
-        self.taskController = [[KFTaskController alloc] init];
+    // try the pod.
+    if (!self.tryController) {
+        self.tryController = [[KFTryController alloc] init];
     }
     
-    // try the pod.
+    [self.tryButton setEnabled:NO];
+    [self.progressIndicator setIndeterminate:YES];
+    [self.progressIndicator startAnimation:self];
+    [self.progressIndicator setHidden:NO];
     
-    // capture all output to figure out a failure if we get one.
-    NSMutableString *totalOutput = [NSMutableString string];
-    
-    DSUnixTask *task = [self.taskController runPodCommand:@[@"try", @"--no-color", repoModel.pod] directory:nil outputHandler:^(DSUnixTask *taskLauncher, NSString *newOutput) {
-        [totalOutput appendString:newOutput];
-    } terminationHandler:^(DSUnixTask *taskLauncher) {
-        [self.progressIndicator stopAnimation:self];
+    [self.tryController tryPodWithName:repoModel.pod progress:^(CGFloat progress) {
+        NSLog(@"PROGRESS: %f", progress);
+        
+        if (progress > 0) {
+            [self.progressIndicator setIndeterminate:NO];
+            [self.progressIndicator setDoubleValue:progress];
+        }
+        
+    } completion:^(NSError *error) {
+        
         [self.tryButton setEnabled:YES];
-    } failureHandler:^(DSUnixTask *taskLauncher) {
-        
         [self.progressIndicator stopAnimation:self];
-        [self.tryButton setEnabled:YES];
+        [self.progressIndicator setHidden:YES];
         
-        // "Unknown arguments" is displayed when the 'pod' doesn't recognize the command.
-        NSRange unknownRange = [totalOutput rangeOfString:@"Unknown arguments"];
-        
-        // "Unable to find any projects" is show when a pod doesn't have any projects to open.
-        NSRange unableRange = [totalOutput rangeOfString:@"Unable to"];
-        
-        // "an error occurred" is shown when cocoapods crashes.
-        NSRange crashRange = [totalOutput rangeOfString:@"an error occurred"];
-        
-        if (crashRange.location != NSNotFound) {
-            // this happens to some pods. See: https://github.com/CocoaPods/cocoapods-try/issues/16
-            [self showPodTryErrorWithMessage:@"There was an error while running 'pod try'. Please use from the command line."];
-        } else if (unknownRange.location != NSNotFound) {
-            // this is a version before try was supported?
-            [self showPodTryErrorWithMessage:@"This version of Cocoapods does not support 'pod try'"];
-        } else if (unableRange.location != NSNotFound) {
-            // we weren't able to find a project.
-            [self showPodTryErrorWithMessage:@"Unable to find an example project in the repository."];
-        } else {
-            // we just had an error or had multiple options.
-            // it's hard to really tell the difference, so assume the common case.
-            [self showPodTryErrorWithMessage:@"There were several projects found. Please use 'pod try' from the command line."];
+        if (error) {
+            [self showPodTryErrorWithMessage:[error localizedDescription]];
         }
     }];
     
-    // writing this to the standard input helps us exit the multiple options case.
-    // it doesn't seem to have any ill effect on the other cases.
-    [task writeStringToStandardInput:@"n\n"];
 }
 
 

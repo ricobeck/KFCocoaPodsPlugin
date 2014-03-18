@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		11627F0218D79018007FBB24 /* KFTryController.m in Sources */ = {isa = PBXBuildFile; fileRef = 11627F0118D79018007FBB24 /* KFTryController.m */; };
 		1D02734A17D746CB00E8389F /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D02734917D746CB00E8389F /* AppKit.framework */; };
 		1D02734C17D746CB00E8389F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D02734B17D746CB00E8389F /* Foundation.framework */; };
 		1D02735217D746CC00E8389F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1D02735017D746CC00E8389F /* InfoPlist.strings */; };
@@ -39,6 +40,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		11627F0018D79018007FBB24 /* KFTryController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = KFTryController.h; path = Sources/Controllers/KFTryController.h; sourceTree = "<group>"; };
+		11627F0118D79018007FBB24 /* KFTryController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = KFTryController.m; path = Sources/Controllers/KFTryController.m; sourceTree = "<group>"; };
 		1D02734617D746CB00E8389F /* KFCocoaPodsPlugin.xcplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KFCocoaPodsPlugin.xcplugin; sourceTree = BUILT_PRODUCTS_DIR; };
 		1D02734917D746CB00E8389F /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		1D02734B17D746CB00E8389F /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -259,6 +262,8 @@
 			children = (
 				1DA3B23F183839C60009AC4E /* KFPodSearchWindowController.h */,
 				1DA3B240183839C60009AC4E /* KFPodSearchWindowController.m */,
+				11627F0018D79018007FBB24 /* KFTryController.h */,
+				11627F0118D79018007FBB24 /* KFTryController.m */,
 			);
 			name = PodSearch;
 			sourceTree = "<group>";
@@ -414,6 +419,7 @@
 				1DF28C9017DA5B6B00DFBD5C /* KFNotificationController.m in Sources */,
 				1D03ECB117E9B64F00F183EB /* AMR_ANSIEscapeHelper.m in Sources */,
 				1D5C6C6117DB63E80009B936 /* MethodSwizzle.m in Sources */,
+				11627F0218D79018007FBB24 /* KFTryController.m in Sources */,
 				1D44D6AE17DBAEDB00CBE93B /* DVTSourceTextView+KFCocoaPods.m in Sources */,
 				1D81CE40181AB41C00D45D84 /* KFConsoleThemeModel.m in Sources */,
 				1DD2CD0B17DE4B72006A1355 /* KFSyntaxAutoCompletionItem.m in Sources */,
