@@ -112,7 +112,6 @@
     [self.progressIndicator setHidden:NO];
     
     [self.tryController tryPodWithName:repoModel.pod progress:^(CGFloat progress) {
-        NSLog(@"PROGRESS: %f", progress);
         
         if (progress > 0) {
             [self.progressIndicator setIndeterminate:NO];
