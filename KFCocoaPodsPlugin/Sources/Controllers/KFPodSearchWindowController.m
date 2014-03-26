@@ -9,6 +9,7 @@
 #import "KFPodSearchWindowController.h"
 #import "KFRepoModel.h"
 #import "KFReplController.h"
+#import "KFTryController.h"
 
 @interface KFPodSearchWindowController ()
 
@@ -16,6 +17,13 @@
 @property (nonatomic, strong, readwrite) NSMutableArray *repoData;
 
 @property (strong) IBOutlet NSArrayController *repoArrayController;
+@property (strong) IBOutlet NSButton *tryButton;
+@property (strong) IBOutlet NSProgressIndicator *progressIndicator;
+
+@property (strong) KFTryController *tryController;
+
+// shows a simple error for pod try
+- (void)showPodTryErrorWithMessage:(NSString *)message;
 
 @end
 
@@ -83,11 +91,60 @@
     [self.window orderOut:self];
 }
 
+- (IBAction)tryPod:(id)sender
+{
+    KFRepoModel *repoModel = [[self.repoArrayController selectedObjects] firstObject];
+    
+    if (repoModel.pod == nil) {
+        // perhaps we don't have a selected object or the repoModel is malformed.
+        // bail, we'll crash later.
+        return;
+    }
+    
+    // try the pod.
+    if (!self.tryController) {
+        self.tryController = [[KFTryController alloc] init];
+    }
+    
+    [self.tryButton setEnabled:NO];
+    [self.progressIndicator setIndeterminate:YES];
+    [self.progressIndicator startAnimation:self];
+    [self.progressIndicator setHidden:NO];
+    
+    [self.tryController tryPodWithName:repoModel.pod progress:^(CGFloat progress) {
+        
+        if (progress > 0) {
+            [self.progressIndicator setIndeterminate:NO];
+            [self.progressIndicator setDoubleValue:progress];
+        }
+        
+    } completion:^(NSError *error) {
+        
+        [self.tryButton setEnabled:YES];
+        [self.progressIndicator stopAnimation:self];
+        [self.progressIndicator setHidden:YES];
+        
+        if (error) {
+            [self showPodTryErrorWithMessage:[error localizedDescription]];
+        }
+    }];
+    
+}
+
+
+- (void)showPodTryErrorWithMessage:(NSString *)message
+{
+    NSAlert *alert = [[NSAlert alloc] init];
+    [alert setMessageText:@"Error Running 'pod try'"];
+    [alert addButtonWithTitle:@"OK"];
+    [alert setInformativeText:message];
+    
+    [alert beginSheetModalForWindow:self.window completionHandler:NULL];
+}
 
 - (IBAction)copyPodnameAction:(id)sender
 {
     KFRepoModel *repoModel = [[self.repoArrayController selectedObjects] firstObject];
-    
     NSPasteboard *pasteBoard = [NSPasteboard generalPasteboard];
     [pasteBoard declareTypes:@[NSStringPboardType] owner:nil];
     [pasteBoard setString:repoModel.pod forType:NSStringPboardType];
