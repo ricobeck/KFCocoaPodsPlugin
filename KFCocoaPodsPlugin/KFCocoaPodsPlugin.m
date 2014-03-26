@@ -151,7 +151,7 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         case KFMenuItemTagUpdate:
             return [KFWorkspaceController currentWorkspaceHasPodfile];
         case KFMenuItemTagPodInit:
-            return ![KFWorkspaceController currentWorkspaceHasPodfile];
+            return [KFWorkspaceController currentWorkspacePodfilePath] != nil && ![KFWorkspaceController currentWorkspaceHasPodfile];
         default:
             return YES;
     }

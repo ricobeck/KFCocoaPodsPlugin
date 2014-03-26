@@ -86,10 +86,19 @@
 + (NSString *)pathForFileNameInCurrentWorkspace:(NSString *)fileName
 {
     IDEWorkspace *workspace = [self workspaceForKeyWindow];
+    
+    if (workspace == nil)
+    {
+        return nil;
+    }
+    
     IDEIndexCollection *indexCollection = [workspace.index filesContaining:fileName anchorStart:NO anchorEnd:NO subsequence:NO ignoreCase:NO cancelWhen:nil];
-    for(DVTFilePath *filePath in indexCollection) {
+    
+    for(DVTFilePath *filePath in indexCollection)
+    {
         return filePath.pathString;
     }
+    
     return nil;
 }
 
