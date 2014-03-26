@@ -144,13 +144,10 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         case KFMenuItemTagCheckForOutdatedPods:
         case KFMenuItemTagUpdate:
             return [KFWorkspaceController currentWorkspaceHasPodfile];
-            break;
         case KFMenuItemTagPodInit:
             return ![KFWorkspaceController currentWorkspaceHasPodfile];
-            break;
         default:
             return YES;
-            break;
     }
 }
 
