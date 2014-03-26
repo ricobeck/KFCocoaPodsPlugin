@@ -29,7 +29,7 @@
 @implementation KFTaskController
 
 
-- (void)runPodCommand:(NSArray *)arguments directory:(NSString *)directory outputHandler:(KFTaskOutputHandler)outpuBlock terminationHandler:(KFTaskTerminationHandler)terminationBlock failureHandler:(KFTaskFailureHandler)failureBlock
+- (DSUnixTask *)runPodCommand:(NSArray *)arguments directory:(NSString *)directory outputHandler:(KFTaskOutputHandler)outpuBlock terminationHandler:(KFTaskTerminationHandler)terminationBlock failureHandler:(KFTaskFailureHandler)failureBlock
 {    
     DSUnixTask *task = [DSUnixTaskSubProcessManager shellTask];
     [[DSUnixTaskSubProcessManager sharedManager] setLoggingEnabled:YES];
@@ -59,6 +59,8 @@
     [task setFailureHandler:failureBlock];
     
     [task launch];
+    
+    return task;
 }
 
 
