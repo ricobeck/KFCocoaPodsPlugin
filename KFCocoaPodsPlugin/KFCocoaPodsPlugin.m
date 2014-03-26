@@ -35,6 +35,7 @@
 #import "KFRepoModel.h"
 #import "KFPodAutoCompletionItem.h"
 #import "KFSyntaxAutoCompletionItem.h"
+#import "IDEKit.h"
 
 #import <YAML-Framework/YAMLSerialization.h>
 #import <KSCrypto/KSSHA1Stream.h>
@@ -49,7 +50,8 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
     KFMenuItemTagCheckForOutdatedPods,
     KFMenuItemTagUpdate,
     KFMenuItemTagPodInit,
-    KFMenuItemTagPodSearch
+    KFMenuItemTagPodSearch,
+    KFMenuItemTagShowConsole
 };
 
 
@@ -71,7 +73,6 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 
 @property (nonatomic, strong) KFPodSearchWindowController *podSearchWindowController;
 
-
 @end
 
 
@@ -82,6 +83,9 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 #define kCommandOutdated @"outdated"
 
 #define kCommandConvertPodFileToYAML @"podfile"
+
+#define kKFAlwaysShowConsoleEnabledStatus @"KFAlwaysShowConsoleEnabledStatus"
+
 
 @implementation KFCocoaPodsPlugin
 
@@ -129,7 +133,9 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 
         [self buildRepoIndex];
         _cocoaPodController = [[KFCocoaPodController alloc] initWithRepoData:self.repos];
-        
+
+        [[NSUserDefaults standardUserDefaults] registerDefaults:@{kKFAlwaysShowConsoleEnabledStatus : @YES}];
+
         [self insertMenu];
     }
     return self;
@@ -144,13 +150,24 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         case KFMenuItemTagCheckForOutdatedPods:
         case KFMenuItemTagUpdate:
             return [KFWorkspaceController currentWorkspaceHasPodfile];
-            break;
         case KFMenuItemTagPodInit:
-            return ![KFWorkspaceController currentWorkspaceHasPodfile];
-            break;
+            return [KFWorkspaceController currentWorkspacePodfilePath] != nil && ![KFWorkspaceController currentWorkspaceHasPodfile];
         default:
             return YES;
-            break;
+    }
+}
+
+
+- (void)showConsole
+{
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:kKFAlwaysShowConsoleEnabledStatus])
+    {
+        IDEEditorArea *editorArea = [KFWorkspaceController keyWindowController].editorArea;
+
+        if (![editorArea showDebuggerArea])
+        {
+            [editorArea showDebuggerArea:nil];
+        }
     }
 }
 
@@ -266,6 +283,16 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
         [submenu addItem:reposMenuItem];
 #endif
         [submenu addItem:[NSMenuItem separatorItem]];
+
+        NSMenuItem *showConsoleItem = [[NSMenuItem alloc] initWithTitle:@"Always Show Console" action:@selector(showConsoleAction:) keyEquivalent:@""];
+        [showConsoleItem setTarget:self];
+        [showConsoleItem setTag:KFMenuItemTagShowConsole];
+        
+        BOOL onState = [[NSUserDefaults standardUserDefaults] boolForKey:kKFAlwaysShowConsoleEnabledStatus];
+        [showConsoleItem setState:onState ? NSOnState : NSOffState];
+        [submenu addItem:showConsoleItem];
+        
+        [submenu addItem:[NSMenuItem separatorItem]];
         
         self.podInitItem = [[NSMenuItem alloc] initWithTitle:@"Initialize Project" action:@selector(podInitAction:) keyEquivalent:@""];
         [self.podInitItem setTarget:self];
@@ -352,6 +379,8 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 
 - (void)podUpdateAction:(id)sender
 {
+    [self showConsole];
+
     NSString *workspaceTitle = [KFWorkspaceController currentRepresentingTitle];
     __weak typeof(self) weakSelf = self;
     
@@ -457,6 +486,7 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 
 - (void)checkOutdatedPodsAction:(id)sender
 {
+    [self showConsole];
     [self checkForOutdatedPodsViaCommand];
 }
 
@@ -526,6 +556,7 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 
 - (void)podInitAction:(id)sender
 {
+    [self showConsole];
     [self printMessageBold:@"pod init"];
     
      __weak typeof(self) weakSelf = self;
@@ -553,6 +584,18 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
     }
     
     [NSApp beginSheet:self.podSearchWindowController.window modalForWindow:[[NSApplication sharedApplication] keyWindow] modalDelegate:nil didEndSelector:nil contextInfo:nil];
+}
+
+
+- (void)showConsoleAction:(NSMenuItem *)sender
+{
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    BOOL onState = ![userDefaults boolForKey:kKFAlwaysShowConsoleEnabledStatus];
+
+    [userDefaults setBool:onState forKey:kKFAlwaysShowConsoleEnabledStatus];
+    [userDefaults synchronize];
+
+    [sender setState:onState ? NSOnState : NSOffState];
 }
 
 

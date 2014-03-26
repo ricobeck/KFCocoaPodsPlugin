@@ -25,6 +25,8 @@
 
 #import <Foundation/Foundation.h>
 
+@class IDEWorkspaceWindowController;
+
 @interface KFWorkspaceController : NSObject
 
 
@@ -42,5 +44,6 @@
 
 + (BOOL)isCurrentFilePodfile;
 
++ (IDEWorkspaceWindowController *)keyWindowController;
 
 @end

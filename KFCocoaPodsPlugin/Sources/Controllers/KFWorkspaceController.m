@@ -66,22 +66,7 @@
 
 + (id)workspaceForKeyWindow
 {
-    /*
-    IDEWorkspaceWindowController *workspaceController = [IDEWorkspaceWindowController workspaceWindowControllerForWindow:[NSApp keyWindow]];
-    return workspaceController.window;
-     */
-    
-    NSArray *workspaceWindowControllers = [NSClassFromString(@"IDEWorkspaceWindowController") valueForKey:@"workspaceWindowControllers"];
-    for (id controller in workspaceWindowControllers)
-    {
-        BOOL isKeyWindow = [[[controller valueForKey:@"window"] valueForKey:@"isKeyWindow"] boolValue];
-        if (isKeyWindow)
-        {
-            NSLog(@"key window is window with controller: %@", controller);
-            return [controller valueForKey:@"_workspace"];
-        }
-    }
-    return nil;
+    return [[self keyWindowController] valueForKey:@"_workspace"];
 }
 
 
@@ -101,10 +86,19 @@
 + (NSString *)pathForFileNameInCurrentWorkspace:(NSString *)fileName
 {
     IDEWorkspace *workspace = [self workspaceForKeyWindow];
+    
+    if (workspace == nil)
+    {
+        return nil;
+    }
+    
     IDEIndexCollection *indexCollection = [workspace.index filesContaining:fileName anchorStart:NO anchorEnd:NO subsequence:NO ignoreCase:NO cancelWhen:nil];
-    for(DVTFilePath *filePath in indexCollection) {
+    
+    for(DVTFilePath *filePath in indexCollection)
+    {
         return filePath.pathString;
     }
+    
     return nil;
 }
 
@@ -127,5 +121,18 @@
     return [[[[[[IDEWorkspaceWindowController workspaceWindowControllerForWindow:[NSApp keyWindow]] editorArea] primaryEditorDocument] filePath] fileName] isEqualToString:@"Podfile"];
 }
 
+
++ (IDEWorkspaceWindowController *)keyWindowController
+{
+    NSArray *workspaceWindowControllers = [NSClassFromString(@"IDEWorkspaceWindowController") valueForKey:@"workspaceWindowControllers"];
+    for (IDEWorkspaceWindowController *controller in workspaceWindowControllers)
+    {
+        if (controller.window.isKeyWindow)
+        {
+           return controller;
+        }
+    }
+    return nil;
+}
 
 @end
