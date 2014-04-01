@@ -599,38 +599,6 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 }
 
 
-#pragma mark - YAML
-
-
-- (void)parseYAMLForPodfile:(NSString *)podfile
-{
-    __weak typeof(self) weakSelf = self;
-    
-    [_taskController runPodCommand:@[kCommandInterprocessCommunication, kCommandConvertPodFileToYAML, podfile] directory:[KFWorkspaceController currentWorkspaceDirectoryPath] outputHandler:^(DSUnixTask *taskLauncher, NSString *newOutput) {
-        
-    } terminationHandler:^(DSUnixTask *task)
-    {
-        [weakSelf printMessageBold:NSLocalizedString(@"Parsed podfile:", nil) forTask:task];
-        NSMutableArray *lines = [[task.standardOutput componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] mutableCopy];
-        [lines removeObjectAtIndex:0];
-        NSString *output = [lines componentsJoinedByString:@"\n"];
-        NSError *error = nil;
-        NSMutableArray *yaml = [YAMLSerialization YAMLWithData:[output dataUsingEncoding:NSUTF8StringEncoding] options:kYAMLReadOptionStringScalars error:&error];
-        if (error == nil)
-        {
-            [weakSelf printMessage:[yaml description] forTask:task];
-        }
-        else
-        {
-            [weakSelf printMessageBold:error.description forTask:task];
-        }
-    } failureHandler:^(DSUnixTask *taskLauncher)
-    {
-        
-    }];
-}
-
-
 #pragma mark - Logging
 
 
