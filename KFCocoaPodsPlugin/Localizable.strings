@@ -1,0 +1,24 @@
+/****************************************************************************/
+/* Localization file */
+
+
+"<Unknown CocoaPods Version>" = "<Unknown CocoaPods Version>";
+
+"Building repo index" = "Building repo index";
+
+"Start pod update" = "Start pod update";
+"Start pod install" = "Start pod install";
+"Cocoapods update succeeded" = "Cocoapods update succeeded";
+"Cocoapods update failed" = "Cocoapods update failed";
+"Open the created Workspace" = "Open the created Workspace";
+"Open" = "Open";
+"Cancel" = "Cancel";
+
+"%d outdated Pods" = "%d outdated Pods";
+"No outdated Pods" = "No outdated Pods";
+"Parsed podfile:" = "Parsed podfile:";
+"No Description" = "No Description";
+"Unknown" = "Unknown";
+"Authors: %@" = "Authors: %@";
+"License: %@" = "License: %@";
+"Plattform: %@" = "Plattform: %@";
