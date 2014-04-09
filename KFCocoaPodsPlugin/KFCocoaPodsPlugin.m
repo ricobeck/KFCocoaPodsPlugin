@@ -198,50 +198,78 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
     [self printMessage:NSLocalizedString(@"Building repo index", nil)];
     
     NSMutableDictionary *parsedRepos = [NSMutableDictionary new];
-    NSArray *repos = [fileManager contentsOfDirectoryAtPath:[@"~/.cocoapods/repos/" stringByExpandingTildeInPath] error:nil];
+    NSString *cocoapodsReposPath = [@"~/.cocoapods/repos/" stringByExpandingTildeInPath];
+    NSArray *repos = [fileManager contentsOfDirectoryAtPath:cocoapodsReposPath error:nil];
     
-    for (NSString *repoDirectory in repos)
-    {
-        
-        NSString *repoPath = [[@"~/.cocoapods/repos" stringByAppendingPathComponent:repoDirectory] stringByExpandingTildeInPath];
-        NSArray *pods = [fileManager contentsOfDirectoryAtPath:repoPath error:nil];
-        
-        for (NSString *podDirectory in pods)
-        {
-            if (![podDirectory hasPrefix:@"."])
-            {
-                NSString *podPath = [repoPath stringByAppendingPathComponent:podDirectory];
-                NSArray *versions = [fileManager contentsOfDirectoryAtPath:podPath error:nil];
-                
-                NSMutableArray *specs = [NSMutableArray new];
-                
-                for (NSString *version in versions)
-                {
-                    KFRepoModel *repoModel = [KFRepoModel new];
-                    repoModel.pod = podDirectory;
-                    repoModel.version = version;
-                    
-                    NSString *specPath = [podPath stringByAppendingPathComponent:version];
-                    NSArray *files = [fileManager contentsOfDirectoryAtPath:specPath error:nil];
-                    for (NSString *podspec in files)
-                    {
-                        if ([podspec.pathExtension isEqualToString:@"podspec"])
-                        {
-                            NSString *specFilePath = [specPath stringByAppendingPathComponent:podspec];
-                            NSData *contents = [NSData dataWithContentsOfFile:specFilePath];
-                            repoModel.checksum = [contents ks_SHA1DigestString];
-                            repoModel.podspec = contents;
-                            repoModel.specFilePath = specFilePath;
-                        }
-                    }
-                    [specs addObject:repoModel];
-                }
-                [parsedRepos setValue:[specs sortedArrayUsingDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"version" ascending:NO]]] forKey:podDirectory];
-            }
-        }
+    NSBundle *pluginBundle = [NSBundle bundleForClass:[self class]];
+    NSString *cachesPath = [pluginBundle pathForResource:@"ReposCache" ofType:@""];
+    
+    NSData *cachedReposData = [NSData dataWithContentsOfFile:cachesPath];
+    NSDictionary *cachedRepos;
+    NSDate *cachesLastModifiedDate;
+    
+    if (cachedReposData) {
+        cachedRepos = [NSJSONSerialization JSONObjectWithData:cachedReposData options:0 error:nil];
+        cachesLastModifiedDate = [cachedRepos objectForKey:@"lastModifiedDate"];
     }
     
-    self.repos = [parsedRepos copy];
+    NSError *error = nil;
+    
+    NSDictionary *cocoapodsReposAttributes = [fileManager attributesOfItemAtPath:cocoapodsReposPath error:&error];
+    NSLog(@"Error: %@", error);
+    NSLog(@"Repo attributes: %@", cocoapodsReposAttributes);
+    NSDate *cocoapodsReposLastModifiedDate = [cocoapodsReposAttributes objectForKey:NSFileModificationDate];
+    
+    NSLog(@"Cocoapods last modified date: %@", cocoapodsReposLastModifiedDate);
+    NSLog(@"Caches last modified date: %@", cachesLastModifiedDate);
+    
+    if (![cocoapodsReposLastModifiedDate isEqualToDate:cachesLastModifiedDate]) {
+        for (NSString *repoDirectory in repos)
+        {
+            
+            NSString *repoPath = [[@"~/.cocoapods/repos" stringByAppendingPathComponent:repoDirectory] stringByExpandingTildeInPath];
+            NSArray *pods = [fileManager contentsOfDirectoryAtPath:repoPath error:nil];
+            
+            for (NSString *podDirectory in pods)
+            {
+                if (![podDirectory hasPrefix:@"."])
+                {
+                    NSString *podPath = [repoPath stringByAppendingPathComponent:podDirectory];
+                    NSArray *versions = [fileManager contentsOfDirectoryAtPath:podPath error:nil];
+                    
+                    NSMutableArray *specs = [NSMutableArray new];
+                    
+                    for (NSString *version in versions)
+                    {
+                        KFRepoModel *repoModel = [KFRepoModel new];
+                        repoModel.pod = podDirectory;
+                        repoModel.version = version;
+                        
+                        NSString *specPath = [podPath stringByAppendingPathComponent:version];
+                        NSArray *files = [fileManager contentsOfDirectoryAtPath:specPath error:nil];
+                        for (NSString *podspec in files)
+                        {
+                            if ([podspec.pathExtension isEqualToString:@"podspec"])
+                            {
+                                NSString *specFilePath = [specPath stringByAppendingPathComponent:podspec];
+                                NSData *contents = [NSData dataWithContentsOfFile:specFilePath];
+                                repoModel.checksum = [contents ks_SHA1DigestString];
+                                repoModel.podspec = contents;
+                                repoModel.specFilePath = specFilePath;
+                            }
+                        }
+                        [specs addObject:repoModel];
+                    }
+                    [parsedRepos setValue:[specs sortedArrayUsingDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"version" ascending:NO]]] forKey:podDirectory];
+                }
+            }
+        }
+        NSDictionary *newCacheDictionary = @{@"lastModifiedDate": cocoapodsReposLastModifiedDate, @"parsedContents" : parsedRepos};
+        [[NSJSONSerialization dataWithJSONObject:newCacheDictionary options:0 error:nil] writeToFile:cachesPath atomically:YES];
+        self.repos = [parsedRepos copy];
+    } else {
+        self.repos = [cachedRepos objectForKey:@"parsedContents"];
+    }
 }
 
 - (void)insertLoadingMenu {
