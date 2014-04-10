@@ -37,6 +37,7 @@
 		1DDE21BF17D8B08D0015857D /* KFConsoleController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DDE21BE17D8B08D0015857D /* KFConsoleController.m */; };
 		1DF28C9017DA5B6B00DFBD5C /* KFNotificationController.m in Sources */ = {isa = PBXBuildFile; fileRef = 1DF28C8F17DA5B6B00DFBD5C /* KFNotificationController.m */; };
 		C8DBFFE38BD1451BB6DACAF9 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8B5BF65125F74E12891B4621 /* libPods.a */; };
+		C909375F18F5DBCC00234BDD /* ReposCache in Resources */ = {isa = PBXBuildFile; fileRef = C909375E18F5DBCC00234BDD /* ReposCache */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -99,6 +100,7 @@
 		1DF28C8F17DA5B6B00DFBD5C /* KFNotificationController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = KFNotificationController.m; path = Sources/Controllers/KFNotificationController.m; sourceTree = "<group>"; };
 		890D3963EC534E2586D5020C /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = SOURCE_ROOT; };
 		8B5BF65125F74E12891B4621 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		C909375E18F5DBCC00234BDD /* ReposCache */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ReposCache; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -253,6 +255,7 @@
 			isa = PBXGroup;
 			children = (
 				1DA3B241183839C60009AC4E /* KFPodSearchWindow.xib */,
+				C909375E18F5DBCC00234BDD /* ReposCache */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -349,6 +352,7 @@
 				1D02735217D746CC00E8389F /* InfoPlist.strings in Resources */,
 				1DDB9A9B17DE4E4200B69C9D /* PodSyntax.plist in Resources */,
 				1DA3B243183839C60009AC4E /* KFPodSearchWindow.xib in Resources */,
+				C909375F18F5DBCC00234BDD /* ReposCache in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
