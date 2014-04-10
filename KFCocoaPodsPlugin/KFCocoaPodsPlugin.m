@@ -206,24 +206,22 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
     
     NSData *cachedReposData = [NSData dataWithContentsOfFile:cachesPath];
     NSDictionary *cachedRepos;
-    NSDate *cachesLastModifiedDate;
+    NSTimeInterval cachesLastModifiedDate = 0.0;
     
     if (cachedReposData) {
         cachedRepos = [NSJSONSerialization JSONObjectWithData:cachedReposData options:0 error:nil];
-        cachesLastModifiedDate = [cachedRepos objectForKey:@"lastModifiedDate"];
+        cachesLastModifiedDate = [[cachedRepos objectForKey:@"lastModifiedDate"] doubleValue];
     }
     
     NSError *error = nil;
     
     NSDictionary *cocoapodsReposAttributes = [fileManager attributesOfItemAtPath:cocoapodsReposPath error:&error];
-    NSLog(@"Error: %@", error);
-    NSLog(@"Repo attributes: %@", cocoapodsReposAttributes);
-    NSDate *cocoapodsReposLastModifiedDate = [cocoapodsReposAttributes objectForKey:NSFileModificationDate];
-    
-    NSLog(@"Cocoapods last modified date: %@", cocoapodsReposLastModifiedDate);
-    NSLog(@"Caches last modified date: %@", cachesLastModifiedDate);
-    
-    if (![cocoapodsReposLastModifiedDate isEqualToDate:cachesLastModifiedDate]) {
+    NSTimeInterval cocoapodsReposLastModifiedDate = [[cocoapodsReposAttributes objectForKey:NSFileModificationDate] timeIntervalSince1970];
+        
+    if (cocoapodsReposLastModifiedDate != cachesLastModifiedDate) {
+        
+        NSMutableDictionary *serializedRepos = [NSMutableDictionary new];
+        
         for (NSString *repoDirectory in repos)
         {
             
@@ -260,17 +258,43 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
                         }
                         [specs addObject:repoModel];
                     }
-                    [parsedRepos setValue:[specs sortedArrayUsingDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"version" ascending:NO]]] forKey:podDirectory];
+                    NSArray *sortedSpecs = [specs sortedArrayUsingDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"version" ascending:NO]]];
+                    
+                    [serializedRepos setObject:[self serializeSpecs:sortedSpecs] forKey:podDirectory];
+                    [parsedRepos setObject:sortedSpecs forKey:podDirectory];
                 }
             }
         }
-        NSDictionary *newCacheDictionary = @{@"lastModifiedDate": cocoapodsReposLastModifiedDate, @"parsedContents" : parsedRepos};
+        NSDictionary *newCacheDictionary = @{@"lastModifiedDate": @(cocoapodsReposLastModifiedDate), @"parsedContents" : serializedRepos};
         [[NSJSONSerialization dataWithJSONObject:newCacheDictionary options:0 error:nil] writeToFile:cachesPath atomically:YES];
-        self.repos = [parsedRepos copy];
+        
     } else {
-        self.repos = [cachedRepos objectForKey:@"parsedContents"];
+        NSDictionary *cachedSerializedRepos = [cachedRepos objectForKey:@"parsedContents"];
+        for (id podDirectory in cachedSerializedRepos) {
+            NSArray *serializedSpecs = cachedSerializedRepos[podDirectory];
+            [parsedRepos setObject:[self deserializeSpecs:serializedSpecs] forKey:podDirectory];
+        }
     }
+    self.repos = [parsedRepos copy];
 }
+
+- (NSArray *)serializeSpecs:(NSArray *)sortedSpecs {
+    NSMutableArray *serializedSpecs = [NSMutableArray arrayWithCapacity:sortedSpecs.count];
+    for (KFRepoModel *repoModel in sortedSpecs) {
+        [serializedSpecs addObject:[repoModel dictionaryRepresentation]];
+    }
+    return [serializedSpecs copy];
+}
+
+- (NSArray *)deserializeSpecs:(NSArray *)specs {
+    NSMutableArray *deserializedSpecs = [NSMutableArray arrayWithCapacity:specs.count];
+    for (NSDictionary *spec in specs) {
+        KFRepoModel *model = [[KFRepoModel alloc] initWithDictionaryRepresentation:spec];
+        [deserializedSpecs addObject:model];
+    }
+    return [deserializedSpecs copy];
+}
+
 
 - (void)insertLoadingMenu {
     NSMenuItem *productsMenuItem = [[NSApp mainMenu] itemWithTitle:@"Product"];
