@@ -84,15 +84,24 @@ NSString * const KFBuildVersion = @"buildVersion";
         
         if (error == nil)
         {
-            NSString *version = yaml[0][@"version"];
-            NSArray *versionComponents = [version componentsSeparatedByString:@"."];
-            if ([versionComponents count] == 3)
+            NSDictionary *versionDictionary = yaml[0];
+            
+            if(![versionDictionary isKindOfClass:[NSDictionary class]])
             {
-                versionBlock(@{KFMajorVersion: versionComponents[0], KFMinorVersion: versionComponents[1], KFBuildVersion: versionComponents[2]});
+                versionBlock(nil);
             }
             else
             {
-                versionBlock(nil);
+                NSString *version = versionDictionary[@"version"];
+                NSArray *versionComponents = [version componentsSeparatedByString:@"."];
+                if ([versionComponents count] == 3)
+                {
+                    versionBlock(@{KFMajorVersion: versionComponents[0], KFMinorVersion: versionComponents[1], KFBuildVersion: versionComponents[2]});
+                }
+                else
+                {
+                    versionBlock(nil);
+                }
             }
         }
         else
