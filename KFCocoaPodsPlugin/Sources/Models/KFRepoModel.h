@@ -55,5 +55,8 @@
 
 - (void)parsePodspec;
 
+- (NSDictionary *)dictionaryRepresentation;
+
+- (instancetype)initWithDictionaryRepresentation:(NSDictionary *)representation;
 
 @end

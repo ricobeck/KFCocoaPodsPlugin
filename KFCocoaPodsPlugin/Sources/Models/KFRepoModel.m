@@ -179,5 +179,27 @@
     return copy;
 }
 
+#pragma mark - Caching additions
+
+- (NSDictionary *)dictionaryRepresentation {
+    NSMutableDictionary *representation = [[self dictionaryWithValuesForKeys:@[@"pod", @"version", @"checksum", @"installedVersion"]] mutableCopy];
+    if (self.podspec) {
+        [representation setObject:[self.podspec base64EncodedStringWithOptions:0] forKey:@"podspec"];
+    }
+    return [representation copy];
+}
+
+- (instancetype)initWithDictionaryRepresentation:(NSDictionary *)representation {
+    self = [self init];
+    if (self) {
+        NSMutableDictionary *mutableRepresentation = [representation mutableCopy];
+        NSData *podspecData = [mutableRepresentation[@"podspec"] dataUsingEncoding:NSUTF8StringEncoding];
+        if (podspecData) {
+            [mutableRepresentation setObject:[podspecData base64EncodedDataWithOptions:0] forKey:@"podspec"];
+        }
+        [self setValuesForKeysWithDictionary:mutableRepresentation];
+    }
+    return self;
+}
 
 @end

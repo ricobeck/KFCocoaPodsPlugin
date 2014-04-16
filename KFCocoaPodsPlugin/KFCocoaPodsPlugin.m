@@ -73,6 +73,8 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 
 @property (nonatomic, strong) KFPodSearchWindowController *podSearchWindowController;
 
++ (void)kf_applicationDidFinishLaunching:(NSNotification *)notification;
+
 @end
 
 
@@ -104,8 +106,12 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 {
     if ([self shouldLoadPlugin])
     {
-        [self sharedPlugin];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(kf_applicationDidFinishLaunching:) name:NSApplicationDidFinishLaunchingNotification object:[NSApplication sharedApplication]];
     }
+}
+
++ (void)kf_applicationDidFinishLaunching:(NSNotification *)notification {
+    [self sharedPlugin];
 }
 
 + (instancetype)sharedPlugin
@@ -114,6 +120,7 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 	static dispatch_once_t onceToken;
 	dispatch_once(&onceToken, ^{
 		sharedPlugin = [[self alloc] init];
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:NSApplicationDidFinishLaunchingNotification object:[NSApplication sharedApplication]];
 	});
     
     return sharedPlugin;
@@ -124,20 +131,30 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
 {
     if (self = [super init])
     {
-        
         _consoleController = [KFConsoleController new];
         _taskController = [KFTaskController new];
         _notificationController = [KFNotificationController new];
         
-        [KFReplController sharedController];
-
-        [self buildRepoIndex];
-        _cocoaPodController = [[KFCocoaPodController alloc] initWithRepoData:self.repos];
-
-        [[NSUserDefaults standardUserDefaults] registerDefaults:@{kKFAlwaysShowConsoleEnabledStatus : @YES}];
-
-        [self insertMenu];
+        KFCocoaPodsPlugin __block *weakself = self;
+        
+        [self insertLoadingMenu];
+        
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            
+            [KFReplController sharedController];
+            
+            [weakself buildRepoIndex];
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                _cocoaPodController = [[KFCocoaPodController alloc] initWithRepoData:weakself.repos];
+                
+                [[NSUserDefaults standardUserDefaults] registerDefaults:@{kKFAlwaysShowConsoleEnabledStatus : @YES}];
+                
+                [weakself insertMenu];
+            });
+        });
     }
+    
     return self;
 }
 
@@ -181,146 +198,211 @@ typedef NS_ENUM(NSUInteger, KFMenuItemTag)
     [self printMessage:NSLocalizedString(@"Building repo index", nil)];
     
     NSMutableDictionary *parsedRepos = [NSMutableDictionary new];
-    NSArray *repos = [fileManager contentsOfDirectoryAtPath:[@"~/.cocoapods/repos/" stringByExpandingTildeInPath] error:nil];
+    NSString *cocoapodsReposPath = [@"~/.cocoapods/repos/" stringByExpandingTildeInPath];
+    NSArray *repos = [fileManager contentsOfDirectoryAtPath:cocoapodsReposPath error:nil];
     
-    for (NSString *repoDirectory in repos)
-    {
-        NSString *repoPath = [[@"~/.cocoapods/repos" stringByAppendingPathComponent:repoDirectory] stringByExpandingTildeInPath];
-        NSArray *pods = [fileManager contentsOfDirectoryAtPath:repoPath error:nil];
-         
-        
-        for (NSString *podDirectory in pods)
-        {
-            if (![podDirectory hasPrefix:@"."])
-            {
-                NSString *podPath = [repoPath stringByAppendingPathComponent:podDirectory];
-                NSArray *versions = [fileManager contentsOfDirectoryAtPath:podPath error:nil];
-                
-                NSMutableArray *specs = [NSMutableArray new];
-                
-                for (NSString *version in versions)
-                {
-                    KFRepoModel *repoModel = [KFRepoModel new];
-                    repoModel.pod = podDirectory;
-                    repoModel.version = version;
-                    
-                    NSString *specPath = [podPath stringByAppendingPathComponent:version];
-                    NSArray *files = [fileManager contentsOfDirectoryAtPath:specPath error:nil];
-                    for (NSString *podspec in files)
-                    {
-                        if ([podspec.pathExtension isEqualToString:@"podspec"])
-                        {
-                            NSString *specFilePath = [specPath stringByAppendingPathComponent:podspec];
-                            NSData *contents = [NSData dataWithContentsOfFile:specFilePath];
-                            repoModel.checksum = [contents ks_SHA1DigestString];
-                            repoModel.podspec = contents;
-                            repoModel.specFilePath = specFilePath;
-                        }
-                    }
-                    [specs addObject:repoModel];
-                }
-                [parsedRepos setValue:[specs sortedArrayUsingDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"version" ascending:NO]]] forKey:podDirectory];
-            }
-        }
+    NSBundle *pluginBundle = [NSBundle bundleForClass:[self class]];
+    NSString *cachesPath = [pluginBundle pathForResource:@"ReposCache" ofType:@""];
+    
+    NSData *cachedReposData = [NSData dataWithContentsOfFile:cachesPath];
+    NSDictionary *cachedRepos;
+    NSTimeInterval cachesLastModifiedDate = 0.0;
+    
+    if (cachedReposData) {
+        cachedRepos = [NSJSONSerialization JSONObjectWithData:cachedReposData options:0 error:nil];
+        cachesLastModifiedDate = [[cachedRepos objectForKey:@"lastModifiedDate"] doubleValue];
     }
     
+    NSError *error = nil;
+    
+    NSDictionary *cocoapodsReposAttributes = [fileManager attributesOfItemAtPath:cocoapodsReposPath error:&error];
+    NSTimeInterval cocoapodsReposLastModifiedDate = [[cocoapodsReposAttributes objectForKey:NSFileModificationDate] timeIntervalSince1970];
+        
+    if (cocoapodsReposLastModifiedDate != cachesLastModifiedDate) {
+        
+        NSMutableDictionary *serializedRepos = [NSMutableDictionary new];
+        
+        for (NSString *repoDirectory in repos)
+        {
+            
+            NSString *repoPath = [[@"~/.cocoapods/repos" stringByAppendingPathComponent:repoDirectory] stringByExpandingTildeInPath];
+            NSArray *pods = [fileManager contentsOfDirectoryAtPath:repoPath error:nil];
+            
+            for (NSString *podDirectory in pods)
+            {
+                if (![podDirectory hasPrefix:@"."])
+                {
+                    NSString *podPath = [repoPath stringByAppendingPathComponent:podDirectory];
+                    NSArray *versions = [fileManager contentsOfDirectoryAtPath:podPath error:nil];
+                    
+                    NSMutableArray *specs = [NSMutableArray new];
+                    
+                    for (NSString *version in versions)
+                    {
+                        KFRepoModel *repoModel = [KFRepoModel new];
+                        repoModel.pod = podDirectory;
+                        repoModel.version = version;
+                        
+                        NSString *specPath = [podPath stringByAppendingPathComponent:version];
+                        NSArray *files = [fileManager contentsOfDirectoryAtPath:specPath error:nil];
+                        for (NSString *podspec in files)
+                        {
+                            if ([podspec.pathExtension isEqualToString:@"podspec"])
+                            {
+                                NSString *specFilePath = [specPath stringByAppendingPathComponent:podspec];
+                                NSData *contents = [NSData dataWithContentsOfFile:specFilePath];
+                                repoModel.checksum = [contents ks_SHA1DigestString];
+                                repoModel.podspec = contents;
+                                repoModel.specFilePath = specFilePath;
+                            }
+                        }
+                        [specs addObject:repoModel];
+                    }
+                    NSArray *sortedSpecs = [specs sortedArrayUsingDescriptors:@[[NSSortDescriptor sortDescriptorWithKey:@"version" ascending:NO]]];
+                    
+                    [serializedRepos setObject:[self serializeSpecs:sortedSpecs] forKey:podDirectory];
+                    [parsedRepos setObject:sortedSpecs forKey:podDirectory];
+                }
+            }
+        }
+        NSDictionary *newCacheDictionary = @{@"lastModifiedDate": @(cocoapodsReposLastModifiedDate), @"parsedContents" : serializedRepos};
+        [[NSJSONSerialization dataWithJSONObject:newCacheDictionary options:0 error:nil] writeToFile:cachesPath atomically:YES];
+        
+    } else {
+        NSDictionary *cachedSerializedRepos = [cachedRepos objectForKey:@"parsedContents"];
+        for (id podDirectory in cachedSerializedRepos) {
+            NSArray *serializedSpecs = cachedSerializedRepos[podDirectory];
+            [parsedRepos setObject:[self deserializeSpecs:serializedSpecs] forKey:podDirectory];
+        }
+    }
     self.repos = [parsedRepos copy];
 }
 
+- (NSArray *)serializeSpecs:(NSArray *)sortedSpecs {
+    NSMutableArray *serializedSpecs = [NSMutableArray arrayWithCapacity:sortedSpecs.count];
+    for (KFRepoModel *repoModel in sortedSpecs) {
+        [serializedSpecs addObject:[repoModel dictionaryRepresentation]];
+    }
+    return [serializedSpecs copy];
+}
 
-- (void)insertMenu
-{
+- (NSArray *)deserializeSpecs:(NSArray *)specs {
+    NSMutableArray *deserializedSpecs = [NSMutableArray arrayWithCapacity:specs.count];
+    for (NSDictionary *spec in specs) {
+        KFRepoModel *model = [[KFRepoModel alloc] initWithDictionaryRepresentation:spec];
+        [deserializedSpecs addObject:model];
+    }
+    return [deserializedSpecs copy];
+}
+
+
+- (void)insertLoadingMenu {
     NSMenuItem *productsMenuItem = [[NSApp mainMenu] itemWithTitle:@"Product"];
     if (productsMenuItem)
     {
-        
         NSMenuItem *cocoapodsMenuItem = [[NSMenuItem alloc] initWithTitle:@"CocoaPods" action:nil keyEquivalent:@""];
         NSMenuItem *seperatorItem = [NSMenuItem separatorItem];
         NSUInteger index = [productsMenuItem.submenu indexOfItemWithTitle:@"Perform Action"] + 1;
         [[productsMenuItem submenu] insertItem:seperatorItem atIndex:index];
         [[productsMenuItem submenu] insertItem:cocoapodsMenuItem atIndex:index +1];
         
-        NSMenu *submenu = [[NSMenu alloc] initWithTitle:@"CocoaPods Submenu"];
+        NSMenu *loadingSubmenu = [[NSMenu alloc] initWithTitle:@"Cocoapods loading submenu"];
+        [loadingSubmenu addItemWithTitle:@"Indexing pods repos..." action:nil keyEquivalent:@"IndexingRepo"];
         
-        
-        NSMenuItem *editPodfileMenuItem = [[NSMenuItem alloc] initWithTitle:@"Edit Podfile" action:@selector(editPodfileAction:) keyEquivalent:@""];
-        [editPodfileMenuItem setTarget:self];
-        [editPodfileMenuItem setTag:KFMenuItemTagEditPodfile];
-        [submenu addItem:editPodfileMenuItem];
-        
-        NSMenuItem *checkMenuItem = [[NSMenuItem alloc] initWithTitle:@"Check For Outdated Pods" action:@selector(checkOutdatedPodsAction:) keyEquivalent:@""];
-        [checkMenuItem setTarget:self];
-        [checkMenuItem setTag:KFMenuItemTagCheckForOutdatedPods];
-        [submenu addItem:checkMenuItem];
-        
-        NSMenuItem *updateMenuItem = [[NSMenuItem alloc] initWithTitle:@"Run Update/Install" action:@selector(podUpdateAction:) keyEquivalent:@""];
-        [updateMenuItem setTarget:self];
-        [updateMenuItem setTag:KFMenuItemTagUpdate];
-        [submenu addItem:updateMenuItem];
-        
-#if SHOW_REPO_MENU
-        NSMenuItem *reposMenuItem = [[NSMenuItem alloc] initWithTitle:@"Repos" action:nil keyEquivalent:@""];
-        
-        NSMenu *repoMenu = [[NSMenu alloc] initWithTitle:@"CocoaPods Repos"];
-        
-        NSArray *repos = [[self.repos allKeys] sortedArrayUsingSelector:@selector(compare:)];
-        for (NSString *repo in repos)
-        {
-            NSMenuItem *repoMenuItem = [[NSMenuItem alloc] initWithTitle:repo action:nil keyEquivalent:@""];
-            
-            NSMenu *repoVersionMenu = [[NSMenu alloc] initWithTitle:repo];
-            
-            for (KFRepoModel *repoModel in self.repos[repo])
-            {
-                NSMenuItem *versionMenuItem = [[NSMenuItem alloc] initWithTitle:repoModel.version action:nil keyEquivalent:@""];
-                [repoVersionMenu addItem:versionMenuItem];
-            }
-            
-            repoMenuItem.submenu = repoVersionMenu;
-            [repoMenu addItem:repoMenuItem];
-        }
-        reposMenuItem.submenu = repoMenu;
-        [submenu addItem:reposMenuItem];
-#endif
-        [submenu addItem:[NSMenuItem separatorItem]];
+        cocoapodsMenuItem.submenu = loadingSubmenu;
+    }
+}
 
-        NSMenuItem *showConsoleItem = [[NSMenuItem alloc] initWithTitle:@"Always Show Console" action:@selector(showConsoleAction:) keyEquivalent:@""];
-        [showConsoleItem setTarget:self];
-        [showConsoleItem setTag:KFMenuItemTagShowConsole];
+- (void)insertMenu
+{
+    NSMenuItem *productsMenuItem = [[NSApp mainMenu] itemWithTitle:@"Product"];
+    if (productsMenuItem)
+    {
+        NSMenuItem *cocoapodsMenuItem = [productsMenuItem.submenu itemWithTitle:@"CocoaPods"];
         
-        BOOL onState = [[NSUserDefaults standardUserDefaults] boolForKey:kKFAlwaysShowConsoleEnabledStatus];
-        [showConsoleItem setState:onState ? NSOnState : NSOffState];
-        [submenu addItem:showConsoleItem];
-        
-        [submenu addItem:[NSMenuItem separatorItem]];
-        
-        self.podInitItem = [[NSMenuItem alloc] initWithTitle:@"Initialize Project" action:@selector(podInitAction:) keyEquivalent:@""];
-        [self.podInitItem setTarget:self];
-        [self.podInitItem setTag:KFMenuItemTagPodInit];
-        [submenu addItem:self.podInitItem];
-        
-        NSMenuItem *searchPodItem = [[NSMenuItem alloc] initWithTitle:@"Search Pod ..." action:@selector(podSearchAction:) keyEquivalent:@""];
-        [searchPodItem setTarget:self];
-        [searchPodItem setTag:KFMenuItemTagPodSearch];
-        [submenu addItem:searchPodItem];
-        
-        NSMenuItem *versionItem = [[NSMenuItem alloc] initWithTitle:@"CocoaPods Version: " action:nil keyEquivalent:@""];
-        [self.cocoaPodController cocoaPodsVersion:^(NSDictionary *version)
-        {
-            if (version != nil)
+        if (cocoapodsMenuItem) {
+            NSMenu *submenu = [[NSMenu alloc] initWithTitle:@"CocoaPods Submenu"];
+            
+            
+            NSMenuItem *editPodfileMenuItem = [[NSMenuItem alloc] initWithTitle:@"Edit Podfile" action:@selector(editPodfileAction:) keyEquivalent:@""];
+            [editPodfileMenuItem setTarget:self];
+            [editPodfileMenuItem setTag:KFMenuItemTagEditPodfile];
+            [submenu addItem:editPodfileMenuItem];
+            
+            NSMenuItem *checkMenuItem = [[NSMenuItem alloc] initWithTitle:@"Check For Outdated Pods" action:@selector(checkOutdatedPodsAction:) keyEquivalent:@""];
+            [checkMenuItem setTarget:self];
+            [checkMenuItem setTag:KFMenuItemTagCheckForOutdatedPods];
+            [submenu addItem:checkMenuItem];
+            
+            NSMenuItem *updateMenuItem = [[NSMenuItem alloc] initWithTitle:@"Run Update/Install" action:@selector(podUpdateAction:) keyEquivalent:@""];
+            [updateMenuItem setTarget:self];
+            [updateMenuItem setTag:KFMenuItemTagUpdate];
+            [submenu addItem:updateMenuItem];
+            
+#if SHOW_REPO_MENU
+            NSMenuItem *reposMenuItem = [[NSMenuItem alloc] initWithTitle:@"Repos" action:nil keyEquivalent:@""];
+            
+            NSMenu *repoMenu = [[NSMenu alloc] initWithTitle:@"CocoaPods Repos"];
+            
+            NSArray *repos = [[self.repos allKeys] sortedArrayUsingSelector:@selector(compare:)];
+            for (NSString *repo in repos)
             {
-                NSString *versionString = [NSString stringWithFormat:@"CocoaPods Version: %@.%@.%@", version[KFMajorVersion], version[KFMinorVersion], version[KFBuildVersion]];
-                [versionItem setTitle:versionString];
+                NSMenuItem *repoMenuItem = [[NSMenuItem alloc] initWithTitle:repo action:nil keyEquivalent:@""];
+                
+                NSMenu *repoVersionMenu = [[NSMenu alloc] initWithTitle:repo];
+                
+                for (KFRepoModel *repoModel in self.repos[repo])
+                {
+                    NSMenuItem *versionMenuItem = [[NSMenuItem alloc] initWithTitle:repoModel.version action:nil keyEquivalent:@""];
+                    [repoVersionMenu addItem:versionMenuItem];
+                }
+                
+                repoMenuItem.submenu = repoVersionMenu;
+                [repoMenu addItem:repoMenuItem];
             }
-            else
-            {
-                [versionItem setTitle:NSLocalizedString(@"<Unknown CocoaPods Version>", nil)];
-            }
-        }];
-        
-        [submenu addItem:versionItem];
-        
-        cocoapodsMenuItem.submenu = submenu;
+            reposMenuItem.submenu = repoMenu;
+            [submenu addItem:reposMenuItem];
+#endif
+            [submenu addItem:[NSMenuItem separatorItem]];
+            
+            NSMenuItem *showConsoleItem = [[NSMenuItem alloc] initWithTitle:@"Always Show Console" action:@selector(showConsoleAction:) keyEquivalent:@""];
+            [showConsoleItem setTarget:self];
+            [showConsoleItem setTag:KFMenuItemTagShowConsole];
+            
+            BOOL onState = [[NSUserDefaults standardUserDefaults] boolForKey:kKFAlwaysShowConsoleEnabledStatus];
+            [showConsoleItem setState:onState ? NSOnState : NSOffState];
+            [submenu addItem:showConsoleItem];
+            
+            [submenu addItem:[NSMenuItem separatorItem]];
+            
+            self.podInitItem = [[NSMenuItem alloc] initWithTitle:@"Initialize Project" action:@selector(podInitAction:) keyEquivalent:@""];
+            [self.podInitItem setTarget:self];
+            [self.podInitItem setTag:KFMenuItemTagPodInit];
+            [submenu addItem:self.podInitItem];
+            
+            NSMenuItem *searchPodItem = [[NSMenuItem alloc] initWithTitle:@"Search Pod ..." action:@selector(podSearchAction:) keyEquivalent:@""];
+            [searchPodItem setTarget:self];
+            [searchPodItem setTag:KFMenuItemTagPodSearch];
+            [submenu addItem:searchPodItem];
+            
+            NSMenuItem *versionItem = [[NSMenuItem alloc] initWithTitle:@"CocoaPods Version: " action:nil keyEquivalent:@""];
+            [self.cocoaPodController cocoaPodsVersion:^(NSDictionary *version)
+             {
+                 if (version != nil)
+                 {
+                     NSString *versionString = [NSString stringWithFormat:@"CocoaPods Version: %@.%@.%@", version[KFMajorVersion], version[KFMinorVersion], version[KFBuildVersion]];
+                     [versionItem setTitle:versionString];
+                 }
+                 else
+                 {
+                     [versionItem setTitle:NSLocalizedString(@"<Unknown CocoaPods Version>", nil)];
+                 }
+             }];
+            
+            [submenu addItem:versionItem];
+            
+            cocoapodsMenuItem.submenu = submenu;
+        }
     }
 }
 
