@@ -5,34 +5,34 @@
 	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
 	<false/>
 	<key>IDESourceControlProjectIdentifier</key>
-	<string>49BC308F-F776-4D75-9A75-384DD87FE4C5</string>
+	<string>F3ED37DB-F20A-421D-8995-1F803AEBD5B6</string>
 	<key>IDESourceControlProjectName</key>
 	<string>KFCocoaPodsPlugin</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
-		<key>E00B30B8-2F7E-4AE2-B2B3-D019DCCAB9B8</key>
-		<string>https://github.com/ricobeck/KFCocoaPodsPlugin.git</string>
+		<key>08D5F82E-B56D-4A60-8F6D-B0845DABE4DD</key>
+		<string>https://github.com/wczekalski/KFCocoaPodsPlugin.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
 	<string>KFCocoaPodsPlugin.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
-		<key>E00B30B8-2F7E-4AE2-B2B3-D019DCCAB9B8</key>
+		<key>08D5F82E-B56D-4A60-8F6D-B0845DABE4DD</key>
 		<string>..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
-	<string>https://github.com/ricobeck/KFCocoaPodsPlugin.git</string>
+	<string>https://github.com/wczekalski/KFCocoaPodsPlugin.git</string>
 	<key>IDESourceControlProjectVersion</key>
 	<integer>110</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>E00B30B8-2F7E-4AE2-B2B3-D019DCCAB9B8</string>
+	<string>08D5F82E-B56D-4A60-8F6D-B0845DABE4DD</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>E00B30B8-2F7E-4AE2-B2B3-D019DCCAB9B8</string>
+			<string>08D5F82E-B56D-4A60-8F6D-B0845DABE4DD</string>
 			<key>IDESourceControlWCCName</key>
 			<string>KFCocoaPodsPlugin</string>
 		</dict>
